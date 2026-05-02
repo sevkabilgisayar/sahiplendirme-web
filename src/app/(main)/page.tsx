@@ -476,7 +476,7 @@ export default function HomePage() {
               { href: '/ilanlar?kategori=sahiplendirme&tur=kus', emoji: '🐦', label: 'Kuş', sub: 'Sahiplendirme' },
               { href: '/ilanlar?kategori=kayip', emoji: '🔍', label: 'Kayıp', sub: 'Hayvanlar' },
               { href: '/ilanlar?kategori=ciftlestirme', emoji: '💕', label: 'Çiftleştirme', sub: 'İlanları' },
-              { href: '/ilanlar?kategori=hizmetler', emoji: '⭐', label: 'Hizmetler', sub: 'Profesyonel' },
+              { href: '/hizmetler', emoji: '⭐', label: 'Hizmetler', sub: 'Profesyonel' },
             ].map((cat) => (
               <Link
                 key={cat.href}
