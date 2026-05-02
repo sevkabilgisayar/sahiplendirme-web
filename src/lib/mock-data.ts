@@ -126,3 +126,18 @@ export const mockListings: Listing[] = [
     ],
   },
 ];
+
+export const mockStoreProducts = [
+  { id: 1, name: 'Royal Canin Medium Adult', brand: 'Royal Canin', price: 289, oldPrice: 350, img: '🥩', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: '%17 İndirim', rating: 4.8, reviews: 324, isBestseller: true, isFeatured: true, isOnSale: true },
+  { id: 2, name: 'Flexi Otomatik Tasma 5m', brand: 'Flexi', price: 199, oldPrice: 249, img: '🦮', photo: 'https://images.unsplash.com/photo-1589883661923-6476cb0ae9f2?w=500&auto=format&fit=crop', tag: '%20 İndirim', rating: 4.6, reviews: 187, isBestseller: true, isFeatured: false, isOnSale: true },
+  { id: 3, name: 'ComfyPet Ortopedik Yatak', brand: 'ComfyPet', price: 379, oldPrice: 450, img: '🛏️', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', tag: '%15 İndirim', rating: 4.9, reviews: 412, isBestseller: false, isFeatured: true, isOnSale: true },
+  { id: 4, name: 'Kong Extreme Oyuncak', brand: 'Kong', price: 149, oldPrice: null, img: '🧸', photo: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=500&auto=format&fit=crop', tag: 'Yeni', rating: 4.7, reviews: 98, isBestseller: false, isFeatured: true, isOnSale: false },
+  { id: 5, name: 'NutriVet Eklem Vitamini', brand: 'NutriVet', price: 89, oldPrice: null, img: '💊', photo: 'https://images.unsplash.com/photo-1623366302587-bcaafabcacbd?w=500&auto=format&fit=crop', tag: '', rating: 4.5, reviews: 203, isBestseller: true, isFeatured: false, isOnSale: false },
+  { id: 6, name: 'Trixie Tüy Fırçası Pro', brand: 'Trixie', price: 129, oldPrice: 159, img: '✂️', photo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=500&auto=format&fit=crop', tag: '%19 İndirim', rating: 4.4, reviews: 76, isBestseller: false, isFeatured: false, isOnSale: true },
+  { id: 7, name: 'Purina Pro Plan Kedi', brand: 'Purina', price: 319, oldPrice: 389, img: '🐱', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: '%18 İndirim', rating: 4.8, reviews: 511, isBestseller: true, isFeatured: true, isOnSale: true },
+  { id: 8, name: 'PetSafe Otomatik Besleyici', brand: 'PetSafe', price: 599, oldPrice: 749, img: '🍽️', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: '%20 İndirim', rating: 4.6, reviews: 143, isBestseller: false, isFeatured: true, isOnSale: true },
+  { id: 9, name: 'Kuş Kafesi Deluxe', brand: 'PetHouse', price: 849, oldPrice: null, img: '🐦', photo: 'https://images.unsplash.com/photo-1544923408-75c5cef46f14?w=500&auto=format&fit=crop', tag: 'Yeni', rating: 4.3, reviews: 34, isBestseller: false, isFeatured: false, isOnSale: false },
+  { id: 10, name: "Hill's Science Plan", brand: "Hill's", price: 459, oldPrice: 529, img: '🥩', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: '%13 İndirim', rating: 4.9, reviews: 678, isBestseller: true, isFeatured: false, isOnSale: true },
+  { id: 11, name: 'Catit Design Çeşme', brand: 'Catit', price: 349, oldPrice: 419, img: '🚰', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: '%17 İndirim', rating: 4.7, reviews: 256, isBestseller: true, isFeatured: false, isOnSale: true },
+  { id: 12, name: 'Ziwi Peak Kuzu Etli', brand: 'Ziwi', price: 189, oldPrice: null, img: '🥩', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', tag: 'Premium', rating: 4.9, reviews: 89, isBestseller: false, isFeatured: true, isOnSale: false },
+];

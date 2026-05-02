@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Card';
 
 import ListingCard from '@/components/ui/ListingCard';
 import AdBanner from '@/components/ui/AdBanner';
-import { mockListings as featuredListings } from '@/lib/mock-data';
+import { mockListings as featuredListings, mockStoreProducts } from '@/lib/mock-data';
 
 const stats = [
   { value: '12.000+', label: 'Mutlu Hayvan', emoji: '🐾' },
@@ -299,15 +299,12 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { id: 1, name: 'Royal Canin Medium Adult', price: 289, img: '🥩', rating: 4.8 },
-              { id: 2, name: 'Flexi Otomatik Tasma', price: 199, img: '🦮', rating: 4.6 },
-              { id: 3, name: 'ComfyPet Yatak', price: 379, img: '🛏️', rating: 4.9 },
-              { id: 4, name: 'Kong Extreme Oyuncak', price: 149, img: '🧸', rating: 4.7 }
-            ].map((p) => (
-              <Link key={p.id} href="/magaza" className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group cursor-pointer block">
-                <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center text-4xl mb-3 group-hover:scale-105 transition-transform">{p.img}</div>
-                <div className="font-semibold text-sm leading-tight mb-1 group-hover:text-emerald-600 transition-colors">{p.name}</div>
+            {mockStoreProducts.slice(0, 4).map((p) => (
+              <Link key={p.id} href={`/magaza/${p.id}`} className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group cursor-pointer block">
+                <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+                </div>
+                <div className="font-semibold text-sm leading-tight mb-1 group-hover:text-emerald-600 transition-colors line-clamp-2">{p.name}</div>
                 <div className="flex items-center gap-1 mb-2">
                   <Star size={10} className="text-yellow-400 fill-yellow-400" /><span className="text-[10px]">{p.rating}</span>
                 </div>

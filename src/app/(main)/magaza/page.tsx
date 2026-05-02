@@ -7,6 +7,7 @@ import {
   ChevronLeft, ChevronRight, Flame, Zap, TrendingUp, Percent, Gift, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { mockStoreProducts } from '@/lib/mock-data';
 
 const CATEGORIES = [
   { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248, color: 'from-red-50 to-orange-50 border-orange-100 hover:border-orange-300' },
@@ -17,31 +18,16 @@ const CATEGORIES = [
   { emoji: '✂️', label: 'Bakım & Tımar', count: 67, color: 'from-pink-50 to-rose-50 border-pink-100 hover:border-pink-300' },
 ];
 
-const ALL_PRODUCTS = [
-  { id: 1, name: 'Royal Canin Medium Adult', brand: 'Royal Canin', price: 289, oldPrice: 350, img: '🥩', tag: '%17 İndirim', rating: 4.8, reviews: 324, isBestseller: true, isFeatured: true, isOnSale: true },
-  { id: 2, name: 'Flexi Otomatik Tasma 5m', brand: 'Flexi', price: 199, oldPrice: 249, img: '🦮', tag: '%20 İndirim', rating: 4.6, reviews: 187, isBestseller: true, isFeatured: false, isOnSale: true },
-  { id: 3, name: 'ComfyPet Ortopedik Yatak', brand: 'ComfyPet', price: 379, oldPrice: 450, img: '🛏️', tag: '%15 İndirim', rating: 4.9, reviews: 412, isBestseller: false, isFeatured: true, isOnSale: true },
-  { id: 4, name: 'Kong Extreme Oyuncak', brand: 'Kong', price: 149, oldPrice: null, img: '🧸', tag: 'Yeni', rating: 4.7, reviews: 98, isBestseller: false, isFeatured: true, isOnSale: false },
-  { id: 5, name: 'NutriVet Eklem Vitamini', brand: 'NutriVet', price: 89, oldPrice: null, img: '💊', tag: '', rating: 4.5, reviews: 203, isBestseller: true, isFeatured: false, isOnSale: false },
-  { id: 6, name: 'Trixie Tüy Fırçası Pro', brand: 'Trixie', price: 129, oldPrice: 159, img: '✂️', tag: '%19 İndirim', rating: 4.4, reviews: 76, isBestseller: false, isFeatured: false, isOnSale: true },
-  { id: 7, name: 'Purina Pro Plan Kedi', brand: 'Purina', price: 319, oldPrice: 389, img: '🐱', tag: '%18 İndirim', rating: 4.8, reviews: 511, isBestseller: true, isFeatured: true, isOnSale: true },
-  { id: 8, name: 'PetSafe Otomatik Besleyici', brand: 'PetSafe', price: 599, oldPrice: 749, img: '🍽️', tag: '%20 İndirim', rating: 4.6, reviews: 143, isBestseller: false, isFeatured: true, isOnSale: true },
-  { id: 9, name: 'Kuş Kafesi Deluxe', brand: 'PetHouse', price: 849, oldPrice: null, img: '🐦', tag: 'Yeni', rating: 4.3, reviews: 34, isBestseller: false, isFeatured: false, isOnSale: false },
-  { id: 10, name: "Hill's Science Plan", brand: "Hill's", price: 459, oldPrice: 529, img: '🥩', tag: '%13 İndirim', rating: 4.9, reviews: 678, isBestseller: true, isFeatured: false, isOnSale: true },
-  { id: 11, name: 'Catit Design Çeşme', brand: 'Catit', price: 349, oldPrice: 419, img: '🚰', tag: '%17 İndirim', rating: 4.7, reviews: 256, isBestseller: true, isFeatured: false, isOnSale: true },
-  { id: 12, name: 'Ziwi Peak Kuzu Etli', brand: 'Ziwi', price: 189, oldPrice: null, img: '🥩', tag: 'Premium', rating: 4.9, reviews: 89, isBestseller: false, isFeatured: true, isOnSale: false },
-];
-
-const BESTSELLERS = ALL_PRODUCTS.filter(p => p.isBestseller);
-const FEATURED = ALL_PRODUCTS.filter(p => p.isFeatured);
-const ON_SALE = ALL_PRODUCTS.filter(p => p.isOnSale);
-const SLIDER_PRODUCTS = ALL_PRODUCTS.slice(0, 5);
+const BESTSELLERS = mockStoreProducts.filter(p => p.isBestseller);
+const FEATURED = mockStoreProducts.filter(p => p.isFeatured);
+const ON_SALE = mockStoreProducts.filter(p => p.isOnSale);
+const SLIDER_PRODUCTS = mockStoreProducts.slice(0, 5);
 
 // Vitrin hero ürünleri
 const HERO_PRODUCTS = [
-  { id: 1, name: 'Royal Canin', subtitle: 'Irka özel formül', img: '🥩', discount: '%17', price: 289, color: 'from-amber-400 to-orange-500' },
-  { id: 3, name: 'Ortopedik Yatak', subtitle: 'Eklem dostları için', img: '🛏️', discount: '%15', price: 379, color: 'from-violet-500 to-purple-600' },
-  { id: 7, name: 'Purina Pro Plan', subtitle: 'Kedi uzmanı mama', img: '🐱', discount: '%18', price: 319, color: 'from-teal-500 to-emerald-600' },
+  { id: 1, name: 'Royal Canin', subtitle: 'Irka özel formül', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%17', price: 289, color: 'from-amber-400 to-orange-500' },
+  { id: 3, name: 'Ortopedik Yatak', subtitle: 'Eklem dostları için', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%15', price: 379, color: 'from-violet-500 to-purple-600' },
+  { id: 7, name: 'Purina Pro Plan', subtitle: 'Kedi uzmanı mama', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%18', price: 319, color: 'from-teal-500 to-emerald-600' },
 ];
 
 function ProductSlider() {
@@ -55,8 +41,10 @@ function ProductSlider() {
   const product = SLIDER_PRODUCTS[current];
   return (
     <div className="relative bg-white/15 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 h-full min-h-[160px]">
-      <div className="p-5 h-full flex items-center gap-4">
-        <div className="w-20 h-20 flex-shrink-0 bg-white/20 rounded-2xl flex items-center justify-center text-5xl">{product.img}</div>
+      <Link href={`/magaza/${product.id}`} className="p-5 h-full flex items-center gap-4 hover:bg-white/5 transition-colors cursor-pointer">
+        <div className="w-20 h-20 flex-shrink-0 bg-white/20 rounded-2xl flex items-center justify-center overflow-hidden">
+          <img src={product.photo} alt={product.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+        </div>
         <div className="flex-1 min-w-0">
           {product.tag && <span className="text-[10px] font-bold bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full mb-2 inline-block">{product.tag}</span>}
           <div className="text-[10px] text-emerald-100 font-medium">{product.brand}</div>
@@ -67,7 +55,7 @@ function ProductSlider() {
             {product.oldPrice && <span className="text-xs line-through text-emerald-200">₺{product.oldPrice}</span>}
           </div>
         </div>
-      </div>
+      </Link>
       <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white transition-colors"><ChevronLeft size={14} /></button>
       <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white transition-colors"><ChevronRight size={14} /></button>
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -80,13 +68,13 @@ function ProductSlider() {
   );
 }
 
-function ProductCard({ product, size = 'normal' }: { product: typeof ALL_PRODUCTS[0]; size?: 'normal' | 'small' }) {
+function ProductCard({ product, size = 'normal' }: { product: typeof mockStoreProducts[0]; size?: 'normal' | 'small' }) {
   const [inCart, setInCart] = useState(false);
   return (
-    <div className={`bg-[var(--surface)] border border-[var(--border)] rounded-2xl flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group cursor-pointer overflow-hidden ${size === 'small' ? 'p-3' : 'p-4'}`}>
+    <Link href={`/magaza/${product.id}`} className={`bg-[var(--surface)] border border-[var(--border)] rounded-2xl flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group cursor-pointer overflow-hidden ${size === 'small' ? 'p-3' : 'p-4'}`}>
       <div className="relative">
-        <div className={`w-full bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${size === 'small' ? 'h-20 text-4xl' : 'h-28 text-5xl'}`}>
-          {product.img}
+        <div className={`w-full bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform ${size === 'small' ? 'h-24' : 'h-36'}`}>
+          <img src={product.photo} alt={product.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
         </div>
         {product.tag && (
           <span className={`absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
@@ -123,7 +111,7 @@ function ProductCard({ product, size = 'normal' }: { product: typeof ALL_PRODUCT
       >
         {inCart ? '✓ Eklendi!' : <><Tag size={10} /> Sepete Ekle</>}
       </button>
-    </div>
+    </Link>
   );
 }
 
@@ -195,15 +183,18 @@ export default function MagazaPage() {
         <SectionHeader icon={<Zap size={18} className="text-white"/>} title="Vitrin Ürünleri" subtitle="Haftanın en beğenilen seçimleri" color="bg-gradient-to-br from-amber-400 to-orange-500" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {HERO_PRODUCTS.map(p => (
-            <div key={p.id} className={`bg-gradient-to-br ${p.color} rounded-3xl p-6 text-white flex items-center gap-5 hover:scale-[1.02] transition-transform cursor-pointer shadow-lg`}>
-              <div className="text-6xl">{p.img}</div>
-              <div className="flex-1">
+            <Link href={`/magaza/${p.id}`} key={p.id} className={`bg-gradient-to-br ${p.color} rounded-3xl p-6 text-white flex items-center gap-5 hover:scale-[1.02] transition-transform cursor-pointer shadow-lg overflow-hidden relative`}>
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20 bg-white rounded-full mix-blend-overlay"></div>
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/20 flex-shrink-0 z-10">
+                <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+              </div>
+              <div className="flex-1 z-10">
                 <div className="text-xs font-bold bg-white/25 text-white px-2 py-0.5 rounded-full inline-block mb-2">{p.discount} İndirim</div>
                 <div className="font-bold text-lg leading-tight">{p.name}</div>
                 <div className="text-white/80 text-xs mt-0.5">{p.subtitle}</div>
                 <div className="text-2xl font-bold mt-3">₺{p.price}</div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -266,10 +257,10 @@ export default function MagazaPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold font-display">Tüm Ürünler</h2>
-            <span className="text-xs text-[var(--foreground-muted)]">{ALL_PRODUCTS.length} ürün</span>
+            <span className="text-xs text-[var(--foreground-muted)]">{mockStoreProducts.length} ürün</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {ALL_PRODUCTS.map(p => <ProductCard key={p.id} product={p} size="small" />)}
+            {mockStoreProducts.map(p => <ProductCard key={p.id} product={p} size="small" />)}
           </div>
         </div>
       </div>
