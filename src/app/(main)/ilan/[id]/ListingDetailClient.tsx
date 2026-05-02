@@ -343,7 +343,7 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
           {/* RIGHT COLUMN - Sidebar */}
           <aside className="lg:w-96 flex-shrink-0">
-            <div className="sticky top-24 flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
 
               {/* Action Card */}
               <Card className="p-6 border-[var(--border)] shadow-md">
