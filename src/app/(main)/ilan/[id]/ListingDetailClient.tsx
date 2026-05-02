@@ -144,6 +144,13 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
   const isKayip = listing.type === 'kayip';
   const isSahiplendirme = listing.type === 'sahiplendirme';
+  const isCiftlestirme = listing.type === 'ciftlestirme';
+
+  const listingTypeBadge = ({
+    sahiplendirme: { label: '🏠 Sahiplendirme İlanı', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    kayip: { label: '🔍 Kayıp Hayvan İlanı', color: 'bg-red-100 text-red-700 border-red-200' },
+    ciftlestirme: { label: '💕 Çiftleştirme İlanı', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+  } as Record<string, { label: string; color: string }>)[listing.type] || { label: 'İlan', color: 'bg-gray-100 text-gray-700 border-gray-200' };
 
   return (
     <div className="bg-[var(--background)] min-h-screen py-8">
@@ -180,6 +187,12 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
             {/* Title + Meta */}
             <div className="mb-8">
+              {/* İlan Türü Badge - büyük ve belirgin */}
+              <div className="mb-4">
+                <span className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full border-2 ${listingTypeBadge.color}`}>
+                  {listingTypeBadge.label}
+                </span>
+              </div>
               <div className="flex items-start justify-between gap-4 mb-3">
                 <h1 className="text-3xl sm:text-4xl font-bold font-display text-[var(--foreground)]">
                   {listing.name} - {listing.breed}
@@ -327,13 +340,17 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                 <div className="mb-6">
                   {listing.reward ? (
                     <div>
-                      <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Kayıp Ödülü</div>
+                      <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">KAYIP ÖDÜLÜ</div>
                       <div className="text-4xl font-bold font-display text-[var(--foreground)]">₺{listing.reward}</div>
                     </div>
-                  ) : (
+                  ) : isCiftlestirme ? (
                     <div>
-                      <div className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Sahiplendirme Ücreti</div>
-                      <div className="text-4xl font-bold font-display text-green-500">Ücretsiz</div>
+                      <div className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">ÇİFTLEŞTİRME</div>
+                      <div className="text-2xl font-bold font-display text-purple-600">💕 Eşleştirme İlanı</div>
+                    </div>
+                  ) : (
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color}`}>
+                      <span className="text-lg font-bold">{listingTypeBadge.label}</span>
                     </div>
                   )}
                 </div>
@@ -370,115 +387,84 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                     <Button variant="outline" className="flex-1 h-12" leftIcon={<Mail size={18} />}>Mesaj</Button>
                   </div>
 
-                  {/* AI Danışman Butonu */}
-                  <button
-                    onClick={() => setIsAiOpen(!isAiOpen)}
-                    className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl border-2 transition-all duration-300 text-sm font-semibold ${
-                      isAiOpen
-                        ? 'border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]'
-                        : 'border-dashed border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary-light)] hover:text-[var(--brand-primary)] hover:bg-orange-50'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                        isAiOpen ? 'gradient-brand text-white shadow-sm' : 'bg-[var(--surface-secondary)]'
-                      }`}>
-                        <Sparkles size={14} />
-                      </span>
-                      Bana Uygun mu? AI'ya Sor
-                    </span>
-                    {isAiOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </button>
-
-                  {/* AI Chat Panel */}
-                  {isAiOpen && (
-                    <div className="animate-fade-in border border-[var(--border)] rounded-2xl overflow-hidden bg-[var(--surface-secondary)]">
-                      {/* Chat Header */}
-                      <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-50 to-pink-50 border-b border-[var(--border)]">
-                        <div className="w-7 h-7 gradient-brand rounded-xl flex items-center justify-center">
-                          <Bot size={14} className="text-white" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-[var(--foreground)]">AI Danışman</div>
-                          <div className="text-[10px] text-green-500 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" /> Çevrimiçi
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Messages */}
-                      <div className="max-h-52 overflow-y-auto p-3 space-y-3">
-                        {aiMessages.map((msg, i) => (
-                          <div key={i} className={`flex gap-2 ${
-                            msg.role === 'user' ? 'flex-row-reverse' : ''
+                  {/* AI Danışman Butonu + Panel - sadece sahiplendirme ve çiftleştirmede */}
+                  {!isKayip && (
+                    <>
+                      <button
+                        onClick={() => setIsAiOpen(!isAiOpen)}
+                        className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl border-2 transition-all duration-300 text-sm font-semibold ${
+                          isAiOpen
+                            ? 'border-[var(--brand-primary)] bg-orange-50 text-[var(--brand-primary)]'
+                            : 'border-dashed border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary-light)] hover:text-[var(--brand-primary)] hover:bg-orange-50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                            isAiOpen ? 'gradient-brand text-white shadow-sm' : 'bg-[var(--surface-secondary)]'
                           }`}>
-                            <div className={`w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-[10px] ${
-                              msg.role === 'ai' ? 'gradient-brand' : 'bg-slate-300'
-                            }`}>
-                              {msg.role === 'ai' ? <Bot size={11} /> : <User size={11} />}
-                            </div>
-                            <div className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${
-                              msg.role === 'user'
-                                ? 'bg-[var(--brand-primary)] text-white rounded-tr-sm'
-                                : 'bg-white text-[var(--foreground)] border border-[var(--border)] rounded-tl-sm'
-                            }`}>
-                              {msg.text.replace(/\*\*(.*?)\*\*/g, '$1')}
-                            </div>
-                          </div>
-                        ))}
-                        {aiLoading && (
-                          <div className="flex gap-2">
-                            <div className="w-6 h-6 rounded-xl gradient-brand flex items-center justify-center">
-                              <Bot size={11} className="text-white" />
-                            </div>
-                            <div className="bg-white border border-[var(--border)] rounded-xl rounded-tl-sm px-3 py-2 flex gap-1 items-center">
-                              <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" />
-                              <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
-                              <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
-                            </div>
-                          </div>
-                        )}
-                        <div ref={aiEndRef} />
-                      </div>
+                            <Sparkles size={14} />
+                          </span>
+                          Bana Uygun mu? AI'ya Sor
+                        </span>
+                        {isAiOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
 
-                      {/* Quick Questions */}
-                      {aiMessages.length <= 1 && (
-                        <div className="px-3 pb-2 flex flex-wrap gap-1.5">
-                          {AI_QUICK_QUESTIONS.map((q) => (
-                            <button
-                              key={q}
-                              onClick={() => sendAiMessage(q)}
-                              className="text-[10px] font-medium px-2.5 py-1.5 rounded-full bg-white border border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
-                            >
-                              {q}
-                            </button>
-                          ))}
+                      {/* AI Chat Panel */}
+                      {isAiOpen && (
+                        <div className="animate-fade-in border border-[var(--border)] rounded-2xl overflow-hidden bg-[var(--surface-secondary)]">
+                          <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-50 to-pink-50 border-b border-[var(--border)]">
+                            <div className="w-7 h-7 gradient-brand rounded-xl flex items-center justify-center">
+                              <Bot size={14} className="text-white" />
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-[var(--foreground)]">AI Danışman</div>
+                              <div className="text-[10px] text-green-500 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" /> Çevrimini
+                              </div>
+                            </div>
+                          </div>
+                          <div className="max-h-52 overflow-y-auto p-3 space-y-3">
+                            {aiMessages.map((msg, i) => (
+                              <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-[10px] ${msg.role === 'ai' ? 'gradient-brand' : 'bg-slate-300'}`}>
+                                  {msg.role === 'ai' ? <Bot size={11} /> : <User size={11} />}
+                                </div>
+                                <div className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${msg.role === 'user' ? 'bg-[var(--brand-primary)] text-white rounded-tr-sm' : 'bg-white text-[var(--foreground)] border border-[var(--border)] rounded-tl-sm'}`}>
+                                  {msg.text.replace(/\*\*(.*?)\*\*/g, '$1')}
+                                </div>
+                              </div>
+                            ))}
+                            {aiLoading && (
+                              <div className="flex gap-2">
+                                <div className="w-6 h-6 rounded-xl gradient-brand flex items-center justify-center"><Bot size={11} className="text-white" /></div>
+                                <div className="bg-white border border-[var(--border)] rounded-xl rounded-tl-sm px-3 py-2 flex gap-1 items-center">
+                                  <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" />
+                                  <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
+                                  <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
+                                </div>
+                              </div>
+                            )}
+                            <div ref={aiEndRef} />
+                          </div>
+                          {aiMessages.length <= 1 && (
+                            <div className="px-3 pb-2 flex flex-wrap gap-1.5">
+                              {AI_QUICK_QUESTIONS.map((q) => (
+                                <button key={q} onClick={() => sendAiMessage(q)} className="text-[10px] font-medium px-2.5 py-1.5 rounded-full bg-white border border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors">
+                                  {q}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          <div className="px-3 pb-3 pt-1 flex gap-2">
+                            <input type="text" value={aiInput} onChange={e => setAiInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendAiMessage(aiInput)} placeholder="Sorunuzu yazın..." disabled={aiLoading} className="flex-1 h-9 px-3 rounded-xl border border-[var(--border)] bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] placeholder:text-[var(--foreground-muted)]" />
+                            <button onClick={() => sendAiMessage(aiInput)} disabled={!aiInput.trim() || aiLoading} className="w-9 h-9 rounded-xl gradient-brand text-white flex items-center justify-center disabled:opacity-40 flex-shrink-0 shadow-sm"><Send size={13} /></button>
+                          </div>
                         </div>
                       )}
-
-                      {/* Input */}
-                      <div className="px-3 pb-3 pt-1 flex gap-2">
-                        <input
-                          type="text"
-                          value={aiInput}
-                          onChange={e => setAiInput(e.target.value)}
-                          onKeyDown={e => e.key === 'Enter' && sendAiMessage(aiInput)}
-                          placeholder="Sorunuzu yazın..."
-                          disabled={aiLoading}
-                          className="flex-1 h-9 px-3 rounded-xl border border-[var(--border)] bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] placeholder:text-[var(--foreground-muted)]"
-                        />
-                        <button
-                          onClick={() => sendAiMessage(aiInput)}
-                          disabled={!aiInput.trim() || aiLoading}
-                          className="w-9 h-9 rounded-xl gradient-brand text-white flex items-center justify-center disabled:opacity-40 flex-shrink-0 shadow-sm"
-                        >
-                          <Send size={13} />
-                        </button>
-                      </div>
-                    </div>
+                    </>
                   )}
                 </div>
-                <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[var(--foreground-muted)]">
+                <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[var(--foreground-muted)]">  
                   <ShieldCheck size={14} className="text-green-500" /> Editör onaylı ilan
                 </div>
               </Card>
@@ -503,9 +489,21 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               </Card>
 
               {/* Warning + Report Desktop */}
-              <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 gap-3 text-orange-800 text-sm hidden lg:flex shadow-sm">
-                <AlertTriangle size={20} className="flex-shrink-0 text-orange-500 mt-0.5" />
-                <div className="leading-relaxed"><strong className="block mb-1">Güvenlik Uyarısı</strong> Asla ön ödeme göndermeyin.</div>
+              <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 gap-3 text-orange-800 text-sm hidden lg:flex flex-col shadow-sm">
+                <div className="flex gap-3">
+                  <AlertTriangle size={20} className="flex-shrink-0 text-orange-500 mt-0.5" />
+                  <div className="leading-relaxed">
+                    <strong className="block mb-1">Güvenlik Uyarısı</strong>
+                    Asla ön ödeme göndermeyin.
+                  </div>
+                </div>
+                <div className="border-t border-orange-200 pt-3 text-[10px] text-orange-700 leading-relaxed space-y-1">
+                  <div className="font-semibold text-[11px]">⚖️ 5199 Sayılı Hayvanları Koruma Kanunu</div>
+                  <div>• Sahiplendirme ilanlarında ücret talep edilmesi yasaktır.</div>
+                  <div>• Bu platform yalnızca aracılık hizmeti sunar.</div>
+                  <div>• Ticari amaçlı hayvan satışı kanunen yasaktır.</div>
+                  <button onClick={() => setIsLegalModalOpen(true)} className="text-orange-600 font-semibold hover:underline mt-1 block">Detaylı bilgi →</button>
+                </div>
               </div>
               <button onClick={() => setIsReportModalOpen(true)} className="hidden lg:flex items-center justify-center gap-2 text-sm text-red-500 hover:underline">
                 <Flag size={14} /> Bu ilanı şikayet et

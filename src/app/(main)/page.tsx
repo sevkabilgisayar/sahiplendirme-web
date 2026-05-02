@@ -42,7 +42,7 @@ export default function HomePage() {
 
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight">
-              Doğru hayvanı bul,{' '}
+              Doğru dostu bul,{' '}
               <span className="text-gradient">sıcak bir yuva</span>{' '}
               ver 🐾
             </h1>
