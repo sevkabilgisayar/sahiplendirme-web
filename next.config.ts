@@ -18,11 +18,6 @@ const nextConfig: NextConfig = {
         destination: '/ilanlar?kategori=ciftlestirme',
         permanent: true,
       },
-      {
-        source: '/hizmetler',
-        destination: '/ilanlar?kategori=hizmetler',
-        permanent: true,
-      },
     ];
   },
 };
