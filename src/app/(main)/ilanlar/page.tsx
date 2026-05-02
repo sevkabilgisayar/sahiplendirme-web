@@ -402,6 +402,7 @@ function ListingsPageInner() {
             )}
             </div>
           </div>
+          </div>
           {/* /ORTA İÇERİK */}
 
           {/* SAĞ REKLAM SÜTUNU */}
