@@ -8,8 +8,8 @@ export const mockListings: Listing[] = [
     imageColor: 'from-amber-200 to-orange-200',
     photos: [
       'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&auto=format&fit=crop',
     ],
   },
   {
@@ -61,7 +61,7 @@ export const mockListings: Listing[] = [
     reward: '2500',
     photos: [
       'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800&auto=format&fit=crop',
     ],
   },
   {
@@ -80,7 +80,7 @@ export const mockListings: Listing[] = [
     ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-08',
     imageColor: 'from-yellow-100 to-amber-100',
     photos: [
-      'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=800&auto=format&fit=crop',
     ],
   },
@@ -91,7 +91,7 @@ export const mockListings: Listing[] = [
     imageColor: 'from-yellow-200 to-orange-100',
     photos: [
       'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
     ],
   },
   {
@@ -121,8 +121,8 @@ export const mockListings: Listing[] = [
     ownerType: 'barinakta', emoji: '🐶', createdAt: '2024-01-04',
     imageColor: 'from-amber-100 to-orange-100',
     photos: [
-      'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1537344008049-9ce0e80b6ffc?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1537942677486-01bf3c90e7e6?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583511655826-05700442f2ef?w=800&auto=format&fit=crop',
     ],
   },
 ];

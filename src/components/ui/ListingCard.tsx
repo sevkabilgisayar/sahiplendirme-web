@@ -83,13 +83,16 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </span>
           {/* AI Eşleştirme chip - kart içi */}
           {listing.type === 'kayip' && (
-            <Link
-              href="/ai-danisman/foto-eslestirme"
-              onClick={e => e.stopPropagation()}
+            <button
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = '/ai-danisman/foto-eslestirme';
+              }}
               className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors w-fit"
             >
               <ScanSearch size={9} /> Fotoğrafla eşleştir
-            </Link>
+            </button>
           )}
           <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)]">
             <MapPin size={12} className="text-[var(--brand-primary)]" />

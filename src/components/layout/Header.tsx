@@ -23,6 +23,7 @@ const navLinks = [
   { href: '/ilanlar?kategori=kayip', label: 'Kayıp', emoji: '🔍' },
   { href: '/ilanlar?kategori=ciftlestirme', label: 'Çiftleştirme', emoji: '💕' },
   { href: '/hizmetler', label: 'Hizmetler', emoji: '⭐' },
+  { href: '/magaza', label: 'Mağaza', emoji: '🛍️' },
 ];
 
 // Mock auth state - will be replaced with real auth
