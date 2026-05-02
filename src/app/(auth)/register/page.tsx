@@ -52,6 +52,23 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  // Fiyatlandırma
+  const UNIT_PRICE = 199; // TL/ay per kategori
+  const DISCOUNT_THRESHOLD = 2; // 2+ kategoride indirim
+  const DISCOUNT_RATE = 0.20; // %20
+
+  const totalFull = selectedServices.length * UNIT_PRICE;
+  const hasDiscount = selectedServices.length >= DISCOUNT_THRESHOLD;
+  const discountAmount = hasDiscount ? Math.round(totalFull * DISCOUNT_RATE) : 0;
+  const totalFinal = totalFull - discountAmount;
+
+  const toggleService = (value: string) => {
+    setSelectedServices(prev =>
+      prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
+    );
+  };
 
   const {
     register,
@@ -255,34 +272,109 @@ export default function RegisterPage() {
 
         {/* Hizmet Türü — Profesyonel seçilince */}
         {accountType === 'profesyonel' && (
-          <div className="animate-slide-up">
-            <label className="block text-sm font-semibold mb-3 text-[var(--foreground)]">
-              Hizmet Türünüz
-            </label>
-            <div className="bg-[var(--surface-secondary)] border border-[var(--border)] rounded-2xl p-4">
-              <div className="flex flex-wrap justify-center gap-4">
-                {SERVICE_CATEGORIES.map((svc) => {
-                  const selected = watch('serviceType') === svc.value;
-                  return (
-                    <button
-                      key={svc.value}
-                      type="button"
-                      onClick={() => setValue('serviceType', svc.value, { shouldValidate: true })}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl min-w-[72px] transition-all ${
-                        selected
-                          ? 'bg-[var(--brand-primary)] text-white shadow-brand'
-                          : 'bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--brand-primary-light)]'
-                      }`}
-                    >
-                      <span className="text-2xl">{svc.emoji}</span>
-                      <span className="text-xs font-medium">{svc.label}</span>
-                    </button>
-                  );
-                })}
+          <div className="animate-slide-up space-y-3">
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-[var(--foreground)]">
+                Hizmet Kategorileri
+              </label>
+              <p className="text-xs text-[var(--foreground-muted)] mb-3">
+                Birden fazla kategori seçebilirsiniz — 2+ kategoride <span className="text-green-600 font-semibold">%20 indirim</span> uygulanır.
+              </p>
+              <div className="bg-[var(--surface-secondary)] border border-[var(--border)] rounded-2xl p-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {SERVICE_CATEGORIES.map((svc) => {
+                    const isSelected = selectedServices.includes(svc.value);
+                    return (
+                      <button
+                        key={svc.value}
+                        type="button"
+                        onClick={() => toggleService(svc.value)}
+                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                          isSelected
+                            ? 'bg-[var(--brand-primary)] text-white shadow-brand'
+                            : 'bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--brand-primary-light)]'
+                        }`}
+                      >
+                        {isSelected && (
+                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
+                            <Check size={10} className="text-white" />
+                          </div>
+                        )}
+                        <span className="text-2xl">{svc.emoji}</span>
+                        <span className="text-[10px] font-medium text-center leading-tight">{svc.label}</span>
+                        <span className={`text-[9px] font-bold ${isSelected ? 'text-orange-200' : 'text-[var(--foreground-muted)]'}`}>
+                          +₺{UNIT_PRICE}/ay
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-            {errors.serviceType && (
-              <p className="text-xs text-[var(--danger)] mt-1">{errors.serviceType.message}</p>
+
+            {/* Fiyat Özeti */}
+            {selectedServices.length > 0 && (
+              <div className="animate-fade-in bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-4 space-y-2">
+                <div className="text-xs font-bold text-[var(--foreground)] mb-2">Fiyat Özeti</div>
+
+                {/* Seçilen kategoriler */}
+                {selectedServices.map(sv => {
+                  const svc = SERVICE_CATEGORIES.find(s => s.value === sv);
+                  return (
+                    <div key={sv} className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-[var(--foreground-muted)]">
+                        <span>{svc?.emoji}</span> {svc?.label}
+                      </span>
+                      <span className="font-medium text-[var(--foreground)]">₺{UNIT_PRICE}/ay</span>
+                    </div>
+                  );
+                })}
+
+                <div className="border-t border-orange-200 my-2" />
+
+                {/* Normal toplam */}
+                {hasDiscount && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[var(--foreground-muted)]">Toplam ({selectedServices.length} kategori)</span>
+                    <span className="line-through text-[var(--foreground-muted)]">₺{totalFull}/ay</span>
+                  </div>
+                )}
+
+                {/* İndirim satırı */}
+                {hasDiscount && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-green-600 font-semibold flex items-center gap-1">
+                      🎉 %20 Çoklu Kategori İndirimi
+                    </span>
+                    <span className="text-green-600 font-bold">-₺{discountAmount}/ay</span>
+                  </div>
+                )}
+
+                {/* Final fiyat */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-[var(--foreground)]">Toplam</span>
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-[var(--brand-primary)]">₺{totalFinal}</span>
+                    <span className="text-xs text-[var(--foreground-muted)]">/ay</span>
+                  </div>
+                </div>
+
+                {hasDiscount && (
+                  <div className="text-[10px] text-green-600 font-medium text-center pt-1">
+                    ✅ Aylık ₺{discountAmount} tasarruf ediyorsunuz!
+                  </div>
+                )}
+
+                {selectedServices.length === 1 && (
+                  <div className="text-[10px] text-orange-500 text-center pt-1">
+                    💡 1 kategori daha ekleyerek %20 indirim kazan!
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedServices.length === 0 && (
+              <p className="text-xs text-[var(--danger)]">Lütfen en az bir hizmet kategorisi seçin.</p>
             )}
           </div>
         )}
