@@ -292,12 +292,39 @@ function ListingsPageInner() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className={`lg:w-64 flex-shrink-0 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
-            <FilterSidebar />
+      <div className="py-8">
+        <div className="flex gap-0 items-start justify-center">
+
+          {/* SOL REKLAM SÜTUNU */}
+          <aside className="hidden xl:flex flex-col gap-4 w-[168px] flex-shrink-0 sticky top-24 self-start px-2">
+            <a href="/paketler" className="block group">
+              <div className="w-[160px] h-[600px] bg-gradient-to-b from-orange-50 to-orange-100 border-2 border-dashed border-orange-200 rounded-2xl flex flex-col items-center justify-center gap-3 hover:border-orange-400 hover:bg-orange-50 transition-all cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'repeating-linear-gradient(45deg, #f97316 0, #f97316 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px'}} />
+                <div className="w-10 h-10 gradient-brand rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="text-white text-lg">📢</span>
+                </div>
+                <div className="text-center px-3">
+                  <div className="text-xs font-bold text-orange-600 mb-1">REKLAM ALANI</div>
+                  <div className="text-[10px] text-orange-400 font-medium">160 × 600</div>
+                  <div className="text-[10px] text-orange-400 mt-1">Skyscraper</div>
+                </div>
+                <div className="text-[9px] text-orange-300 text-center px-2 leading-relaxed">
+                  Reklamınız burada görünsün
+                </div>
+                <div className="mt-2 px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded-full group-hover:bg-orange-600 transition-colors">
+                  Reklam Ver
+                </div>
+              </div>
+            </a>
           </aside>
+
+          {/* ORTA İÇERİK */}
+          <div className="flex-1 max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Filter Sidebar */}
+              <aside className={`lg:w-64 flex-shrink-0 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+                <FilterSidebar />
+              </aside>
 
           {/* Main Content */}
           <div className="flex-1">
@@ -373,7 +400,46 @@ function ListingsPageInner() {
                 <Button variant="outline" onClick={clearAll}>Filtreleri Temizle</Button>
               </div>
             )}
+            </div>
           </div>
+          {/* /ORTA İÇERİK */}
+
+          {/* SAĞ REKLAM SÜTUNU */}
+          <aside className="hidden xl:flex flex-col gap-4 w-[168px] flex-shrink-0 sticky top-24 self-start px-2">
+            <a href="/paketler" className="block group">
+              <div className="w-[160px] h-[300px] bg-gradient-to-b from-violet-50 to-purple-100 border-2 border-dashed border-violet-200 rounded-2xl flex flex-col items-center justify-center gap-3 hover:border-violet-400 transition-all cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'repeating-linear-gradient(45deg, #8b5cf6 0, #8b5cf6 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px'}} />
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="text-white text-lg">✨</span>
+                </div>
+                <div className="text-center px-3">
+                  <div className="text-xs font-bold text-violet-600 mb-1">REKLAM ALANI</div>
+                  <div className="text-[10px] text-violet-400 font-medium">160 × 300</div>
+                  <div className="text-[10px] text-violet-400 mt-1">Half Page</div>
+                </div>
+                <div className="mt-2 px-3 py-1.5 bg-violet-500 text-white text-[10px] font-bold rounded-full group-hover:bg-violet-600 transition-colors">
+                  Reklam Ver
+                </div>
+              </div>
+            </a>
+            <a href="/paketler" className="block group">
+              <div className="w-[160px] h-[280px] bg-gradient-to-b from-emerald-50 to-teal-100 border-2 border-dashed border-emerald-200 rounded-2xl flex flex-col items-center justify-center gap-3 hover:border-emerald-400 transition-all cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'repeating-linear-gradient(45deg, #10b981 0, #10b981 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px'}} />
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="text-white text-lg">🐾</span>
+                </div>
+                <div className="text-center px-3">
+                  <div className="text-xs font-bold text-emerald-600 mb-1">REKLAM ALANI</div>
+                  <div className="text-[10px] text-emerald-400 font-medium">160 × 280</div>
+                  <div className="text-[10px] text-emerald-400 mt-1">Square</div>
+                </div>
+                <div className="mt-2 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full group-hover:bg-emerald-600 transition-colors">
+                  Reklam Ver
+                </div>
+              </div>
+            </a>
+          </aside>
+
         </div>
       </div>
     </div>
