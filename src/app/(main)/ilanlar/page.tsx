@@ -1,0 +1,381 @@
+'use client';
+
+import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Search, Filter, ChevronDown, MapPin, SlidersHorizontal, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import ListingCard from '@/components/ui/ListingCard';
+import { mockListings } from '@/lib/mock-data';
+import Button from '@/components/ui/Button';
+import AdBanner from '@/components/ui/AdBanner';
+import {
+  CITIES, AGE_OPTIONS, GENDER_OPTIONS, ANIMAL_TYPES, LISTING_TYPES, OWNER_TYPES,
+  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS,
+} from '@/constants';
+
+const BREEDS_BY_ANIMAL: Record<string, string[]> = {
+  kopek: DOG_BREEDS,
+  kedi: CAT_BREEDS,
+  kus: BIRD_BREEDS,
+};
+
+const ITEMS_PER_PAGE = 9;
+
+export default function ListingsPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ListingsPageInner />
+    </Suspense>
+  );
+}
+
+function ListingsPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const [sort, setSort] = useState('newest');
+  const [page, setPage] = useState(1);
+
+  // Filter states — initialized from URL query params
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(
+    searchParams.get('kategori') ? [searchParams.get('kategori')!] : []
+  );
+  const [selectedAnimals, setSelectedAnimals] = useState<string[]>(
+    searchParams.get('tur') ? [searchParams.get('tur')!] : []
+  );
+  const [selectedCity, setSelectedCity] = useState(searchParams.get('sehir') || '');
+  const [selectedGender, setSelectedGender] = useState('');
+  const [selectedOwnerType, setSelectedOwnerType] = useState('');
+  const [selectedBreed, setSelectedBreed] = useState('');
+  const [selectedAge, setSelectedAge] = useState('');
+
+  // Available breeds based on selected animal types
+  const availableBreeds = useMemo(() => {
+    if (selectedAnimals.length === 1) return BREEDS_BY_ANIMAL[selectedAnimals[0]] || [];
+    if (selectedAnimals.length === 0) return [...DOG_BREEDS, ...CAT_BREEDS, ...BIRD_BREEDS];
+    return [];
+  }, [selectedAnimals]);
+
+  const toggleFilter = (arr: string[], val: string, setter: (v: string[]) => void) => {
+    setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
+    setPage(1);
+    setSelectedBreed(''); // Reset breed when animal changes
+  };
+
+  const clearAll = () => {
+    setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
+    setSelectedCity(''); setSelectedGender(''); setSelectedOwnerType('');
+    setSelectedBreed(''); setSelectedAge('');
+    setPage(1);
+  };
+
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCity || selectedGender || selectedOwnerType || selectedBreed || selectedAge;
+
+  // All listings (duplicated for demo volume)
+  const allListings = [
+    ...mockListings,
+    ...mockListings.map(l => ({ ...l, id: `${l.id}-b`, city: 'Ankara' })),
+    ...mockListings.slice(0, 6).map(l => ({ ...l, id: `${l.id}-c`, city: 'İzmir' })),
+  ];
+
+  const filtered = useMemo(() => {
+    let result = [...allListings];
+
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(l =>
+        l.name.toLowerCase().includes(q) ||
+        l.breed.toLowerCase().includes(q) ||
+        l.city.toLowerCase().includes(q)
+      );
+    }
+    if (selectedTypes.length) result = result.filter(l => selectedTypes.includes(l.type));
+    if (selectedAnimals.length) result = result.filter(l => selectedAnimals.includes(l.animalType));
+    if (selectedCity) result = result.filter(l => l.city === selectedCity);
+    if (selectedGender) result = result.filter(l => l.gender === selectedGender);
+    if (selectedOwnerType) result = result.filter(l => l.ownerType === selectedOwnerType);
+    if (selectedBreed) result = result.filter(l => l.breed === selectedBreed);
+
+    if (sort === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (sort === 'oldest') result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
+
+    return result;
+  }, [search, selectedTypes, selectedAnimals, selectedCity, selectedGender, selectedOwnerType, selectedBreed, selectedAge, sort]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  const FilterSidebar = () => (
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 sticky top-24">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-bold text-lg flex items-center gap-2">
+          <Filter size={18} className="text-[var(--brand-primary)]" /> Filtreler
+        </h2>
+        {hasFilters && (
+          <button onClick={clearAll} className="text-xs text-red-500 hover:underline font-medium">
+            Temizle
+          </button>
+        )}
+      </div>
+
+      {/* İlan Türü */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">İlan Türü</h3>
+        <div className="flex flex-col gap-2">
+          {LISTING_TYPES.map((cat) => (
+            <label key={cat.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" checked={selectedTypes.includes(cat.value)}
+                onChange={() => toggleFilter(selectedTypes, cat.value, setSelectedTypes)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)]" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors">{cat.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Hayvan Türü */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Hayvan Türü</h3>
+        <div className="flex flex-col gap-2">
+          {ANIMAL_TYPES.map((type) => (
+            <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" checked={selectedAnimals.includes(type.value)}
+                onChange={() => toggleFilter(selectedAnimals, type.value, setSelectedAnimals)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)]" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors">{type.emoji} {type.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Irk Filtresi — Hayvan türüne göre dinamik */}
+      {selectedAnimals.length <= 1 && (
+        <div className="mb-6 border-b border-[var(--border)] pb-5">
+          <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Irk</h3>
+          <div className="relative">
+            <select
+              value={selectedBreed}
+              onChange={(e) => { setSelectedBreed(e.target.value); setPage(1); }}
+              className="w-full h-10 px-3 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+            >
+              <option value="">Tüm Irklar</option>
+              {availableBreeds.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+          </div>
+        </div>
+      )}
+
+      {/* Cinsiyet */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Cinsiyet</h3>
+        <div className="flex gap-2">
+          {[{ value: '', label: 'Tümü' }, ...GENDER_OPTIONS].map(g => (
+            <button key={g.value} onClick={() => { setSelectedGender(g.value); setPage(1); }}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                selectedGender === g.value
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                  : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary-light)]'
+              }`}>
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Etiket (Sahibinde/Barınakta) */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Konum</h3>
+        <div className="flex flex-col gap-2">
+          {OWNER_TYPES.map((o) => (
+            <label key={o.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="radio" name="ownerType" checked={selectedOwnerType === o.value}
+                onChange={() => { setSelectedOwnerType(selectedOwnerType === o.value ? '' : o.value); setPage(1); }}
+                className="w-4 h-4 accent-[var(--brand-primary)]" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors">
+                {o.value === 'sahibinde' ? '🏠' : '🏛️'} {o.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Şehir */}
+      <div className="mb-2">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Şehir</h3>
+        <div className="relative">
+          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
+          <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setPage(1); }}
+            className="w-full h-10 pl-9 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]">
+            <option value="">Tüm Şehirler</option>
+            {CITIES.map((city) => <option key={city} value={city}>{city}</option>)}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="bg-[var(--background)] min-h-screen">
+      {/* Top Header */}
+      <div className="bg-[var(--surface)] border-b border-[var(--border)] pt-8 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold font-display text-[var(--foreground)] mb-4">İlanlar</h1>
+
+          {/* Active filters chips */}
+          {hasFilters && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedTypes.map(t => (
+                <span key={t} className="flex items-center gap-1 bg-[var(--brand-primary)] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {LISTING_TYPES.find(x => x.value === t)?.label}
+                  <button onClick={() => setSelectedTypes(selectedTypes.filter(x => x !== t))} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              ))}
+              {selectedAnimals.map(a => (
+                <span key={a} className="flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {ANIMAL_TYPES.find(x => x.value === a)?.emoji} {ANIMAL_TYPES.find(x => x.value === a)?.label}
+                  <button onClick={() => setSelectedAnimals(selectedAnimals.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              ))}
+              {selectedBreed && (
+                <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  🐾 {selectedBreed}
+                  <button onClick={() => setSelectedBreed('')} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              )}
+              {selectedCity && (
+                <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  <MapPin size={10} /> {selectedCity}
+                  <button onClick={() => setSelectedCity('')} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              )}
+              <button onClick={clearAll} className="text-xs text-red-500 hover:underline font-medium px-2">Tümünü Temizle</button>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
+              <input type="text" placeholder="İlan adı, cins, ırk veya şehir ara..."
+                value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full h-12 pl-11 pr-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] text-sm" />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] hover:text-[var(--foreground)]">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <div className="relative">
+                <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }}
+                  className="h-12 pl-4 pr-10 appearance-none rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]">
+                  <option value="newest">En Yeniler</option>
+                  <option value="oldest">En Eskiler</option>
+                  <option value="reward">Ödülü En Yüksek</option>
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+              </div>
+              <Button variant="outline" className="lg:hidden h-12 px-4 border-[var(--border)] relative"
+                onClick={() => setShowMobileFilters(!showMobileFilters)}>
+                <SlidersHorizontal size={18} />
+                {hasFilters && <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--brand-primary)] rounded-full text-white text-[9px] flex items-center justify-center font-bold">!</span>}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <aside className={`lg:w-64 flex-shrink-0 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+            <FilterSidebar />
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Results count */}
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-sm text-[var(--foreground-muted)]">
+                Toplam <strong className="text-[var(--foreground)]">{filtered.length}</strong> ilan bulundu
+                {totalPages > 1 && <span className="ml-1">· Sayfa {page}/{totalPages}</span>}
+              </span>
+            </div>
+
+            {/* Listings Grid */}
+            {paginated.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                  {paginated.map((listing) => (
+                    <div key={listing.id} className="h-full">
+                      <ListingCard listing={listing} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Ad Banner between pages */}
+                {page === 1 && (
+                  <AdBanner
+                    imageUrl="https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?q=80&w=2670&auto=format&fit=crop"
+                    linkUrl="/paketler"
+                    altText="Sahiplendirme.com Premium"
+                  />
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-8">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="w-10 h-10 rounded-xl border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                      return (
+                        <button key={pageNum} onClick={() => setPage(pageNum)}
+                          className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${
+                            page === pageNum
+                              ? 'gradient-brand text-white shadow-brand'
+                              : 'border border-[var(--border)] text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)]'
+                          }`}>
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="w-10 h-10 rounded-xl border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Empty State */
+              <div className="text-center py-20">
+                <div className="w-20 h-20 mx-auto bg-[var(--surface-secondary)] rounded-full flex items-center justify-center mb-4">
+                  <Search size={32} className="text-[var(--foreground-muted)]" />
+                </div>
+                <h3 className="text-lg font-bold font-display mb-2">İlan bulunamadı</h3>
+                <p className="text-sm text-[var(--foreground-muted)] mb-4">Filtreleri değiştirerek tekrar deneyin.</p>
+                <Button variant="outline" onClick={clearAll}>Filtreleri Temizle</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
