@@ -61,9 +61,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
               {listing.gender === 'erkek' ? '♂ Erkek' : '♀ Dişi'}
             </span>
           </div>
-          <h3 className="font-semibold text-[var(--foreground)] text-base mb-2 group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
+          <h3 className="font-semibold text-[var(--foreground)] text-base mb-1 group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
             {listing.name}
           </h3>
+          <span className="text-[10px] text-[var(--foreground-muted)] font-mono mb-2 block">
+            #{String(listing.id).padStart(5, '0')}
+          </span>
           <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)]">
             <MapPin size={12} className="text-[var(--brand-primary)]" />
             {listing.city}

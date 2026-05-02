@@ -186,6 +186,9 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                 <span className="flex items-center gap-1"><MapPin size={16} className="text-[var(--brand-primary)]" />{listing.location.address}</span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {listing.viewCount || 124} görüntülenme</span>
                 <span className="flex items-center gap-1"><Clock size={14} /> {listing.createdAt || '2 gün önce'}</span>
+                <span className="ml-auto text-[10px] font-mono bg-[var(--surface-secondary)] border border-[var(--border)] px-2 py-0.5 rounded-md text-[var(--foreground-muted)] select-all cursor-pointer" title="İlan numarası">
+                  #İlan {String(listing.id).padStart(5, '0')}
+                </span>
               </div>
             </div>
 
@@ -295,6 +298,20 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
               {/* Action Card */}
               <Card className="p-6 border-[var(--border)] shadow-md">
+                {/* İlan No */}
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
+                  <span className="text-xs text-[var(--foreground-muted)] font-medium">İlan No</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard?.writeText(String(listing.id).padStart(5, '0'));
+                      toast.success('İlan no kopyalandı!');
+                    }}
+                    className="font-mono text-sm font-bold text-[var(--brand-primary)] bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg hover:bg-orange-100 transition-colors"
+                    title="Kopyalamak için tıkla"
+                  >
+                    #{String(listing.id).padStart(5, '0')}
+                  </button>
+                </div>
                 <div className="mb-6">
                   {listing.reward ? (
                     <div>
