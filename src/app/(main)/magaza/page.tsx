@@ -6,6 +6,7 @@ import {
   ShoppingBag, Tag, Star, Truck, Shield, RefreshCw, Search,
   ChevronLeft, ChevronRight, Flame, Zap, TrendingUp, Percent, Gift, Clock
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CATEGORIES = [
   { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248, color: 'from-red-50 to-orange-50 border-orange-100 hover:border-orange-300' },
@@ -110,7 +111,12 @@ function ProductCard({ product, size = 'normal' }: { product: typeof ALL_PRODUCT
         {product.oldPrice && <span className="text-xs line-through text-[var(--foreground-muted)]">₺{product.oldPrice}</span>}
       </div>
       <button
-        onClick={() => { setInCart(true); setTimeout(() => setInCart(false), 2000); }}
+        onClick={(e) => { 
+          e.preventDefault(); 
+          setInCart(true); 
+          toast.success(`${product.name} sepete eklendi!`);
+          setTimeout(() => setInCart(false), 2000); 
+        }}
         className={`w-full mt-2 font-semibold rounded-xl flex items-center justify-center gap-1 transition-all ${size === 'small' ? 'h-7 text-[11px]' : 'h-9 text-xs'} ${
           inCart ? 'bg-green-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white'
         }`}

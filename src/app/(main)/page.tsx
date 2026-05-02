@@ -194,28 +194,166 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============ FEATURED LISTINGS ============ */}
-      <section className="py-20">
+      {/* ============ ÖNE ÇIKAN SAHİPLENDİRME ============ */}
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold font-display text-[var(--foreground)] mb-2">
-                Son İlanlar
-              </h2>
-              <p className="text-[var(--foreground-muted)]">
-                Platformumuzdaki en güncel ilanlar
-              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">🏠</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Öne Çıkan Sahiplendirme</h2>
+                <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">PREMIUM</span>
+              </div>
+              <p className="text-[var(--foreground-muted)] text-sm">Sıcak bir yuva arayan can dostlarımız</p>
             </div>
-            <Link href="/ilanlar">
-              <Button variant="outline" rightIcon={<ArrowRight size={16} />}>
-                Tümünü Gör
-              </Button>
+            <Link href="/ilanlar?kategori=sahiplendirme">
+              <Button variant="outline" rightIcon={<ArrowRight size={14} />} className="hidden sm:flex text-sm h-9">Tümünü Gör</Button>
             </Link>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {featuredListings.map((listing) => (
+            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 3).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=sahiplendirme" className="sm:hidden">
+              <Button variant="outline">Tümünü Gör</Button>
+            </Link>
+            <Link href="/ilan-ver">
+              <Button variant="gradient" rightIcon={<Zap size={14}/>}>Hemen Sahiplendirme İlanı Ver</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ ÖNE ÇIKAN KAYIP ============ */}
+      <section className="py-16 bg-red-50/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg">🔍</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Kayıp İlanları</h2>
+                <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">PREMIUM</span>
+              </div>
+              <p className="text-[var(--foreground-muted)] text-sm">Görenlerin iletişime geçmesi önemle rica olunur</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {featuredListings.filter(l => l.type === 'kayip').slice(0, 3).map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=kayip">
+              <Button variant="outline">Kayıp İlanlarını İncele</Button>
+            </Link>
+            <Link href="/ilan-ver">
+              <Button className="bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/20" rightIcon={<Zap size={14}/>}>Kayıp İlanı Ver</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ ÖNE ÇIKAN ÇİFTLEŞTİRME ============ */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg">💕</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Çiftleştirme Eşleştirmeleri</h2>
+                <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">PREMIUM</span>
+              </div>
+              <p className="text-[var(--foreground-muted)] text-sm">Uyumlu eş arayan dostlarımız</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 3).map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=ciftlestirme">
+              <Button variant="outline">Tüm Eşleştirmeleri Gör</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ MAĞAZA VİTRİN ============ */}
+      <section className="py-16 bg-emerald-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">🛍️</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Mağaza Vitrini</h2>
+                <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">YENİ</span>
+              </div>
+              <p className="text-emerald-700/70 text-sm">Pet dostunuz için en popüler ürünler</p>
+            </div>
+            <Link href="/magaza">
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" rightIcon={<ArrowRight size={14}/>}>Mağazaya Git</Button>
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { id: 1, name: 'Royal Canin Medium Adult', price: 289, img: '🥩', rating: 4.8 },
+              { id: 2, name: 'Flexi Otomatik Tasma', price: 199, img: '🦮', rating: 4.6 },
+              { id: 3, name: 'ComfyPet Yatak', price: 379, img: '🛏️', rating: 4.9 },
+              { id: 4, name: 'Kong Extreme Oyuncak', price: 149, img: '🧸', rating: 4.7 }
+            ].map((p) => (
+              <div key={p.id} className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group">
+                <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center text-4xl mb-3 group-hover:scale-105 transition-transform">{p.img}</div>
+                <div className="font-semibold text-sm leading-tight mb-1">{p.name}</div>
+                <div className="flex items-center gap-1 mb-2">
+                  <Star size={10} className="text-yellow-400 fill-yellow-400" /><span className="text-[10px]">{p.rating}</span>
+                </div>
+                <div className="mt-auto flex items-center justify-between">
+                  <span className="font-bold text-emerald-600">₺{p.price}</span>
+                  <Link href="/magaza" className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-colors">
+                    <ArrowRight size={12}/>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ RESMİ BARINAKLAR ============ */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">🏛️</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Resmi Barınaklar</h2>
+              </div>
+              <p className="text-[var(--foreground-muted)] text-sm">Türkiye genelindeki belediye ve resmi barınaklar</p>
+            </div>
+            <Button variant="outline" rightIcon={<ArrowRight size={14}/>}>Tüm Barınaklar</Button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {[
+              { id: 1, name: 'İstanbul Büyükşehir Belediyesi Barınağı', city: 'İstanbul', count: 450, img: '🏢' },
+              { id: 2, name: 'Ankara Çankaya Hayvan Barınağı', city: 'Ankara', count: 320, img: '🏥' },
+              { id: 3, name: 'İzmir Şopengazi Barınağı', city: 'İzmir', count: 210, img: '🏡' }
+            ].map(b => (
+              <div key={b.id} className="border border-[var(--border)] bg-[var(--surface)] p-5 rounded-3xl flex items-center gap-4 hover:border-[var(--brand-primary)] hover:shadow-md transition-all cursor-pointer">
+                <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl">{b.img}</div>
+                <div>
+                  <div className="font-bold text-sm leading-tight mb-1">{b.name}</div>
+                  <div className="flex items-center gap-2 text-xs text-[var(--foreground-muted)]">
+                    <span className="flex items-center gap-0.5"><MapPin size={10}/> {b.city}</span>
+                    <span>•</span>
+                    <span className="font-medium text-orange-600">{b.count} İlan</span>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
