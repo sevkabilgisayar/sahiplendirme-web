@@ -1,82 +1,126 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Star, MapPin, Phone, Mail, Globe, CheckCircle, Shield, Award, Clock } from 'lucide-react';
+import { Star, MapPin, Phone, Mail, Globe, CheckCircle, Shield, Clock, ArrowLeft, ChevronRight, Share2 } from 'lucide-react';
+import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { mockServices } from '../page';
+import { SERVICE_CATEGORIES } from '@/constants';
 
 export default function HizmetProviderDetayPage() {
   const params = useParams();
   const id = params.id as string;
+  const service = mockServices.find(s => s.id === id) || mockServices[0];
+  const catInfo = SERVICE_CATEGORIES.find(c => c.value === service.category);
 
   return (
     <div className="bg-[var(--background)] min-h-screen">
-      {/* Cover & Header */}
-      <div className="h-64 bg-slate-200 relative">
-        <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" alt="Cover" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+      {/* Cover */}
+      <div className="h-52 sm:h-64 relative overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1400&auto=format&fit=crop"
+          alt="Cover"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        {/* Back */}
+        <Link href="/hizmetler" className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-sm font-medium px-3 py-1.5 rounded-full hover:bg-white/30 transition-colors">
+          <ArrowLeft size={14} /> Hizmetler
+        </Link>
+        {/* Breadcrumb */}
+        <div className="absolute bottom-4 left-4 text-white/70 text-xs flex items-center gap-1">
+          <Link href="/" className="hover:text-white">Ana Sayfa</Link>
+          <ChevronRight size={10} />
+          <Link href="/hizmetler" className="hover:text-white">Hizmetler</Link>
+          <ChevronRight size={10} />
+          <span className="text-white font-medium truncate max-w-[180px]">{service.name}</span>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-20">
-        <div className="flex flex-col md:flex-row gap-8">
-          
-          {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-14 relative z-10 pb-20">
+        <div className="flex flex-col lg:flex-row gap-8">
+
+          {/* Main */}
           <div className="flex-1 space-y-6">
-            <Card className="p-6 md:p-8 border-0 shadow-sm">
-              <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                <div className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-md overflow-hidden flex-shrink-0">
-                  <img src="https://ui-avatars.com/api/?name=Vet+Life&background=0D8ABC&color=fff&size=128" alt="Logo" className="w-full h-full object-cover" />
+
+            {/* Profile Header Card */}
+            <Card className="p-6 sm:p-8 border-0 shadow-md">
+              <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+                <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${service.color} flex items-center justify-center text-5xl flex-shrink-0 shadow-sm`}>
+                  {service.emoji}
                 </div>
                 <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 mb-1">
-                    <h1 className="text-2xl sm:text-3xl font-bold font-display">VetLife Veteriner Kliniği</h1>
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-md font-bold flex items-center gap-1">
-                      <CheckCircle size={12} /> Onaylı Uzman
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold font-display">{service.name}</h1>
+                    {service.verified && (
+                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1">
+                        <CheckCircle size={11} /> Onaylı
+                      </span>
+                    )}
+                    {service.featured && (
+                      <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-bold">
+                        ⭐ Öne Çıkan
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[var(--foreground-muted)] flex items-center gap-2 mb-3">
-                    <MapPin size={16} /> İstanbul, Kadıköy
+                  <p className="text-[var(--foreground-muted)] flex items-center gap-1.5 text-sm mb-2">
+                    <MapPin size={14} /> {service.district}, {service.city}
                   </p>
-                  <div className="flex items-center gap-4 text-sm font-semibold">
+                  <div className="flex items-center gap-4 text-sm font-semibold flex-wrap">
                     <div className="flex items-center gap-1 text-orange-500">
-                      <Star size={16} className="fill-orange-500" /> 4.9 (128 Değerlendirme)
+                      <Star size={14} className="fill-orange-500" /> {service.rating}
+                      <span className="font-normal text-[var(--foreground-muted)] text-xs">({service.reviews} değerlendirme)</span>
                     </div>
-                    <div className="text-green-600">Açık - 22:00'a kadar</div>
+                    <span className="text-emerald-600 text-sm font-bold">{service.price}</span>
+                    <span className="text-xs text-[var(--brand-primary)] font-bold uppercase">{catInfo?.emoji} {catInfo?.label}</span>
                   </div>
                 </div>
+                <button className="p-2 rounded-xl border border-[var(--border)] hover:border-[var(--brand-primary)] transition-colors text-[var(--foreground-muted)]">
+                  <Share2 size={18} />
+                </button>
               </div>
 
-              <div className="mt-8 border-t border-[var(--border)] pt-6">
-                <h2 className="text-xl font-bold mb-4">Hakkımızda</h2>
-                <p className="text-[var(--foreground-muted)] leading-relaxed">
-                  10 yılı aşkın tecrübemizle can dostlarınızın sağlığı için 7/24 hizmetinizdeyiz. Tam donanımlı kliniğimizde röntgen, ultrason, laboratuvar ve cerrahi operasyon hizmetleri sunmaktayız. Uzman kadromuzla yanınızdayız.
-                </p>
+              {/* About */}
+              <div className="mt-6 pt-6 border-t border-[var(--border)]">
+                <h2 className="text-lg font-bold mb-3">Hakkında</h2>
+                <p className="text-[var(--foreground-muted)] leading-relaxed text-sm">{service.about}</p>
               </div>
 
-              <div className="mt-8 border-t border-[var(--border)] pt-6">
-                <h2 className="text-xl font-bold mb-4">Hizmetlerimiz</h2>
+              {/* Services */}
+              <div className="mt-6 pt-6 border-t border-[var(--border)]">
+                <h2 className="text-lg font-bold mb-3">Sunduğu Hizmetler</h2>
                 <div className="flex flex-wrap gap-2">
-                  {['Genel Muayene', 'Aşılama', 'Cerrahi Operasyon', 'Röntgen/Ultrason', 'Diş Bakımı', 'Laboratuvar', '7/24 Acil'].map(s => (
-                    <span key={s} className="bg-[var(--surface-secondary)] border border-[var(--border)] px-3 py-1.5 rounded-lg text-sm">{s}</span>
+                  {service.services.map(s => (
+                    <span key={s} className="bg-[var(--surface-secondary)] border border-[var(--border)] text-sm px-3 py-1.5 rounded-xl font-medium">
+                      {s}
+                    </span>
                   ))}
                 </div>
               </div>
             </Card>
 
-            {/* Yorumlar */}
+            {/* Reviews */}
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-6">Değerlendirmeler</h2>
-              <div className="space-y-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="border-b border-[var(--border)] last:border-0 pb-6 last:pb-0">
+              <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
+                <Star size={18} className="text-orange-400 fill-orange-400" /> Değerlendirmeler
+              </h2>
+              <div className="space-y-5">
+                {[
+                  { name: 'Ayşe D.', text: 'Çok ilgililer, her aşamada bilgi verdiler. Kesinlikle tavsiye ederim.', rating: 5, time: '2 gün önce' },
+                  { name: 'Mert K.', text: 'Köpeğim çok mutlu oldu, tekrar geleceğiz.', rating: 5, time: '1 hafta önce' },
+                  { name: 'Selin Y.', text: 'Profesyonel ve temiz ortam. Fiyat performans çok iyi.', rating: 4, time: '2 hafta önce' },
+                ].map((r, i) => (
+                  <div key={i} className="border-b border-[var(--border)] last:border-0 pb-5 last:pb-0">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold">Ayşe D.</div>
-                      <div className="flex items-center gap-1 text-orange-500 text-xs">
-                        {Array(5).fill(0).map((_, i) => <Star key={i} size={12} className="fill-orange-500" />)}
-                        <span className="text-slate-400 ml-2">2 gün önce</span>
+                      <div className="font-semibold text-sm">{r.name}</div>
+                      <div className="flex items-center gap-1 text-orange-400 text-xs">
+                        {Array(r.rating).fill(0).map((_, j) => <Star key={j} size={11} className="fill-orange-400" />)}
+                        <span className="text-slate-400 ml-2">{r.time}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-[var(--foreground-muted)]">Kedimizin kısırlaştırma operasyonunu burada yaptırdık. Çok ilgililer, her aşamada bilgi verdiler. Tavsiye ederim.</p>
+                    <p className="text-sm text-[var(--foreground-muted)]">{r.text}</p>
                   </div>
                 ))}
               </div>
@@ -85,47 +129,84 @@ export default function HizmetProviderDetayPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="md:w-80 space-y-6">
-            <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4">İletişim Bilgileri</h3>
-              <div className="space-y-4">
+          <div className="lg:w-80 space-y-5">
+
+            {/* Contact */}
+            <Card className="p-6 shadow-sm">
+              <h3 className="font-bold text-base mb-4">İletişim Bilgileri</h3>
+              <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <MapPin size={18} className="text-[var(--foreground-muted)] mt-0.5" />
-                  <div className="text-sm text-[var(--foreground)]">Caferağa Mah. Moda Cad. No: 123 Kadıköy / İstanbul</div>
+                  <MapPin size={16} className="text-[var(--foreground-muted)] mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-[var(--foreground)]">{service.address}</div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Phone size={18} className="text-[var(--foreground-muted)]" />
-                  <a href="tel:02160000000" className="text-sm font-semibold hover:text-[var(--brand-primary)]">0216 000 00 00</a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Globe size={18} className="text-[var(--foreground-muted)]" />
-                  <a href="#" className="text-sm hover:text-[var(--brand-primary)]">www.vetlife.com.tr</a>
-                </div>
+                {service.phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone size={16} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                    <a href={`tel:${service.phone}`} className="text-sm font-semibold hover:text-[var(--brand-primary)]">{service.phone}</a>
+                  </div>
+                )}
+                {service.web && (
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                    <a href={`https://${service.web}`} target="_blank" rel="noreferrer" className="text-sm hover:text-[var(--brand-primary)] truncate">{service.web}</a>
+                  </div>
+                )}
               </div>
-              <div className="mt-6 flex gap-2">
-                <Button variant="gradient" fullWidth leftIcon={<Phone size={16} />}>Hemen Ara</Button>
-                <Button variant="outline" className="w-12 p-0 flex items-center justify-center"><Mail size={16} /></Button>
+              <div className="mt-5 flex gap-2">
+                <Button variant="gradient" fullWidth leftIcon={<Phone size={15} />}>Hemen Ara</Button>
+                <Button variant="outline" className="w-12 p-0 flex items-center justify-center flex-shrink-0"><Mail size={16} /></Button>
               </div>
             </Card>
 
-            <Card className="p-6 bg-orange-50 border-orange-100">
-              <div className="flex items-center gap-2 font-bold text-orange-800 mb-2">
-                <Shield size={18} /> Sahiplendirme Güvencesi
+            {/* Hours */}
+            <Card className="p-6 shadow-sm">
+              <h3 className="font-bold mb-4 flex items-center gap-2 text-sm"><Clock size={15} /> Çalışma Saatleri</h3>
+              <ul className="text-sm space-y-2">
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Pzt – Cum</span>
+                  <span className="font-semibold">{service.hours.hafta}</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Cumartesi</span>
+                  <span className="font-semibold">{service.hours.cumartesi}</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className={service.hours.pazar === 'Kapalı' ? 'text-red-500' : 'text-[var(--foreground-muted)]'}>Pazar</span>
+                  <span className={`font-semibold ${service.hours.pazar === 'Kapalı' ? 'text-red-500' : ''}`}>{service.hours.pazar}</span>
+                </li>
+              </ul>
+            </Card>
+
+            {/* Trust Badge */}
+            <Card className="p-5 bg-orange-50 border-orange-100">
+              <div className="flex items-center gap-2 font-bold text-orange-800 mb-2 text-sm">
+                <Shield size={16} /> Sahiplendirme Güvencesi
               </div>
               <p className="text-xs text-orange-700 leading-relaxed">
-                Bu işletme Sahiplendirme.com ekibi tarafından belgesel olarak doğrulanmış profesyonel bir hizmet sağlayıcıdır.
+                Bu işletme Sahiplendirme.com ekibi tarafından belgesel olarak doğrulanmış ve onaylanmış profesyonel bir hizmet sağlayıcıdır.
               </p>
             </Card>
 
-            <Card className="p-6">
-              <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={16} /> Çalışma Saatleri</h3>
-              <ul className="text-sm space-y-2 text-[var(--foreground-muted)]">
-                <li className="flex justify-between"><span>Pazartesi - Cuma</span><span className="font-medium text-[var(--foreground)]">09:00 - 22:00</span></li>
-                <li className="flex justify-between"><span>Cumartesi</span><span className="font-medium text-[var(--foreground)]">10:00 - 20:00</span></li>
-                <li className="flex justify-between text-red-500"><span>Pazar</span><span>Acil Vaka Sadece</span></li>
-              </ul>
+            {/* Other services */}
+            <Card className="p-5">
+              <h3 className="font-bold text-sm mb-4">Benzer Hizmetler</h3>
+              <div className="space-y-3">
+                {mockServices.filter(s => s.category === service.category && s.id !== service.id).slice(0, 3).map(s => (
+                  <Link key={s.id} href={`/hizmetler/${s.id}`} className="flex items-center gap-3 hover:bg-[var(--surface-secondary)] rounded-xl p-2 -mx-2 transition-colors">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center text-xl flex-shrink-0`}>{s.emoji}</div>
+                    <div>
+                      <div className="text-xs font-semibold line-clamp-1">{s.name}</div>
+                      <div className="text-[10px] text-[var(--foreground-muted)]">{s.district}, {s.city}</div>
+                    </div>
+                    <div className="ml-auto text-[10px] flex items-center gap-0.5 text-orange-500">
+                      <Star size={9} className="fill-orange-500" />{s.rating}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </Card>
           </div>
+
         </div>
       </div>
     </div>
