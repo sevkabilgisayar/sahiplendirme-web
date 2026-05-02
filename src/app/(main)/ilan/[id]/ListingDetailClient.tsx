@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import {
   ChevronRight, Heart, Share2, AlertTriangle, Phone, Mail, MapPin,
   CheckCircle, ShieldCheck, Eye, Flag, Clock, Award, Camera, Send,
-  Sparkles, Bot, User, X, ChevronDown, ChevronUp,
+  Sparkles, Bot, User, X, ChevronDown, ChevronUp, Zap, Star, Tag, Package2, ShoppingBag, Info,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -88,6 +88,18 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
       setAiLoading(false);
     }, 900);
   };
+
+  // Modal states
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(true); // Otomatik açılır
+  const [isFeaturedModalOpen, setIsFeaturedModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('7gun');
+
+  // Öne çıkarma planları
+  const FEATURED_PLANS = [
+    { id: '3gun', label: '3 Gün', price: 29, badge: '', desc: 'Hızlı görünürlük' },
+    { id: '7gun', label: '7 Gün', price: 49, badge: '⭐ Popüler', desc: 'En çok tercih edilen' },
+    { id: '30gun', label: '30 Gün', price: 149, badge: '🔥 Fırsat', desc: 'En uzun süre, en düşük günlük maliyet' },
+  ];
 
   // Başvuru formu state
   const [appMessage, setAppMessage] = useState('');
@@ -326,6 +338,17 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                   )}
                 </div>
                 <div className="flex flex-col gap-3">
+                  {/* Öne Çıkar Butonu */}
+                  <button
+                    onClick={() => setIsFeaturedModalOpen(true)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 hover:border-yellow-400 transition-all"
+                  >
+                    <span className="flex items-center gap-2 text-xs font-semibold text-yellow-700">
+                      <Zap size={14} className="text-yellow-500" /> İlanı Öne Çıkar
+                    </span>
+                    <span className="text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">₺29&apos;dan</span>
+                  </button>
+
                   {isSahiplendirme && (
                     <Button size="lg" variant="gradient" fullWidth className="h-14 text-base" onClick={() => setIsAdoptModalOpen(true)}>
                       Sahiplenme Talebi Gönder
@@ -487,9 +510,70 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               <button onClick={() => setIsReportModalOpen(true)} className="hidden lg:flex items-center justify-center gap-2 text-sm text-red-500 hover:underline">
                 <Flag size={14} /> Bu ilanı şikayet et
               </button>
+
+              {/* Şikayet altı reklam alanı */}
+              <a href="/paketler" className="block group hidden lg:block">
+                <div className="w-full h-[160px] bg-gradient-to-br from-violet-50 to-purple-100 border-2 border-dashed border-violet-200 rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-violet-400 transition-all">
+                  <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <ShoppingBag size={14} className="text-white" />
+                  </div>
+                  <div className="text-xs font-bold text-violet-600">REKLAM ALANI</div>
+                  <div className="text-[10px] text-violet-400">300 × 160</div>
+                  <div className="text-[9px] px-3 py-1 bg-violet-500 text-white font-bold rounded-full">Reklam Ver</div>
+                </div>
+              </a>
+
+              {/* Yasal bilgilendirme linki */}
+              <button
+                onClick={() => setIsLegalModalOpen(true)}
+                className="hidden lg:flex items-center justify-center gap-1.5 text-[10px] text-[var(--foreground-muted)] hover:text-[var(--brand-primary)] transition-colors"
+              >
+                <Info size={11} /> Hayvan ticareti hakkında yasal bilgi
+              </button>
             </div>
           </aside>
         </div>
+      </div>
+
+      {/* ===== ÜRÜN ÖNERİLERİ ===== */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-[var(--border)]">
+        <div className="flex items-center gap-2 mb-6">
+          <Package2 size={20} className="text-[var(--brand-primary)]" />
+          <h2 className="text-xl font-bold font-display">Önerilen Ürünler</h2>
+          <span className="text-xs text-[var(--foreground-muted)] ml-1">({listing.breed || listing.animalType} sahipleri için)</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[
+            { name: 'Premium Mama', brand: 'Royal Canin', price: '₺289', oldPrice: '₺350', img: '🥩', tag: '%17 İndirim' },
+            { name: 'Oyun Halısı', brand: 'PetZone', price: '₺149', oldPrice: '', img: '🎯', tag: 'Yeni' },
+            { name: 'Tasma & Gezdirme', brand: 'Flexi', price: '₺199', oldPrice: '₺249', img: '🦮', tag: '%20 İndirim' },
+            { name: 'Vitamin Takviyesi', brand: 'NutriVet', price: '₺89', oldPrice: '', img: '💊', tag: '' },
+            { name: 'Yatak & Yuva', brand: 'ComfyPet', price: '₺379', oldPrice: '₺450', img: '🛏️', tag: '%15 İndirim' },
+          ].map((product, i) => (
+            <div key={i} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md hover:-translate-y-0.5 transition-all group cursor-pointer">
+              <div className="relative">
+                <div className="w-full h-24 bg-[var(--surface-secondary)] rounded-xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                  {product.img}
+                </div>
+                {product.tag && (
+                  <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[var(--brand-primary)] text-white">{product.tag}</span>
+                )}
+              </div>
+              <div className="text-[10px] text-[var(--foreground-muted)] font-medium">{product.brand}</div>
+              <div className="text-sm font-semibold text-[var(--foreground)] leading-tight">{product.name}</div>
+              <div className="flex items-center gap-2 mt-auto">
+                <span className="text-sm font-bold text-[var(--brand-primary)]">{product.price}</span>
+                {product.oldPrice && <span className="text-xs line-through text-[var(--foreground-muted)]">{product.oldPrice}</span>}
+              </div>
+              <button className="w-full h-8 text-xs font-semibold rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--brand-primary)] hover:text-white transition-all flex items-center justify-center gap-1">
+                <Tag size={11} /> Sepete Ekle
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-[var(--foreground-muted)] text-center mt-4">
+          Bu ürünler affiliate ortaklık kapsamında önerilmektedir. sahiplendirme.com, ürün satışı yapmamaktadır.
+        </p>
       </div>
 
       {/* ===== MODAL: Sahiplenme Başvurusu (Madde 5.B) ===== */}
@@ -599,6 +683,94 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
             ))}
           </div>
           <Button variant="danger" fullWidth onClick={handleReport}>Şikayeti Gönder</Button>
+        </div>
+      </Modal>
+
+      {/* ===== MODAL: Yasal Bilgilendirme ===== */}
+      <Modal isOpen={isLegalModalOpen} onClose={() => setIsLegalModalOpen(false)} title="⚖️ Yasal Bilgilendirme">
+        <div className="p-1 flex flex-col gap-4">
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+            <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-bold text-blue-800 mb-1 text-sm">Hayvan Ticareti Yasağı</div>
+              <p className="text-xs text-blue-700 leading-relaxed">
+                5199 sayılı Hayvanları Koruma Kanunu ve ilgili mevzuat gereğince evcil hayvan alım-satımı kısıtlamalar kapsamındadır.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {[
+              { icon: '✅', text: 'Bu platform yalnızca ücretsiz sahiplendirme, kayıp hayvan ve çiftleştirme ilanlarına aracılık eder.' },
+              { icon: '🚫', text: 'Ticari amaçlı hayvan satışı, platformumuzda kesinlikle yasaktır ve ilanlar moderatörler tarafından kaldırılır.' },
+              { icon: '🏛️', text: 'sahiplendirme.com, hayvan alım-satışından hiçbir ticari çıkar sağlamamakta ve bu süreçte taraf tutmamaktadır.' },
+              { icon: '⚠️', text: 'Sahiplendirme ilanlarında ücret talep edilmesi yasak olup şikayet edilmesi durumunda ilgili ilan derhal kaldırılır.' },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-3 text-sm text-[var(--foreground-muted)]">
+                <span className="text-base flex-shrink-0">{item.icon}</span>
+                <span className="leading-relaxed">{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-[10px] text-[var(--foreground-muted)] leading-relaxed border-t border-[var(--border)] pt-3">
+            Daha fazla bilgi için: <a href="/kvkk" className="text-[var(--brand-primary)] hover:underline">KVKK</a> | <a href="/kullanim-sartlari" className="text-[var(--brand-primary)] hover:underline">Kullanım Şartları</a> | <a href="/gizlilik" className="text-[var(--brand-primary)] hover:underline">Gizlilik Politikası</a>
+          </div>
+
+          <Button variant="gradient" fullWidth onClick={() => setIsLegalModalOpen(false)}>Anladım, Devam Et</Button>
+        </div>
+      </Modal>
+
+      {/* ===== MODAL: Öne Çıkar ===== */}
+      <Modal isOpen={isFeaturedModalOpen} onClose={() => setIsFeaturedModalOpen(false)} title="⚡ İlanı Öne Çıkar">
+        <div className="p-1 flex flex-col gap-4">
+          <p className="text-sm text-[var(--foreground-muted)]">
+            İlanınızı öne çıkararak daha fazla kişiye ulaşın. Öne çıkan ilanlar listenin en üstünde 🌟 rozeti ile görünür.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            {FEATURED_PLANS.map((plan) => (
+              <button
+                key={plan.id}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
+                  selectedPlan === plan.id
+                    ? 'border-[var(--brand-primary)] bg-orange-50'
+                    : 'border-[var(--border)] hover:border-[var(--brand-primary-light)]'
+                }`}
+              >
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-[var(--foreground)]">{plan.label}</span>
+                    {plan.badge && <span className="text-[10px] font-bold px-2 py-0.5 bg-[var(--brand-primary)] text-white rounded-full">{plan.badge}</span>}
+                  </div>
+                  <div className="text-xs text-[var(--foreground-muted)] mt-0.5">{plan.desc}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-[var(--brand-primary)]">{plan.price} ₺</div>
+                  <div className="text-[10px] text-[var(--foreground-muted)]">{Math.round(plan.price / parseInt(plan.id))} ₺/gün</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-[var(--surface-secondary)] p-3 rounded-xl border border-[var(--border)]">
+            {["Arama sonuçlarında en üstte görünüm", "🌟 Öne Çıkan rozeti", "3x daha fazla görüntülenme", "Anlık aktivasyon"].map((f) => (
+              <div key={f} className="flex items-center gap-2 text-xs text-[var(--foreground-muted)] py-1">
+                <Star size={10} className="text-yellow-500 flex-shrink-0" /> {f}
+              </div>
+            ))}
+          </div>
+
+          <Button
+            variant="gradient"
+            fullWidth
+            size="lg"
+            onClick={() => { setIsFeaturedModalOpen(false); toast.success('Ödeme sayfasına yönlendiriliyorsunuz...'); }}
+            leftIcon={<Zap size={16} />}
+          >
+            {FEATURED_PLANS.find(p => p.id === selectedPlan)?.price} ₺ ile Öne Çıkar
+          </Button>
         </div>
       </Modal>
     </div>
