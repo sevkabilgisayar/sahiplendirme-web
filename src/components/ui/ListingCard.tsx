@@ -19,13 +19,19 @@ export default function ListingCard({ listing }: ListingCardProps) {
     <Link href={`/ilan/${listing.id}`} className="group block h-full">
       <div className="bg-[var(--surface)] h-full flex flex-col rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1 group-hover:border-[var(--brand-primary-light)]">
         {/* Image area */}
-        <div className={`relative aspect-[4/3] w-full overflow-hidden shrink-0 ${!listing.photos?.[0] ? `bg-gradient-to-br ${listing.imageColor} flex items-center justify-center` : ''}`}>
+        <div className={`relative aspect-[4/3] w-full overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 ${!listing.photos?.[0] ? `bg-gradient-to-br ${listing.imageColor}` : ''}`}>
           {listing.photos?.[0] ? (
-            <img
-              src={listing.photos[0]}
-              alt={listing.name}
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-            />
+            <>
+              <div 
+                className="absolute inset-0 bg-cover bg-center blur-xl opacity-50 scale-110 transition-transform duration-500 group-hover:scale-125" 
+                style={{ backgroundImage: `url(${listing.photos[0]})` }} 
+              />
+              <img
+                src={listing.photos[0]}
+                alt={listing.name}
+                className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg"
+              />
+            </>
           ) : (
             <span className="text-7xl group-hover:scale-110 transition-transform duration-300">
               {listing.emoji}
