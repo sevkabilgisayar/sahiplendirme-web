@@ -170,16 +170,35 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
           <div className="flex-1 min-w-0">
             {/* Gallery */}
             <div className="mb-8">
-              <div className={`w-full aspect-[4/3] sm:aspect-[16/9] bg-gradient-to-br ${listing.gallery[activeImage]} rounded-3xl mb-4 flex items-center justify-center border border-[var(--border)] shadow-sm transition-all duration-500`}>
-                <span className="text-9xl animate-float">{listing.emoji}</span>
+              {/* Ana fotoğraf */}
+              <div className="w-full aspect-[4/3] sm:aspect-[16/9] rounded-3xl mb-4 overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface-secondary)]">
+                {listing.photos?.[activeImage] ? (
+                  <img
+                    src={listing.photos[activeImage]}
+                    alt={`${listing.name} - fotoğraf ${activeImage + 1}`}
+                    className="w-full h-full object-cover transition-all duration-500"
+                    onError={e => { (e.target as HTMLImageElement).src = `https://via.placeholder.com/800x600/f3f4f6/9ca3af?text=${encodeURIComponent(listing.name)}`; }}
+                  />
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-br ${listing.imageColor || 'from-orange-100 to-amber-200'} flex items-center justify-center`}>
+                    <span className="text-9xl">{listing.emoji}</span>
+                  </div>
+                )}
               </div>
+              {/* Thumbnail'lar */}
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
-                {listing.gallery.map((bg: string, idx: number) => (
+                {(listing.photos && listing.photos.length > 0 ? listing.photos : [listing.imageColor]).map((photo: string, idx: number) => (
                   <button key={idx} onClick={() => setActiveImage(idx)}
-                    className={`w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-gradient-to-br ${bg} rounded-2xl flex items-center justify-center border-2 transition-all snap-start ${
-                      activeImage === idx ? 'border-[var(--brand-primary)] scale-100 shadow-md' : 'border-transparent scale-95 opacity-70 hover:opacity-100'
+                    className={`w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all snap-start ${
+                      activeImage === idx ? 'border-[var(--brand-primary)] shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}>
-                    <span className="text-4xl">{listing.emoji}</span>
+                    {listing.photos?.[idx] ? (
+                      <img src={listing.photos[idx]} alt={`Fotoğraf ${idx + 1}`} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${photo} flex items-center justify-center`}>
+                        <span className="text-4xl">{listing.emoji}</span>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -319,7 +338,7 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
           {/* RIGHT COLUMN - Sidebar */}
           <aside className="lg:w-96 flex-shrink-0">
-            <div className="sticky top-24 flex flex-col gap-6">
+            <div className="sticky top-24 flex flex-col gap-6 max-h-[calc(100vh-7rem)] overflow-y-auto pb-4 pr-1">
 
               {/* Action Card */}
               <Card className="p-6 border-[var(--border)] shadow-md">
