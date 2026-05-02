@@ -305,19 +305,19 @@ export default function HomePage() {
               { id: 3, name: 'ComfyPet Yatak', price: 379, img: '🛏️', rating: 4.9 },
               { id: 4, name: 'Kong Extreme Oyuncak', price: 149, img: '🧸', rating: 4.7 }
             ].map((p) => (
-              <div key={p.id} className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group">
+              <Link key={p.id} href="/magaza" className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group cursor-pointer block">
                 <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center text-4xl mb-3 group-hover:scale-105 transition-transform">{p.img}</div>
-                <div className="font-semibold text-sm leading-tight mb-1">{p.name}</div>
+                <div className="font-semibold text-sm leading-tight mb-1 group-hover:text-emerald-600 transition-colors">{p.name}</div>
                 <div className="flex items-center gap-1 mb-2">
                   <Star size={10} className="text-yellow-400 fill-yellow-400" /><span className="text-[10px]">{p.rating}</span>
                 </div>
                 <div className="mt-auto flex items-center justify-between">
                   <span className="font-bold text-emerald-600">₺{p.price}</span>
-                  <Link href="/magaza" className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-colors">
+                  <div className="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     <ArrowRight size={12}/>
-                  </Link>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

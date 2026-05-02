@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MapPin, ScanSearch } from 'lucide-react';
+import { Heart, MapPin, ScanSearch, ChevronRight } from 'lucide-react';
 import { Listing } from '@/types';
 
 const listingTypeConfig = {
@@ -94,11 +94,20 @@ export default function ListingCard({ listing }: ListingCardProps) {
               <ScanSearch size={9} /> Fotoğrafla eşleştir
             </button>
           )}
-          <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)]">
+          <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)] pb-3">
             <MapPin size={12} className="text-[var(--brand-primary)]" />
             {listing.city}
             <span className="ml-auto text-[10px]">{listing.createdAt}</span>
           </div>
+          {/* Quick Action Button */}
+          <button className={`w-full mt-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all
+            ${listing.type === 'sahiplendirme' ? 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600' : 
+              listing.type === 'kayip' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-100 hover:border-red-600' : 
+              'bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 hover:border-purple-600'}`}
+          >
+            {listing.type === 'sahiplendirme' ? 'Sahiplen' : listing.type === 'kayip' ? 'Gördüm / İhbar Et' : 'Eşleştir'}
+            <ChevronRight size={14} />
+          </button>
         </div>
       </div>
     </Link>
