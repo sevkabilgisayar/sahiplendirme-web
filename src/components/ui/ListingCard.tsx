@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MapPin } from 'lucide-react';
+import { Heart, MapPin, ScanSearch } from 'lucide-react';
 import { Listing } from '@/types';
 
 const listingTypeConfig = {
@@ -58,6 +58,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
           >
             <Heart size={14} className="text-[var(--foreground-muted)]" />
           </button>
+          {/* AI Eşleştirme Badge — sadece kayıp ilanlarda */}
+          {listing.type === 'kayip' && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-violet-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+              <ScanSearch size={11} /> AI Eşleştirme
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -75,6 +81,16 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <span className="text-[10px] text-[var(--foreground-muted)] font-mono mb-2 block">
             #{String(listing.id).padStart(5, '0')}
           </span>
+          {/* AI Eşleştirme chip - kart içi */}
+          {listing.type === 'kayip' && (
+            <Link
+              href="/ai-danisman/foto-eslestirme"
+              onClick={e => e.stopPropagation()}
+              className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors w-fit"
+            >
+              <ScanSearch size={9} /> Fotoğrafla eşleştir
+            </Link>
+          )}
           <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)]">
             <MapPin size={12} className="text-[var(--brand-primary)]" />
             {listing.city}

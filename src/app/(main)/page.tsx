@@ -113,6 +113,50 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ============ AI FOTOĞRAF EŞLEŞTİRME BANNER ============ */}
+      <section className="py-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <Link href="/ai-danisman/foto-eslestirme" className="block group">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 sm:p-8 shadow-xl shadow-violet-200/50 hover:shadow-violet-300/60 transition-all hover:-translate-y-0.5">
+              {/* Decorative circles */}
+              <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-px h-20 bg-white/20" />
+
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                {/* Left content */}
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-inner">
+                    📸
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="font-bold text-xl text-white">Yapay Zeka ile Fotoğraf Eşleştirme</span>
+                      <span className="text-[10px] font-bold bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">YENİ</span>
+                    </div>
+                    <p className="text-violet-100 text-sm leading-relaxed max-w-lg">
+                      Kayıp hayvan fotoğrafını yükle, sistemdeki tüm ilanlarla otomatik olarak karşılaştır. Eşleşme bulunduğunda anında bildirim al.
+                    </p>
+                    <div className="flex items-center gap-3 mt-3 flex-wrap">
+                      {['📷 Fotoğraf yükle', '🤖 AI karşılaştır', '🔔 Eşleşme bildirimi'].map(step => (
+                        <span key={step} className="text-[11px] font-medium bg-white/15 text-white px-3 py-1 rounded-full">{step}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right CTA */}
+                <div className="flex-shrink-0">
+                  <div className="flex items-center gap-2 bg-white text-violet-700 font-bold text-sm px-5 py-3 rounded-2xl shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
+                    Nasıl Çalışır? <ArrowRight size={16} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* ============ NASIL ÇALIŞIR ============ */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
