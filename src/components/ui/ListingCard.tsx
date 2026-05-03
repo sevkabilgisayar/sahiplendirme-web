@@ -1,120 +1,164 @@
 import Link from 'next/link';
-import { Heart, MapPin, ScanSearch, ChevronRight } from 'lucide-react';
+import { Heart, MapPin, ScanSearch, Eye, MessageCircle, ArrowRight, Shield, User } from 'lucide-react';
 import { Listing } from '@/types';
-
-const listingTypeConfig = {
-  sahiplendirme: { label: 'Sahiplendirme', color: 'bg-blue-100 text-blue-700' },
-  kayip: { label: 'Kayıp', color: 'bg-red-100 text-red-700' },
-  ciftlestirme: { label: 'Çiftleştirme', color: 'bg-purple-100 text-purple-700' },
-};
 
 interface ListingCardProps {
   listing: Listing;
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
-  const typeConf = listingTypeConfig[listing.type];
+  const isSahibinde = listing.ownerType === 'sahibinde';
+  
+  // Design details based on type
+  let btnClass = 'bg-[#FF6B00] hover:bg-[#E65A00]';
+  let borderClass = 'hover:border-[#FF6B00] border-gray-200';
+  let icon = <Eye size={16} />;
+  let btnText = 'Sahiplen';
+  
+  if (listing.type === 'kayip') {
+    btnClass = 'bg-red-500 hover:bg-red-600';
+    borderClass = 'hover:border-red-500 border-gray-200';
+    icon = <ScanSearch size={16} />;
+    btnText = 'İhbar Et';
+  } else if (listing.type === 'ciftlestirme') {
+    btnClass = 'bg-purple-500 hover:bg-purple-600';
+    borderClass = 'hover:border-purple-500 border-gray-200';
+    btnText = 'Eşleştir';
+  }
+
+  // Determine border color for card (mocking the screenshot where some are orange, green, yellow)
+  // Let's use a dynamic approach or just the type's color. The screenshot shows vibrant borders.
+  // We'll use a default border and colorful on hover to keep it clean.
   
   return (
     <Link href={`/ilan/${listing.id}`} className="group block h-full">
-      <div className="bg-[var(--surface)] h-full flex flex-col rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1 group-hover:border-[var(--brand-primary-light)]">
-        {/* Image area */}
-        <div className={`relative aspect-[4/3] w-full overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 ${!listing.photos?.[0] ? `bg-gradient-to-br ${listing.imageColor}` : ''}`}>
+      <div className={`bg-white h-full flex flex-col rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${borderClass} overflow-hidden`}>
+        
+        {/* Image Area */}
+        <div className="relative aspect-[4/4] w-full overflow-hidden shrink-0 bg-slate-100">
           {listing.photos?.[0] ? (
-            <>
-              <div 
-                className="absolute inset-0 bg-cover bg-center blur-xl opacity-50 scale-110 transition-transform duration-500 group-hover:scale-125" 
-                style={{ backgroundImage: `url(${listing.photos[0]})` }} 
-              />
-              <img
-                src={listing.photos[0]}
-                alt={listing.name}
-                className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </>
+            <img
+              src={listing.photos[0]}
+              alt={listing.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
           ) : (
-            <span className="text-7xl group-hover:scale-110 transition-transform duration-300">
-              {listing.emoji}
-            </span>
-          )}
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${typeConf.color}`}>
-              {typeConf.label}
-            </span>
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-              listing.ownerType === 'sahibinde' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-green-50 text-green-600 border border-green-100'
-            }`}>
-              {listing.ownerType === 'sahibinde' ? '🏠 Sahibinde' : '🏛️ Barınakta'}
-            </span>
-          </div>
-          {/* Reward badge */}
-          {listing.reward && (
-            <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm z-20">
-              🏅 ₺{listing.reward} Ödül
+            <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${listing.imageColor}`}>
+              <span className="text-7xl">{listing.emoji}</span>
             </div>
           )}
-          {/* Heart */}
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+          {/* Top Left Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm ${
+              !isSahibinde ? 'bg-emerald-500 text-white' : 'bg-white text-gray-700'
+            }`}>
+              {!isSahibinde ? <Shield size={12} /> : <User size={12} />}
+              {!isSahibinde ? 'Barınak' : 'Bireysel'}
+            </span>
+            
+            {listing.type === 'kayip' && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm">
+                KAYIP
+              </span>
+            )}
+            
+            {listing.reward && (
+              <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm">
+                🏅 ₺{listing.reward} Ödül
+              </span>
+            )}
+          </div>
+
+          {/* Heart Icon */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
             }}
-            className="absolute bottom-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-sm z-20"
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-sm z-20"
           >
-            <Heart size={14} className="text-[var(--foreground-muted)]" />
+            <Heart size={15} className="text-gray-400 hover:text-red-500 transition-colors" />
           </button>
-          {/* AI Eşleştirme Badge — sadece kayıp ilanlarda */}
-          {listing.type === 'kayip' && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-violet-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm z-20">
-              <ScanSearch size={11} /> AI Eşleştirme
-            </div>
-          )}
+
+          {/* Title & Breed inside Image */}
+          <div className="absolute bottom-3 left-4 z-20 text-white pr-4">
+            <h3 className="font-bold text-lg mb-0.5 leading-tight">{listing.name}</h3>
+            <p className="text-xs text-white/90">
+              {listing.breed} • {listing.animalType === 'kopek' ? 'Köpek' : listing.animalType === 'kedi' ? 'Kedi' : 'Kuş'}
+            </p>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4 flex flex-col flex-1">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="text-xs text-[var(--foreground-muted)] font-medium bg-[var(--surface-secondary)] px-2 py-0.5 rounded-md">{listing.breed}</span>
-            <span className="text-xs text-[var(--foreground-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-md">{listing.age}</span>
-            <span className="text-xs text-[var(--foreground-muted)] bg-[var(--surface-secondary)] px-2 py-0.5 rounded-md">
-              {listing.gender === 'erkek' ? '♂ Erkek' : '♀ Dişi'}
-            </span>
+        {/* Content Area */}
+        <div className="p-4 flex flex-col flex-1 bg-white">
+          {/* Row 1: Details and Location */}
+          <div className="flex justify-between items-center text-[11px] text-gray-500 mb-3">
+            <div className="flex items-center gap-1.5">
+              <span>{listing.gender === 'erkek' ? 'Erkek' : 'Dişi'}</span>
+              <span className="text-gray-300">•</span>
+              <span>{listing.age}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <MapPin size={12} />
+              <span>{listing.city}</span>
+            </div>
           </div>
-          <h3 className="font-semibold text-[var(--foreground)] text-base mb-1 group-hover:text-[var(--brand-primary)] transition-colors line-clamp-1">
-            {listing.name}
-          </h3>
-          <span className="text-[10px] text-[var(--foreground-muted)] font-mono mb-2 block">
-            #{String(listing.id).padStart(5, '0')}
-          </span>
-          {/* AI Eşleştirme chip - kart içi */}
-          {listing.type === 'kayip' && (
-            <button
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.location.href = '/ai-danisman/foto-eslestirme';
-              }}
-              className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors w-fit"
-            >
-              <ScanSearch size={9} /> Fotoğrafla eşleştir
+
+          {/* Row 2: Health Info */}
+          <div className="flex items-center gap-2 text-[10px] text-gray-600 font-medium mb-4 flex-wrap">
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Aşılı
+            </div>
+            {listing.type !== 'kayip' && (
+               <>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Kısır
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Pasaportlu
+                </div>
+               </>
+            )}
+            {/* Sadece kayıp ilanlarında AI Eşleştir butonu */}
+            {listing.type === 'kayip' && (
+              <button
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = '/ai-danisman/foto-eslestirme';
+                }}
+                className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors"
+              >
+                <ScanSearch size={9} /> Fotoğrafla eşleştir
+              </button>
+            )}
+          </div>
+
+          {/* Spacer */}
+          <div className="mt-auto"></div>
+
+          {/* Row 3: Action Buttons */}
+          <div className="flex gap-2 items-center">
+            <button className={`flex-1 ${btnClass} text-white text-sm font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors`}>
+              {icon}
+              {btnText}
             </button>
-          )}
-          <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)] mt-auto pt-2 border-t border-[var(--border-subtle)] pb-3">
-            <MapPin size={12} className="text-[var(--brand-primary)]" />
-            {listing.city}
-            <span className="ml-auto text-[10px]">{listing.createdAt}</span>
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-500 transition-colors"
+            >
+              <MessageCircle size={18} />
+            </button>
+            <div className="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-500 transition-colors">
+              <ArrowRight size={18} />
+            </div>
           </div>
-          {/* Quick Action Button */}
-          <button className={`w-full mt-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all
-            ${listing.type === 'sahiplendirme' ? 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600' : 
-              listing.type === 'kayip' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-100 hover:border-red-600' : 
-              'bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 hover:border-purple-600'}`}
-          >
-            {listing.type === 'sahiplendirme' ? 'Sahiplen' : listing.type === 'kayip' ? 'Gördüm / İhbar Et' : 'Eşleştir'}
-            <ChevronRight size={14} />
-          </button>
         </div>
+        
       </div>
     </Link>
   );
