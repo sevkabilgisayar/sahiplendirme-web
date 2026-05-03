@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import {
   ChevronRight, Heart, Share2, AlertTriangle, Phone, Mail, MapPin,
   CheckCircle, ShieldCheck, Eye, Flag, Clock, Award, Camera, Send,
-  Sparkles, Bot, User, X, ChevronDown, ChevronUp, Zap, Star, Tag, Package2, ShoppingBag, Info,
+  Sparkles, Bot, User, X, ChevronDown, ChevronUp, Zap, Star, Tag, Package2, ShoppingBag, Info, Building2
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -349,13 +349,13 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               <Card className="p-6 border-[var(--border)] shadow-md">
                 {/* İlan No */}
                 <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
-                  <span className="text-xs text-[var(--foreground-muted)] font-medium">İlan No</span>
+                  <span className="text-sm text-[var(--foreground-muted)] font-semibold">İlan No</span>
                   <button
                     onClick={() => {
                       navigator.clipboard?.writeText(String(listing.id).padStart(5, '0'));
                       toast.success('İlan no kopyalandı!');
                     }}
-                    className="font-mono text-sm font-bold text-[var(--brand-primary)] bg-orange-50 border border-orange-100 px-3 py-1 rounded-lg hover:bg-orange-100 transition-colors"
+                    className="font-mono text-xl font-black text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20 px-4 py-1.5 rounded-xl hover:bg-[var(--brand-primary)]/20 transition-all shadow-sm"
                     title="Kopyalamak için tıkla"
                   >
                     #{String(listing.id).padStart(5, '0')}
@@ -373,8 +373,16 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                       <div className="text-2xl font-bold font-display text-purple-600">💕 Eşleştirme İlanı</div>
                     </div>
                   ) : (
-                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color}`}>
-                      <span className="text-lg font-bold">{listingTypeBadge.label}</span>
+                    <div className="flex flex-col gap-2">
+                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color}`}>
+                        <span className="text-lg font-bold">{listingTypeBadge.label}</span>
+                      </div>
+                      {listing.ownerType === 'barinakta' && listing.shelterName && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl w-fit">
+                          <Building2 size={16} />
+                          <span className="font-bold text-sm">{listing.shelterName}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
