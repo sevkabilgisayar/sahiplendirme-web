@@ -32,6 +32,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   // Mock Auth State
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const pathname = usePathname();
@@ -88,7 +89,7 @@ export default function Header() {
               
               {/* İlan Ver Butonu */}
               <Link href="/ilan-ver">
-                <Button size="sm" variant="gradient" leftIcon={<Plus size={16} />} className="hidden sm:flex shadow-brand px-4 py-2 text-sm">
+                <Button variant="gradient" leftIcon={<Plus size={16} />} className="hidden sm:flex shadow-brand whitespace-nowrap">
                   İlan Ver
                 </Button>
               </Link>
@@ -107,13 +108,38 @@ export default function Header() {
               {isLoggedIn ? (
                 <div className="flex items-center gap-2">
                   {/* Notifications */}
-                  <Link
-                    href="/bildirimler"
-                    className="relative hidden sm:flex items-center justify-center w-10 h-10 rounded-full text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    <Bell size={20} />
-                    <span className="absolute top-0 right-0 w-4 h-4 bg-[var(--danger)] rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">2</span>
-                  </Link>
+                  <div className="relative">
+                    <button
+                      onClick={() => { setNotificationsOpen(!notificationsOpen); setProfileOpen(false); }}
+                      className="relative hidden sm:flex items-center justify-center w-10 h-10 rounded-full text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
+                    >
+                      <Bell size={20} />
+                      <span className="absolute top-0 right-0 w-4 h-4 bg-[var(--danger)] rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+                    </button>
+
+                    {notificationsOpen && (
+                      <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-[var(--border)] py-2 z-50 animate-fade-in">
+                        <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+                          <h3 className="font-bold text-[var(--foreground)]">Bildirimler</h3>
+                          <Link href="/bildirimler" onClick={() => setNotificationsOpen(false)} className="text-xs text-[var(--brand-primary)] hover:underline font-medium">
+                            Tümünü Gör
+                          </Link>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                          <div className="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 cursor-pointer">
+                            <p className="text-sm font-medium text-[var(--foreground)]">Yeni Sahiplenme Talebi</p>
+                            <p className="text-xs text-[var(--foreground-muted)] mt-1">Ali Demir, Pamuk ilanınız için başvuru yaptı.</p>
+                            <p className="text-[10px] text-gray-400 mt-2">5 dk önce</p>
+                          </div>
+                          <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                            <p className="text-sm font-medium text-[var(--foreground)]">Yeni Mesaj</p>
+                            <p className="text-xs text-[var(--foreground-muted)] mt-1">Ahmet Yılmaz size bir mesaj gönderdi.</p>
+                            <p className="text-[10px] text-gray-400 mt-2">1 saat önce</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Messages */}
                   <Link
@@ -126,7 +152,7 @@ export default function Header() {
                   {/* Profile Dropdown */}
                   <div className="relative">
                     <button 
-                      onClick={() => setProfileOpen(!profileOpen)}
+                      onClick={() => { setProfileOpen(!profileOpen); setNotificationsOpen(false); }}
                       className="w-10 h-10 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-full flex items-center justify-center cursor-pointer hover:shadow-brand transition-all ring-2 ring-transparent hover:ring-[var(--brand-primary-light)]"
                     >
                       <User size={18} className="text-white" />
@@ -153,12 +179,12 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setIsLoggedIn(true)} className="hidden sm:block whitespace-nowrap text-sm font-semibold hover:text-[var(--brand-primary)] px-2 transition-colors">
+                  <Link href="/login" className="hidden sm:block whitespace-nowrap text-sm font-semibold hover:text-[var(--brand-primary)] px-2 transition-colors">
                     Giriş Yap
-                  </button>
-                  <button onClick={() => setIsLoggedIn(true)} className="whitespace-nowrap bg-[var(--foreground)] text-[var(--surface)] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[var(--foreground)]/90 transition-colors shadow-sm">
+                  </Link>
+                  <Link href="/register" className="whitespace-nowrap bg-[var(--foreground)] text-[var(--surface)] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[var(--foreground)]/90 transition-colors shadow-sm">
                     Üye Ol
-                  </button>
+                  </Link>
                 </div>
               )}
 

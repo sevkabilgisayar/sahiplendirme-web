@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sahiplendirme</string>
+    <string name="title_activity_main">Sahiplendirme</string>
+    <string name="package_name">com.sahiplendirme.app</string>
+    <string name="custom_url_scheme">com.sahiplendirme.app</string>
+</resources>
