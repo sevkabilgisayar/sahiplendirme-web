@@ -59,9 +59,9 @@ export default function Footer() {
         {/* Main footer */}
         <div className="py-14 grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2">
             <Link href="/" className="inline-flex mb-4" style={{ overflow: 'visible' }}>
-              <SiteLogo size="sm" />
+              <SiteLogo size="md" />
             </Link>
             <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">
               Sahiplendirme, kayıp hayvan ve çiftleştirme ilanları için yapay zekâ destekli platform.

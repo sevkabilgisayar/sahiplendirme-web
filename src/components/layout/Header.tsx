@@ -30,8 +30,8 @@ const navLinks = [
 
 // Mock auth state - will be replaced with real auth
 const useAuth = () => ({
-  user: null as null | { name: string; email: string },
-  isLoggedIn: false,
+  user: { name: 'Ayşe Yılmaz', email: 'ayse@example.com' },
+  isLoggedIn: true,
 });
 
 export default function Header() {

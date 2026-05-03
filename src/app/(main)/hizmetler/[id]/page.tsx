@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Star, MapPin, Phone, Mail, Globe, CheckCircle, Shield, Clock, ArrowLeft, ChevronRight, Share2 } from 'lucide-react';
+import { Star, MapPin, Phone, Mail, Globe, CheckCircle, Shield, Clock, ArrowLeft, ChevronRight, Share2, Image, Play } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -97,6 +97,35 @@ export default function HizmetProviderDetayPage() {
                       {s}
                     </span>
                   ))}
+                </div>
+              </div>
+
+              {/* Görsel & Video Galerisi */}
+              <div className="mt-6 pt-6 border-t border-[var(--border)]">
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Image size={18} className="text-[var(--brand-primary)]" /> Fotoğraf & Videolar
+                </h2>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {/* Görseller */}
+                  {[
+                    'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1507146426996-ef05306b995a?w=400&auto=format&fit=crop',
+                  ].map((src, i) => (
+                    <div key={i} className="aspect-square rounded-2xl overflow-hidden border border-[var(--border)] hover:scale-[1.02] transition-transform cursor-pointer shadow-sm">
+                      <img src={src} alt={`Galeri ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                  {/* Video Thumbnail */}
+                  <div className="aspect-square rounded-2xl overflow-hidden border border-[var(--border)] relative hover:scale-[1.02] transition-transform cursor-pointer shadow-sm group">
+                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&auto=format&fit=crop" alt="Video" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                        <Play size={16} className="text-[var(--brand-primary)] fill-[var(--brand-primary)] ml-0.5" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">0:42</div>
+                  </div>
                 </div>
               </div>
             </Card>
