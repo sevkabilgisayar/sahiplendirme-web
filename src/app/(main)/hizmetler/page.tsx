@@ -71,7 +71,7 @@ export default function HizmetlerPage() {
             <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-sm sticky top-24">
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-[var(--border)]">
                 <h2 className="font-bold font-display text-lg flex items-center gap-2">
-                  <Search size={18} className="text-[var(--brand-primary)]" /> Filtrele (Süzgeç)
+                  <Search size={18} className="text-[var(--brand-primary)]" /> Filtrele
                 </h2>
                 {hasFilters && (
                   <button onClick={() => { setSearch(''); setSelectedCategory(''); setSelectedCity(''); }} className="text-xs text-red-500 hover:underline font-medium">
