@@ -228,7 +228,7 @@ function ListingsPageInner() {
 
       {/* Etiket (Sahibinde/Barınakta) */}
       <div className="mb-6 border-b border-[var(--border)] pb-5">
-        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Konum</h3>
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Kimden</h3>
         <div className="flex flex-col gap-2">
           {OWNER_TYPES.map((o) => (
             <label key={o.value} className="flex items-center gap-3 cursor-pointer group">
