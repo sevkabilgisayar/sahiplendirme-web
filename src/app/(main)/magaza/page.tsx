@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { mockStoreProducts } from '@/lib/mock-data';
+import ProductCard from '@/components/ui/ProductCard';
 
 const CATEGORIES = [
   { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248, color: 'from-red-50 to-orange-50 border-orange-100 hover:border-orange-300' },
@@ -18,9 +19,18 @@ const CATEGORIES = [
   { emoji: '✂️', label: 'Bakım & Tımar', count: 67, color: 'from-pink-50 to-rose-50 border-pink-100 hover:border-pink-300' },
 ];
 
-const BESTSELLERS = mockStoreProducts.filter(p => p.isBestseller);
-const FEATURED = mockStoreProducts.filter(p => p.isFeatured);
-const ON_SALE = mockStoreProducts.filter(p => p.isOnSale);
+const duplicateItems = (arr: any[], count: number) => {
+  const result = [];
+  while (result.length < count) {
+    result.push(...arr.map(a => ({ ...a, id: a.id + Math.random() })));
+  }
+  return result.slice(0, count);
+};
+
+const BESTSELLERS = duplicateItems(mockStoreProducts.filter(p => p.isBestseller), 18);
+const FEATURED = duplicateItems(mockStoreProducts.filter(p => p.isFeatured), 18);
+const ON_SALE = duplicateItems(mockStoreProducts.filter(p => p.isOnSale), 18);
+const ALL_PRODUCTS = duplicateItems(mockStoreProducts, 30);
 const SLIDER_PRODUCTS = mockStoreProducts.slice(0, 5);
 
 // Vitrin hero ürünleri
@@ -28,6 +38,7 @@ const HERO_PRODUCTS = [
   { id: 1, name: 'Royal Canin', subtitle: 'Irka özel formül', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%17', price: 289, color: 'from-amber-400 to-orange-500' },
   { id: 3, name: 'Ortopedik Yatak', subtitle: 'Eklem dostları için', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%15', price: 379, color: 'from-violet-500 to-purple-600' },
   { id: 7, name: 'Purina Pro Plan', subtitle: 'Kedi uzmanı mama', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%18', price: 319, color: 'from-teal-500 to-emerald-600' },
+  { id: 9, name: 'Otomatik Su Kabı', subtitle: 'Sürekli taze su', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%20', price: 450, color: 'from-blue-500 to-indigo-600' },
 ];
 
 function ProductSlider() {
@@ -68,52 +79,7 @@ function ProductSlider() {
   );
 }
 
-function ProductCard({ product, size = 'normal' }: { product: typeof mockStoreProducts[0]; size?: 'normal' | 'small' }) {
-  const [inCart, setInCart] = useState(false);
-  return (
-    <Link href={`/magaza/${product.id}`} className={`bg-[var(--surface)] border border-[var(--border)] rounded-2xl flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group cursor-pointer overflow-hidden ${size === 'small' ? 'p-3' : 'p-4'}`}>
-      <div className="relative">
-        <div className={`w-full bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform ${size === 'small' ? 'h-24' : 'h-36'}`}>
-          <img src={product.photo} alt={product.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
-        </div>
-        {product.tag && (
-          <span className={`absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-            product.tag.includes('İndirim') ? 'bg-rose-500 text-white' :
-            product.tag === 'Yeni' ? 'bg-blue-500 text-white' :
-            'bg-emerald-500 text-white'
-          }`}>{product.tag}</span>
-        )}
-        {product.isBestseller && (
-          <span className="absolute top-1.5 right-1.5 text-[9px] font-bold bg-amber-400 text-amber-900 px-1 py-0.5 rounded-md">🔥</span>
-        )}
-      </div>
-      <div className={`text-[10px] text-[var(--foreground-muted)] font-medium ${size === 'small' ? 'mt-2' : 'mt-2'}`}>{product.brand}</div>
-      <div className={`font-semibold text-[var(--foreground)] leading-tight line-clamp-2 ${size === 'small' ? 'text-xs' : 'text-sm'}`}>{product.name}</div>
-      <div className="flex items-center gap-1 mt-1">
-        <Star size={9} className="text-yellow-400 fill-yellow-400" />
-        <span className="text-[10px] font-medium">{product.rating}</span>
-        <span className="text-[9px] text-[var(--foreground-muted)]">({product.reviews})</span>
-      </div>
-      <div className="flex items-center gap-2 mt-auto pt-2">
-        <span className={`font-bold text-emerald-600 ${size === 'small' ? 'text-sm' : 'text-base'}`}>₺{product.price}</span>
-        {product.oldPrice && <span className="text-xs line-through text-[var(--foreground-muted)]">₺{product.oldPrice}</span>}
-      </div>
-      <button
-        onClick={(e) => { 
-          e.preventDefault(); 
-          setInCart(true); 
-          toast.success(`${product.name} sepete eklendi!`);
-          setTimeout(() => setInCart(false), 2000); 
-        }}
-        className={`w-full mt-2 font-semibold rounded-xl flex items-center justify-center gap-1 transition-all ${size === 'small' ? 'h-7 text-[11px]' : 'h-9 text-xs'} ${
-          inCart ? 'bg-green-500 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white'
-        }`}
-      >
-        {inCart ? '✓ Eklendi!' : <><Tag size={10} /> Sepete Ekle</>}
-      </button>
-    </Link>
-  );
-}
+
 
 function SectionHeader({ icon, title, subtitle, color }: { icon: React.ReactNode; title: string; subtitle?: string; color: string }) {
   return (
@@ -181,7 +147,7 @@ export default function MagazaPage() {
       {/* ── VİTRİN HERO ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <SectionHeader icon={<Zap size={18} className="text-white"/>} title="Vitrin Ürünleri" subtitle="Haftanın en beğenilen seçimleri" color="bg-gradient-to-br from-amber-400 to-orange-500" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {HERO_PRODUCTS.map(p => (
             <Link href={`/magaza/${p.id}`} key={p.id} className={`bg-gradient-to-br ${p.color} rounded-3xl p-6 text-white flex items-center gap-5 hover:scale-[1.02] transition-transform cursor-pointer shadow-lg overflow-hidden relative`}>
               <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20 bg-white rounded-full mix-blend-overlay"></div>
@@ -213,7 +179,7 @@ export default function MagazaPage() {
         </div>
       </div>
 
-      {/* ── ÇOK SATANLAR ── */}
+      {/* ── ÇOK SATANLAR (3 Satır) ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <SectionHeader icon={<Flame size={18} className="text-white"/>} title="Çok Satanlar" subtitle="Binlerce kullanıcının tercihi" color="bg-gradient-to-br from-rose-500 to-red-600" />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -238,29 +204,29 @@ export default function MagazaPage() {
               <Clock size={12}/> Sınırlı süre
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {ON_SALE.map(p => <ProductCard key={p.id} product={p} />)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {ON_SALE.map(p => <ProductCard key={p.id} product={p} size="small" />)}
           </div>
         </div>
       </div>
 
-      {/* ── ÖNE ÇIKAN ÜRÜNLER ── */}
+      {/* ── ÖNE ÇIKAN ÜRÜNLER (3 Satır) ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SectionHeader icon={<TrendingUp size={18} className="text-white"/>} title="Öne Çıkan Ürünler" subtitle="Editörün önerdiği seçimler" color="bg-gradient-to-br from-emerald-500 to-teal-600" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {FEATURED.map(p => <ProductCard key={p.id} product={p} />)}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {FEATURED.map(p => <ProductCard key={p.id} product={p} size="small" />)}
         </div>
       </div>
 
-      {/* ── TÜM ÜRÜNLER ── */}
+      {/* ── TÜM ÜRÜNLER (5 Satır) ── */}
       <div className="bg-[var(--surface-secondary)] py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold font-display">Tüm Ürünler</h2>
-            <span className="text-xs text-[var(--foreground-muted)]">{mockStoreProducts.length} ürün</span>
+            <span className="text-xs text-[var(--foreground-muted)]">{ALL_PRODUCTS.length} ürün</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {mockStoreProducts.map(p => <ProductCard key={p.id} product={p} size="small" />)}
+            {ALL_PRODUCTS.map(p => <ProductCard key={p.id} product={p} size="small" />)}
           </div>
         </div>
       </div>

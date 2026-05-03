@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
-import Link from 'next/link';
 import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import ProductCard from '@/components/ui/ProductCard';
 
 const mockReviews = [
   { id: 1, name: 'Ayşe K.', avatar: 'A', rating: 5, date: '2024-01-10', text: 'Harika ürün, köpeğim çok beğendi! Kalitesi gerçekten çok iyi, kesinlikle tavsiye ederim.' },
@@ -13,10 +13,12 @@ const mockReviews = [
 ];
 
 const mockInstallments = [
-  { bank: 'Ziraat Bankası', logo: '🏛️', months: [{ n: 3, price: '' }, { n: 6, price: '' }, { n: 9, price: '' }, { n: 12, price: '' }] },
-  { bank: 'Garanti BBVA', logo: '🟢', months: [{ n: 3, price: '' }, { n: 6, price: '' }, { n: 9, price: '' }, { n: 12, price: '' }] },
-  { bank: 'İş Bankası', logo: '🔵', months: [{ n: 3, price: '' }, { n: 6, price: '' }, { n: 9, price: '' }, { n: 12, price: '' }] },
-  { bank: 'Yapı Kredi', logo: '🟡', months: [{ n: 3, price: '' }, { n: 6, price: '' }, { n: 9, price: '' }, { n: 12, price: '' }] },
+  { bank: 'World', logo: '🟣' },
+  { bank: 'Axess', logo: '🔴' },
+  { bank: 'Maximum', logo: '🛑' },
+  { bank: 'Bonus', logo: '🟢' },
+  { bank: 'CardFinans', logo: '🔵' },
+  { bank: 'Paraf', logo: '💠' },
 ];
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
@@ -26,6 +28,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const avgRating = mockReviews.reduce((a, r) => a + r.rating, 0) / mockReviews.length;
 
   const installmentPrice = (months: number) => (product.price / months).toFixed(2);
+
+  // Benzer Ürünler (aynı markadan veya rastgele 4 ürün)
+  const relatedProducts = mockStoreProducts.filter(p => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[var(--background)] py-10">
@@ -188,36 +193,54 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
           {activeTab === 'installments' && (
             <div>
-              <div className="flex items-center gap-3 mb-6 bg-blue-50 text-blue-700 p-4 rounded-xl border border-blue-100">
+              <div className="flex items-center gap-3 mb-8 bg-blue-50 text-blue-700 p-4 rounded-xl border border-blue-100">
                 <CreditCard size={20} />
-                <span className="font-medium text-sm">Aşağıdaki banka kartlarına peşin fiyatına taksit imkanı sunulmaktadır.</span>
+                <span className="font-medium text-sm">
+                  Peşin fiyatına 3 taksit seçeneği tüm banka kartlarında geçerlidir. <strong className="text-violet-700">Renkli ve kalın</strong> yazılan tutarlar peşin fiyatına taksitleri gösterir.
+                </span>
               </div>
-              <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-[var(--surface-secondary)]">
-                      <th className="text-left px-4 py-3 font-semibold text-[var(--foreground)]">Banka</th>
-                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">3 Taksit</th>
-                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">6 Taksit</th>
-                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">9 Taksit</th>
-                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">12 Taksit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockInstallments.map((bank, i) => (
-                      <tr key={bank.bank} className={i % 2 === 0 ? 'bg-white' : 'bg-[var(--surface-secondary)]/50'}>
-                        <td className="px-4 py-3 font-medium flex items-center gap-2">
-                          <span>{bank.logo}</span> {bank.bank}
-                        </td>
-                        {[3, 6, 9, 12].map(n => (
-                          <td key={n} className="px-4 py-3 text-center text-emerald-700 font-semibold">
-                            ₺{installmentPrice(n)}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mockInstallments.map((bank) => (
+                  <div key={bank.bank} className="border border-[var(--border)] rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className="bg-[var(--surface-secondary)] py-3 flex justify-center items-center border-b border-[var(--border)] font-bold text-[var(--foreground)] text-sm">
+                      {bank.logo} <span className="ml-2 tracking-wide uppercase">{bank.bank}</span>
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead className="bg-white">
+                        <tr>
+                          <th className="text-left py-3 px-4 text-[var(--foreground-muted)] font-medium border-b border-[var(--border)]">Taksit</th>
+                          <th className="text-right py-3 px-4 text-[var(--foreground-muted)] font-medium border-b border-[var(--border)]">Aylık Tutar</th>
+                          <th className="text-right py-3 px-4 text-[var(--foreground-muted)] font-medium border-b border-[var(--border)]">Toplam Tutar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[2, 3, 6, 9].map((n) => {
+                          // Peşin fiyatına taksitler (<= 3 ay)
+                          const isPesin = n <= 3;
+                          // Eğer peşin değilse ufak bir vade farkı (%3 aylık) ekliyoruz simulasyon için
+                          const interestRate = isPesin ? 1 : (1 + (n * 0.03));
+                          const total = product.price * interestRate;
+                          const monthly = total / n;
+                          
+                          return (
+                            <tr key={n} className="border-b border-[var(--border)] last:border-b-0 hover:bg-gray-50/50">
+                              <td className={`py-3 px-4 ${isPesin ? 'font-bold text-violet-700' : 'text-[var(--foreground)]'}`}>
+                                {n} taksit
+                              </td>
+                              <td className={`text-right py-3 px-4 ${isPesin ? 'font-bold text-violet-700' : 'text-[var(--foreground)]'}`}>
+                                ₺{monthly.toFixed(2)}
+                              </td>
+                              <td className={`text-right py-3 px-4 ${isPesin ? 'font-bold text-violet-700' : 'text-[var(--foreground)]'}`}>
+                                ₺{total.toFixed(2)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -315,6 +338,16 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               </div>
             </div>
           )}
+        </div>
+
+        {/* ============ BENZER ÜRÜNLER ============ */}
+        <div className="mt-16 pt-10 border-t border-[var(--border)]">
+          <h2 className="text-2xl font-bold font-display text-[var(--foreground)] mb-6">İlginizi Çekebilir</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {relatedProducts.map(p => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
         </div>
 
       </div>

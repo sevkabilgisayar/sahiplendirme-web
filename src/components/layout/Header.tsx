@@ -11,6 +11,7 @@ import {
   Search,
   Settings,
   User,
+  ShoppingCart,
   X
 } from 'lucide-react';
 import Link from 'next/link';
@@ -91,6 +92,16 @@ export default function Header() {
               <button className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors">
                 <Search size={18} />
               </button>
+
+              {/* Cart */}
+              <Link
+                href="/sepet"
+                className="relative flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
+              >
+                <ShoppingCart size={18} />
+                {/* Cart badge */}
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">3</span>
+              </Link>
 
               {isLoggedIn ? (
                 <>
