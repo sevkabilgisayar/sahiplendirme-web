@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
 import Link from 'next/link';
-import { ChevronRight, ChevronLeft, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare, UserPlus, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -26,6 +26,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [activeTab, setActiveTab] = useState('description');
   const [selectedVariant, setSelectedVariant] = useState('3 KG');
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const product = mockStoreProducts.find((p) => p.id === parseInt(params.id)) || mockStoreProducts[0];
   const avgRating = mockReviews.reduce((a, r) => a + r.rating, 0) / mockReviews.length;
@@ -178,9 +179,21 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   9.8
                 </div>
               </div>
-              <button onClick={() => setActiveTab('qa')} className="hidden sm:flex items-center gap-2 px-4 py-2.5 border border-[var(--border)] bg-white rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm ml-2">
-                <MessageSquare size={16} className="text-blue-500" /> Satıcıya Sor
-              </button>
+              <div className="flex flex-col gap-2 ml-2">
+                <button
+                  onClick={() => setIsFollowing(f => !f)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all shadow-sm ${
+                    isFollowing
+                      ? 'bg-gray-100 text-[var(--foreground)] border-[var(--border)] hover:bg-gray-200'
+                      : 'bg-[var(--brand-primary)] text-white border-transparent hover:bg-emerald-700'
+                  }`}
+                >
+                  {isFollowing ? <><Check size={13} /> Takip Ediliyor</> : <><UserPlus size={13} /> Takip Et</>}
+                </button>
+                <button onClick={() => setActiveTab('qa')} className="flex items-center gap-1.5 px-3 py-2 border border-[var(--border)] bg-white rounded-xl text-xs font-bold hover:bg-gray-50 transition-colors shadow-sm">
+                  <MessageSquare size={13} className="text-blue-500" /> Satıcıya Sor
+                </button>
+              </div>
             </div>
 
             {/* Kargo & İade ikonları */}
