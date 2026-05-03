@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MapPin, ScanSearch, Eye, MessageCircle, ArrowRight, Shield, User, Building2 } from 'lucide-react';
+import { Heart, MapPin, ScanSearch, Eye, MessageCircle, ArrowRight, Shield, User, Building2, Images } from 'lucide-react';
 import { Listing } from '@/types';
 
 interface ListingCardProps {
@@ -78,6 +78,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
           >
             <Heart size={15} className="text-gray-400 hover:text-red-500 transition-colors" />
           </button>
+
+          {/* Photo Count Indicator */}
+          {listing.photos && listing.photos.length > 1 && (
+            <div className="absolute top-3 right-14 bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 z-20">
+              <Images size={10} /> 1/{listing.photos.length}
+            </div>
+          )}
 
           {/* Bottom: Name, Breed & Shelter */}
           <div className="absolute bottom-3 left-4 right-4 z-20 text-white">

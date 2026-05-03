@@ -135,6 +135,8 @@ export const mockListings: Listing[] = [
     reward: '3000',
     photos: [
       'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1558788353-f76d92427f16?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1596766782806-03f69e6b4c3e?w=800&auto=format&fit=crop',
     ],
   },
   // Çiftleştirme 4.
@@ -145,6 +147,7 @@ export const mockListings: Listing[] = [
     imageColor: 'from-stone-200 to-gray-300',
     photos: [
       'https://images.unsplash.com/photo-1508253578933-20b529302151?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?w=800&auto=format&fit=crop',
     ],
   },
   // Sahiplendirme 4. (barınaktan)
@@ -155,6 +158,9 @@ export const mockListings: Listing[] = [
     imageColor: 'from-amber-200 to-yellow-300',
     photos: [
       'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&auto=format&fit=crop',
     ],
   },
 ];

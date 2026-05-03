@@ -1,6 +1,9 @@
+'use client';
+
+import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
 import Link from 'next/link';
-import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, ChevronDown } from 'lucide-react';
+import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 const mockReviews = [
@@ -17,6 +20,8 @@ const mockInstallments = [
 ];
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const [activeTab, setActiveTab] = useState('description');
+
   const product = mockStoreProducts.find((p) => p.id === parseInt(params.id)) || mockStoreProducts[0];
   const avgRating = mockReviews.reduce((a, r) => a + r.rating, 0) / mockReviews.length;
 
@@ -59,7 +64,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 ))}
               </div>
               <span className="text-sm font-bold text-yellow-600">{avgRating.toFixed(1)}</span>
-              <span className="text-sm text-[var(--foreground-muted)] underline cursor-pointer">{mockReviews.length} Değerlendirme</span>
+              <span className="text-sm text-[var(--foreground-muted)] underline cursor-pointer" onClick={() => setActiveTab('reviews')}>{mockReviews.length} Değerlendirme</span>
             </div>
 
             <div className="flex items-baseline gap-4 mb-4">
@@ -104,44 +109,91 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
 
-        {/* ============ ÜRÜN AÇIKLAMASI ============ */}
-        <section className="mb-6">
-          <details open className="border border-[var(--border)] rounded-2xl overflow-hidden group">
-            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
-              <span className="font-bold text-[var(--foreground)] text-lg">Ürün Açıklaması</span>
-              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="px-6 py-5 prose prose-sm max-w-none text-[var(--foreground-muted)] leading-relaxed space-y-3">
-              <p>
+        {/* ============ TABS ============ */}
+        <div className="border-b border-[var(--border)] mb-8 flex overflow-x-auto hide-scrollbar gap-8">
+          <button
+            onClick={() => setActiveTab('description')}
+            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === 'description'
+                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            Ürün Açıklaması
+          </button>
+          <button
+            onClick={() => setActiveTab('installments')}
+            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === 'installments'
+                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            Taksit Seçenekleri
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === 'reviews'
+                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            Değerlendirmeler ({mockReviews.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('return-policy')}
+            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === 'return-policy'
+                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            İptal & İade
+          </button>
+        </div>
+
+        {/* ============ TAB CONTENT ============ */}
+        <div className="min-h-[400px]">
+          {activeTab === 'description' && (
+            <div className="prose prose-sm sm:prose max-w-none text-[var(--foreground-muted)] leading-relaxed space-y-6">
+              <p className="text-lg">
                 <strong className="text-[var(--foreground)]">{product.name}</strong>, evcil hayvanınızın ihtiyaçlarını karşılamak için özenle tasarlanmıştır. 
                 Premium malzemeler kullanılarak üretilen bu ürün, uzun ömürlü kullanım için dayanıklı yapısı ile öne çıkmaktadır.
               </p>
-              <p>
-                Veteriner kontrolünden geçmiş ve uluslararası kalite standartlarını karşılamış bu ürün, hem köpekler hem de kediler için idealdir. 
-                Can dostunuzun sağlığını ve mutluluğunu ön planda tutan <strong className="text-[var(--foreground)]">{product.brand}</strong> markasının güvencesiyle sunulmaktadır.
-              </p>
-              <ul className="list-disc list-inside space-y-1 mt-4">
-                <li>%100 doğal ve güvenli içerik</li>
-                <li>Veteriner onaylı formül</li>
-                <li>Kolay kullanım ve temizlik</li>
-                <li>Çevre dostu ambalaj</li>
-                <li>Türkiye'de dağıtım garantisi</li>
-              </ul>
-            </div>
-          </details>
-        </section>
+              
+              {/* Rich HTML Content Example (Images, Headings, Highlights) */}
+              <div className="grid sm:grid-cols-2 gap-8 my-8 items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-[var(--foreground)] mb-3">Veteriner Onaylı Kalite</h3>
+                  <p className="mb-4">
+                    Veteriner kontrolünden geçmiş ve uluslararası kalite standartlarını karşılamış bu ürün, hem köpekler hem de kediler için idealdir.
+                    Laboratuvar testlerinden tam not almıştır.
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-[var(--foreground)] font-medium">
+                    <li>%100 doğal ve güvenli içerik</li>
+                    <li>Alerjen içermeyen yapı</li>
+                    <li>Kolay temizlenebilir materyal</li>
+                  </ul>
+                </div>
+                <div className="rounded-2xl overflow-hidden shadow-lg border border-[var(--border)]">
+                  <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop" alt="Detay Görseli" className="w-full h-auto" />
+                </div>
+              </div>
 
-        {/* ============ TAKSİT SEÇENEKLERİ ============ */}
-        <section className="mb-6">
-          <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
-            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
-              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
-                <CreditCard size={20} className="text-blue-500" />
-                Kredi Kartı Taksit Seçenekleri
-              </span>
-              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="px-6 py-5">
+              <div className="bg-[var(--surface-secondary)] p-6 rounded-2xl border border-[var(--border)]">
+                <h4 className="font-bold text-[var(--foreground)] mb-2">Kullanım Talimatı:</h4>
+                <p>Paketi açtıktan sonra serin ve kuru bir yerde muhafaza ediniz. Ürün direkt güneş ışığına maruz bırakılmamalıdır. Günlük önerilen kullanım miktarını aşmayınız.</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'installments' && (
+            <div>
+              <div className="flex items-center gap-3 mb-6 bg-blue-50 text-blue-700 p-4 rounded-xl border border-blue-100">
+                <CreditCard size={20} />
+                <span className="font-medium text-sm">Aşağıdaki banka kartlarına peşin fiyatına taksit imkanı sunulmaktadır.</span>
+              </div>
               <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
                 <table className="w-full text-sm">
                   <thead>
@@ -169,45 +221,34 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   </tbody>
                 </table>
               </div>
-              <p className="text-xs text-[var(--foreground-muted)] mt-2">* Fiyatlar aylık taksit tutarlarını göstermektedir. Faizsiz taksit bankaya göre değişebilir.</p>
             </div>
-          </details>
-        </section>
+          )}
 
-        {/* ============ DEĞERLENDİRMELER ============ */}
-        <section className="mb-6">
-          <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
-            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
-              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
-                <Star size={20} className="text-yellow-400 fill-yellow-400" />
-                Değerlendirmeler ({mockReviews.length})
-              </span>
-              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="px-6 py-5">
+          {activeTab === 'reviews' && (
+            <div>
               {/* Özet */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-5 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
-                <div className="text-center sm:w-32">
-                  <div className="text-5xl font-bold text-yellow-500">{avgRating.toFixed(1)}</div>
-                  <div className="flex items-center gap-0.5 justify-center mt-1">
+              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
+                <div className="text-center sm:w-40 border-b sm:border-b-0 sm:border-r border-[var(--border)] pb-4 sm:pb-0 sm:pr-6">
+                  <div className="text-6xl font-bold text-yellow-500">{avgRating.toFixed(1)}</div>
+                  <div className="flex items-center gap-1 justify-center mt-2">
                     {[1,2,3,4,5].map(i => (
-                      <Star key={i} size={14} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                      <Star key={i} size={16} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                     ))}
                   </div>
-                  <div className="text-xs text-[var(--foreground-muted)] mt-1">{mockReviews.length} yorum</div>
+                  <div className="text-sm font-medium text-[var(--foreground-muted)] mt-2">{mockReviews.length} değerlendirme</div>
                 </div>
-                <div className="flex-1 w-full space-y-1.5">
+                <div className="flex-1 w-full space-y-2">
                   {[5,4,3,2,1].map(star => {
                     const count = mockReviews.filter(r => r.rating === star).length;
                     const pct = (count / mockReviews.length) * 100;
                     return (
-                      <div key={star} className="flex items-center gap-2 text-xs">
-                        <span className="w-3 text-right">{star}</span>
-                        <Star size={11} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                      <div key={star} className="flex items-center gap-3 text-sm">
+                        <span className="w-4 text-right font-medium">{star}</span>
+                        <Star size={14} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                        <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-yellow-400 rounded-full transition-all duration-1000" style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="w-4 text-[var(--foreground-muted)]">{count}</span>
+                        <span className="w-8 text-right text-[var(--foreground-muted)] text-xs font-medium">%{pct.toFixed(0)}</span>
                       </div>
                     );
                   })}
@@ -217,18 +258,23 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {/* Yorum listesi */}
               <div className="space-y-4">
                 {mockReviews.map(review => (
-                  <div key={review.id} className="p-5 bg-white border border-[var(--border)] rounded-2xl">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-sm">{review.avatar}</div>
+                  <div key={review.id} className="p-6 bg-white border border-[var(--border)] rounded-2xl shadow-sm">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-base shadow-sm">{review.avatar}</div>
                         <div>
-                          <div className="font-semibold text-sm">{review.name}</div>
-                          <div className="text-xs text-[var(--foreground-muted)]">{review.date}</div>
+                          <div className="font-bold text-[var(--foreground)]">{review.name}</div>
+                          <div className="text-xs text-[var(--foreground-muted)] flex items-center gap-2 mt-0.5">
+                            {review.date}
+                            <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                              <CheckCircle size={10} /> Satın Aldı
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-0.5">
+                      <div className="flex items-center gap-1">
                         {[1,2,3,4,5].map(i => (
-                          <Star key={i} size={13} className={i <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                          <Star key={i} size={14} className={i <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                         ))}
                       </div>
                     </div>
@@ -237,30 +283,41 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 ))}
               </div>
             </div>
-          </details>
-        </section>
+          )}
 
-        {/* ============ İPTAL & İADE KOŞULLARI ============ */}
-        <section className="mb-12">
-          <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
-            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
-              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
-                <RefreshCw size={20} className="text-orange-500" />
-                İptal & İade Koşulları
-              </span>
-              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="px-6 py-5 text-sm text-[var(--foreground-muted)] space-y-3 leading-relaxed">
-              <p><strong className="text-[var(--foreground)]">İptal Hakkı:</strong> Siparişinizi kargoya verilmeden önce iptal edebilirsiniz. Kargoya verildikten sonra iade prosedürü geçerlidir.</p>
-              <p><strong className="text-[var(--foreground)]">İade Süreci:</strong> Ürünü teslim aldıktan itibaren 30 gün içinde iade talebinde bulunabilirsiniz. Kullanılmamış ve orijinal ambalajında olması gerekmektedir.</p>
-              <p><strong className="text-[var(--foreground)]">Para İadesi:</strong> Onaylanan iadeler 3-7 iş günü içinde ödeme yönteminize iade edilir.</p>
-              <p><strong className="text-[var(--foreground)]">Kargo:</strong> İade kargo ücreti alıcıya aittir. Hasarlı veya yanlış ürün gönderimlerinde kargo ücreti tarafımızca karşılanır.</p>
-              <Link href="/iptal-iade" className="inline-block mt-2 text-[var(--brand-primary)] font-semibold hover:underline">
-                Detaylı İptal & İade Politikasını Oku →
-              </Link>
+          {activeTab === 'return-policy' && (
+            <div className="bg-white border border-[var(--border)] rounded-2xl p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[var(--border)]">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                  <RefreshCw size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold font-display text-[var(--foreground)]">İade ve İptal Prosedürü</h3>
+                  <p className="text-sm text-[var(--foreground-muted)] mt-1">Sahiplendirme.com güvencesiyle 30 gün içinde kolay iade.</p>
+                </div>
+              </div>
+
+              <div className="space-y-6 text-sm text-[var(--foreground-muted)] leading-relaxed">
+                <div>
+                  <strong className="text-[var(--foreground)] block mb-1 text-base">İptal Hakkı:</strong> 
+                  Siparişinizi kargoya verilmeden önce iptal edebilirsiniz. Siparişiniz kargoya verildikten sonra iptal edilemez, ancak ürün elinize ulaştığında iade prosedürü başlatabilirsiniz.
+                </div>
+                <div>
+                  <strong className="text-[var(--foreground)] block mb-1 text-base">İade Süreci:</strong> 
+                  Ürünü teslim aldıktan itibaren <strong>30 gün</strong> içinde hiçbir gerekçe göstermeksizin iade talebinde bulunabilirsiniz. İade edilecek ürünün kullanılmamış, etiketleri koparılmamış ve orijinal ambalajında olması gerekmektedir.
+                </div>
+                <div>
+                  <strong className="text-[var(--foreground)] block mb-1 text-base">Para İadesi:</strong> 
+                  Depomuza ulaşan ve iade şartlarına uygunluğu onaylanan ürünlerin ücret iadesi, <strong>3-7 iş günü</strong> içinde ödeme yaptığınız kredi kartına/hesaba aktarılır.
+                </div>
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <strong className="text-[var(--foreground)] block mb-1 text-base">Kargo Ücreti:</strong> 
+                  Anlaşmalı olduğumuz kargo firması (MNG Kargo) ile gönderilen iadelerde kargo ücreti <strong className="text-emerald-600">tarafımızca karşılanır</strong>. Farklı bir kargo firması tercih ederseniz ücret alıcıya aittir. Hasarlı veya yanlış ürün gönderimlerinde tüm masraflar bize aittir.
+                </div>
+              </div>
             </div>
-          </details>
-        </section>
+          )}
+        </div>
 
       </div>
     </div>
