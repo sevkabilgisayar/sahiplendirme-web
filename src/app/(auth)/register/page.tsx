@@ -52,10 +52,12 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   // Fiyatlandırma
-  const UNIT_PRICE = 199; // TL/ay per kategori
+  const isYearly = billingCycle === 'yearly';
+  const UNIT_PRICE = isYearly ? 159 : 199; // TL/ay per kategori
   const DISCOUNT_THRESHOLD = 2; // 2+ kategoride indirim
   const DISCOUNT_RATE = 0.20; // %20
 
@@ -272,13 +274,41 @@ export default function RegisterPage() {
 
         {/* Hizmet Türü — Profesyonel seçilince */}
         {accountType === 'profesyonel' && (
-          <div className="animate-slide-up space-y-3">
+          <div className="animate-slide-up space-y-4">
+            
+            {/* Yıllık/Aylık Toggle */}
+            <div className="flex justify-center mb-1">
+              <div className="bg-[var(--surface-secondary)] p-1 rounded-xl flex items-center border border-[var(--border)] w-fit mx-auto">
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                    !isYearly ? 'bg-white shadow-sm text-[var(--foreground)] border border-[var(--border)]' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] border border-transparent'
+                  }`}
+                >
+                  Aylık
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                    isYearly ? 'bg-[var(--brand-primary)] text-white shadow-brand border border-transparent' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] border border-transparent'
+                  }`}
+                >
+                  Yıllık 
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${isYearly ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'}`}>
+                    %20 İndirim
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold mb-1 text-[var(--foreground)]">
                 Hizmet Kategorileri
               </label>
               <p className="text-xs text-[var(--foreground-muted)] mb-3">
-                Birden fazla kategori seçebilirsiniz — 2+ kategoride <span className="text-green-600 font-semibold">%20 indirim</span> uygulanır.
+                Birden fazla kategori seçebilirsiniz — 2+ kategoride <span className="text-green-600 font-semibold">ekstra %20 indirim</span> uygulanır.
               </p>
               <div className="bg-[var(--surface-secondary)] border border-[var(--border)] rounded-2xl p-4">
                 <div className="grid grid-cols-3 gap-2">
@@ -354,10 +384,16 @@ export default function RegisterPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-[var(--foreground)]">Toplam</span>
                   <div className="text-right">
-                    <span className="text-lg font-bold text-[var(--brand-primary)]">₺{totalFinal}</span>
-                    <span className="text-xs text-[var(--foreground-muted)]">/ay</span>
+                    <span className="text-xl font-black text-[var(--brand-primary)]">₺{isYearly ? totalFinal * 12 : totalFinal}</span>
+                    <span className="text-xs text-[var(--foreground-muted)]">/{isYearly ? 'yıl' : 'ay'}</span>
                   </div>
                 </div>
+
+                {isYearly && (
+                  <div className="text-[10px] text-[var(--foreground-muted)] text-right -mt-1 font-medium">
+                    (Aylık ₺{totalFinal}'ye denk gelir)
+                  </div>
+                )}
 
                 {hasDiscount && (
                   <div className="text-[10px] text-green-600 font-medium text-center pt-1">
