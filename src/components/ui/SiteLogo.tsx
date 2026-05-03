@@ -27,15 +27,15 @@ export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
 
       {/* Pati 'e' Kombinasyonu */}
       <div className="inline-flex flex-col items-center justify-end">
-        {/* Parmaklar (DOM akışında e'nin hemen üstünde durur, asla uçmaz) */}
+        {/* Parmaklar (Daha büyük ve daha belirgin) */}
         <svg 
           viewBox="0 0 24 16" 
           className="text-[#f38118] fill-current"
           style={{ 
-            width: '0.85em',
-            height: '0.6em',
-            // Parmakları 'e' harfinin kavislerine bindirmek için güçlü bir negatif margin
-            marginBottom: '-0.3em', 
+            width: '1.05em',     // Genişlik artırıldı
+            height: '0.75em',    // Yükseklik artırıldı
+            // Parmaklar harfin içine çok gömülmesin, tam üstünde belirgin dursun
+            marginBottom: '-0.15em', 
             zIndex: 10
           }}
           aria-hidden="true"
