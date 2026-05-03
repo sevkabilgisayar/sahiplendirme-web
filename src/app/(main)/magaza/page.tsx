@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { mockStoreProducts } from '@/lib/mock-data';
 import ProductCard from '@/components/ui/ProductCard';
+import AdBanner from '@/components/ui/AdBanner';
 
 const CATEGORIES = [
   { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248, color: 'from-red-50 to-orange-50 border-orange-100 hover:border-orange-300' },
@@ -187,6 +188,11 @@ export default function MagazaPage() {
         </div>
       </div>
 
+      {/* ── REKLAM ALANI ORTA ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <AdBanner />
+      </div>
+
       {/* ── İNDİRİMDEKİLER ── */}
       <div className="bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-950/20 dark:to-orange-950/20 border-y border-rose-100 py-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -232,10 +238,17 @@ export default function MagazaPage() {
       </div>
 
       {/* ── FOOTER NOT ── */}
-      <div className="py-6 text-center">
-        <p className="text-[10px] text-[var(--foreground-muted)]">
-          Bu ürünler affiliate ortaklık kapsamında önerilmektedir. sahiplendirme.com, doğrudan ürün satışı yapmamaktadır.
-        </p>
+      <div className="py-8 bg-amber-50 border-y border-amber-200 mt-12 mb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm font-semibold text-amber-800">
+            Bu ürünler affiliate ortaklık kapsamında önerilmektedir. sahiplendirme.com, doğrudan ürün satışı yapmamaktadır.
+          </p>
+        </div>
+      </div>
+
+      {/* ── REKLAM ALT ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <AdBanner />
       </div>
     </div>
   );
