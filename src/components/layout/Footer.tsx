@@ -42,6 +42,13 @@ const footerLinks = {
       { href: '/iptal-iade', label: 'İptal & İade Koşulları' },
     ],
   },
+  magaza: {
+    title: 'Mağazalar',
+    links: [
+      { href: '/neden-magaza', label: 'Neden Mağaza?' },
+      { href: '/magaza-ac', label: 'Mağaza Açmak İstiyorum' },
+    ],
+  },
 };
 
 export default function Footer() {
@@ -50,7 +57,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Main footer */}
-        <div className="py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="py-14 grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex mb-4" style={{ overflow: 'visible' }}>
