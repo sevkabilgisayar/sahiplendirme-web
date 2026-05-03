@@ -138,64 +138,90 @@ export default function HizmetlerPage() {
           </div>
         </div>
 
-        {/* Grid with Ad Banner after 3rd item */}
+        {/* Render grouped by category if no specific category is selected, else render a single grid */}
         {filtered.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((service, idx) => (
-              <>
-                <Link key={service.id} href={`/hizmetler/${service.id}`}>
-                  <Card className={`p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group h-full border-2 ${service.featured ? 'border-orange-200 hover:border-orange-400' : 'border-[var(--border)] hover:border-[var(--brand-primary-light)]'}`}>
-                    {service.featured && (
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full w-fit mb-3">
-                        ⭐ Öne Çıkan
+          <div className="space-y-16">
+            {SERVICE_CATEGORIES.map((cat, catIdx) => {
+              // Sadece seçili kategori gösterilir (veya hiç seçili değilse hepsi gösterilir)
+              if (selectedCategory && selectedCategory !== cat.value) return null;
+
+              const categoryServices = filtered.filter(s => s.category === cat.value);
+              if (categoryServices.length === 0) return null;
+
+              return (
+                <div key={cat.value} className="space-y-6">
+                  {/* Category Title (only if showing all) */}
+                  {!selectedCategory && (
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm bg-white border border-[var(--border)]`}>
+                        {cat.emoji}
                       </div>
-                    )}
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-sm`}>
-                        {service.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                          <h3 className="font-bold text-base leading-tight line-clamp-1">{service.name}</h3>
-                          {service.verified && <CheckCircle size={15} className="text-blue-500 flex-shrink-0" />}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)]">
-                          <MapPin size={11} className="flex-shrink-0" />
-                          {service.district}, {service.city}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <div className="flex items-center gap-0.5 text-orange-500 font-bold text-xs">
-                            <Star size={11} className="fill-orange-500" />
-                            {service.rating}
+                      <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">{cat.label} İlanları</h2>
+                      <span className="text-sm font-semibold text-[var(--foreground-muted)] px-3 py-1 bg-[var(--surface-secondary)] rounded-full border border-[var(--border)] ml-2">
+                        {categoryServices.length} uzman
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {categoryServices.map((service, idx) => (
+                      <Link key={service.id} href={`/hizmetler/${service.id}`}>
+                        <Card className={`p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group h-full border-2 ${service.featured ? 'border-orange-200 hover:border-orange-400' : 'border-[var(--border)] hover:border-[var(--brand-primary-light)]'}`}>
+                          {service.featured && (
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full w-fit mb-3">
+                              ⭐ Öne Çıkan
+                            </div>
+                          )}
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-sm`}>
+                              {service.emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                <h3 className="font-bold text-base leading-tight line-clamp-1">{service.name}</h3>
+                                {service.verified && <CheckCircle size={15} className="text-blue-500 flex-shrink-0" />}
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-[var(--foreground-muted)]">
+                                <MapPin size={11} className="flex-shrink-0" />
+                                {service.district}, {service.city}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <div className="flex items-center gap-0.5 text-orange-500 font-bold text-xs">
+                                  <Star size={11} className="fill-orange-500" />
+                                  {service.rating}
+                                </div>
+                                <span className="text-[10px] text-[var(--foreground-muted)]">({service.reviews})</span>
+                                <span className="text-xs text-emerald-600 font-semibold ml-auto">{service.price}</span>
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-[10px] text-[var(--foreground-muted)]">({service.reviews})</span>
-                          <span className="text-xs text-emerald-600 font-semibold ml-auto">{service.price}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {service.tags.map(tag => (
-                        <span key={tag} className="text-[10px] font-semibold bg-[var(--surface-secondary)] text-[var(--foreground-muted)] px-2 py-1 rounded-full border border-[var(--border)]">{tag}</span>
-                      ))}
-                    </div>
-                    <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${SERVICE_CATEGORIES.find(c => c.value === service.category)?.color || 'text-[var(--brand-primary)]'}`}>
-                        {SERVICE_CATEGORIES.find(c => c.value === service.category)?.emoji}{' '}
-                        {SERVICE_CATEGORIES.find(c => c.value === service.category)?.label}
-                      </span>
-                      <span className="text-xs text-[var(--foreground-muted)] group-hover:text-[var(--brand-primary)] transition-colors font-medium flex items-center gap-0.5">
-                        Profili Gör <ArrowRight size={12} />
-                      </span>
-                    </div>
-                  </Card>
-                </Link>
-                {(idx + 1) % 3 === 0 && idx !== filtered.length - 1 && (
-                  <div key={`ad-${idx}`} className="sm:col-span-2 lg:col-span-3">
-                    <AdBanner imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" linkUrl="#" altText="Reklam Alanı" />
+                          <div className="flex flex-wrap gap-1.5 mb-4">
+                            {service.tags.map(tag => (
+                              <span key={tag} className="text-[10px] font-semibold bg-[var(--surface-secondary)] text-[var(--foreground-muted)] px-2 py-1 rounded-full border border-[var(--border)]">{tag}</span>
+                            ))}
+                          </div>
+                          <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${cat.color || 'text-[var(--brand-primary)]'}`}>
+                              {cat.emoji} {cat.label}
+                            </span>
+                            <span className="text-xs text-[var(--foreground-muted)] group-hover:text-[var(--brand-primary)] transition-colors font-medium flex items-center gap-0.5">
+                              Profili Gör <ArrowRight size={12} />
+                            </span>
+                          </div>
+                        </Card>
+                      </Link>
+                    ))}
                   </div>
-                )}
-              </>
-            ))}
+                  
+                  {/* Reklam alanı: Her kategori grubunun sonunda (son kategori hariç) gösterelim */}
+                  {!selectedCategory && catIdx !== SERVICE_CATEGORIES.length - 1 && categoryServices.length > 0 && (
+                    <div className="mt-8 pt-4">
+                      <AdBanner imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" linkUrl="#" altText={`${cat.label} Reklam`} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20">
