@@ -53,7 +53,7 @@ function ListingsPageInner() {
   );
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [selectedGender, setSelectedGender] = useState('');
-  const [selectedOwnerType, setSelectedOwnerType] = useState('');
+  const [selectedOwnerTypes, setSelectedOwnerTypes] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedAges, setSelectedAges] = useState<string[]>([]);
 
@@ -92,12 +92,12 @@ function ListingsPageInner() {
 
   const clearAll = () => {
     setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
-    setSelectedCities([]); setSelectedDistricts([]); setSelectedGender(''); setSelectedOwnerType('');
+    setSelectedCities([]); setSelectedDistricts([]); setSelectedGender(''); setSelectedOwnerTypes([]);
     setSelectedBreeds([]); setSelectedAges([]);
     setPage(1);
   };
 
-  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerType || selectedBreeds.length || selectedAges.length;
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerTypes.length || selectedBreeds.length || selectedAges.length;
 
   // All listings (duplicated for demo volume)
   const allListings = useMemo(() => {
@@ -129,7 +129,7 @@ function ListingsPageInner() {
     if (selectedCities.length) result = result.filter(l => selectedCities.includes(l.city));
     if (selectedDistricts.length) result = result.filter(l => selectedDistricts.includes(l.district));
     if (selectedGender) result = result.filter(l => l.gender === selectedGender);
-    if (selectedOwnerType) result = result.filter(l => l.ownerType === selectedOwnerType);
+    if (selectedOwnerTypes.length) result = result.filter(l => selectedOwnerTypes.includes(l.ownerType));
     if (selectedBreeds.length) result = result.filter(l => selectedBreeds.includes(l.breed));
 
     if (sort === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -137,7 +137,7 @@ function ListingsPageInner() {
     if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
 
     return result;
-  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerType, selectedBreeds, selectedAges, sort, allListings]);
+  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerTypes, selectedBreeds, selectedAges, sort, allListings]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -226,16 +226,23 @@ function ListingsPageInner() {
         </div>
       </div>
 
-      {/* Etiket (Sahibinde/Barınakta) */}
+      {/* Kimden (Sahibinde/Barınakta) */}
       <div className="mb-6 border-b border-[var(--border)] pb-5">
-        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Kimden</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">Kimden</h3>
+          {selectedOwnerTypes.length > 0 && (
+            <button onClick={() => setSelectedOwnerTypes([])} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+              Tümünü Kaldır
+            </button>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           {OWNER_TYPES.map((o) => (
             <label key={o.value} className="flex items-center gap-3 cursor-pointer group">
-              <input type="radio" name="ownerType" checked={selectedOwnerType === o.value}
-                onChange={() => { setSelectedOwnerType(selectedOwnerType === o.value ? '' : o.value); setPage(1); }}
-                className="w-4 h-4 accent-[var(--brand-primary)]" />
-              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors">
+              <input type="checkbox" checked={selectedOwnerTypes.includes(o.value)}
+                onChange={() => toggleFilter(selectedOwnerTypes, o.value, setSelectedOwnerTypes)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors py-0.5">
                 {o.value === 'sahibinde' ? '🏠' : '🏛️'} {o.label}
               </span>
             </label>
@@ -345,6 +352,12 @@ function ListingsPageInner() {
                 <span key={a} className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
                   ⏳ {AGE_OPTIONS.find(x => x.value === a)?.label}
                   <button onClick={() => setSelectedAges(selectedAges.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              ))}
+              {selectedOwnerTypes.map(o => (
+                <span key={o} className="flex items-center gap-1 bg-stone-100 text-stone-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {o === 'sahibinde' ? '🏠' : '🏛️'} {OWNER_TYPES.find(x => x.value === o)?.label}
+                  <button onClick={() => setSelectedOwnerTypes(selectedOwnerTypes.filter(x => x !== o))} className="hover:opacity-70"><X size={12} /></button>
                 </span>
               ))}
               {selectedCities.map(c => (
