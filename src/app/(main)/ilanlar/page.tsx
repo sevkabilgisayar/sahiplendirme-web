@@ -51,7 +51,7 @@ function ListingsPageInner() {
   const [selectedCity, setSelectedCity] = useState(searchParams.get('sehir') || '');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedOwnerType, setSelectedOwnerType] = useState('');
-  const [selectedBreed, setSelectedBreed] = useState('');
+  const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedAge, setSelectedAge] = useState('');
 
   // Available breeds based on selected animal types
@@ -64,17 +64,20 @@ function ListingsPageInner() {
   const toggleFilter = (arr: string[], val: string, setter: (v: string[]) => void) => {
     setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
     setPage(1);
-    setSelectedBreed(''); // Reset breed when animal changes
+    // Hayvan türü değişirse ırkları temizle
+    if (setter === setSelectedAnimals) {
+      setSelectedBreeds([]);
+    }
   };
 
   const clearAll = () => {
     setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
     setSelectedCity(''); setSelectedGender(''); setSelectedOwnerType('');
-    setSelectedBreed(''); setSelectedAge('');
+    setSelectedBreeds([]); setSelectedAge('');
     setPage(1);
   };
 
-  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCity || selectedGender || selectedOwnerType || selectedBreed || selectedAge;
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCity || selectedGender || selectedOwnerType || selectedBreeds.length || selectedAge;
 
   // All listings (duplicated for demo volume)
   const allListings = [
@@ -99,14 +102,14 @@ function ListingsPageInner() {
     if (selectedCity) result = result.filter(l => l.city === selectedCity);
     if (selectedGender) result = result.filter(l => l.gender === selectedGender);
     if (selectedOwnerType) result = result.filter(l => l.ownerType === selectedOwnerType);
-    if (selectedBreed) result = result.filter(l => l.breed === selectedBreed);
+    if (selectedBreeds.length) result = result.filter(l => selectedBreeds.includes(l.breed));
 
     if (sort === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     if (sort === 'oldest') result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
 
     return result;
-  }, [search, selectedTypes, selectedAnimals, selectedCity, selectedGender, selectedOwnerType, selectedBreed, selectedAge, sort]);
+  }, [search, selectedTypes, selectedAnimals, selectedCity, selectedGender, selectedOwnerType, selectedBreeds, selectedAge, sort]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -155,19 +158,25 @@ function ListingsPageInner() {
       </div>
 
       {/* Irk Filtresi — Hayvan türüne göre dinamik */}
-      {selectedAnimals.length <= 1 && (
+      {selectedAnimals.length <= 1 && availableBreeds.length > 0 && (
         <div className="mb-6 border-b border-[var(--border)] pb-5">
-          <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Irk</h3>
-          <div className="relative">
-            <select
-              value={selectedBreed}
-              onChange={(e) => { setSelectedBreed(e.target.value); setPage(1); }}
-              className="w-full h-10 px-3 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
-            >
-              <option value="">Tüm Irklar</option>
-              {availableBreeds.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">Irk</h3>
+            {selectedBreeds.length > 0 && (
+              <button onClick={() => setSelectedBreeds([])} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+                Tümünü Kaldır
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            {availableBreeds.map(b => (
+              <label key={b} className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" checked={selectedBreeds.includes(b)}
+                  onChange={() => toggleFilter(selectedBreeds, b, setSelectedBreeds)}
+                  className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+                <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors leading-tight py-0.5">{b}</span>
+              </label>
+            ))}
           </div>
         </div>
       )}
@@ -244,12 +253,12 @@ function ListingsPageInner() {
                   <button onClick={() => setSelectedAnimals(selectedAnimals.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
                 </span>
               ))}
-              {selectedBreed && (
-                <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  🐾 {selectedBreed}
-                  <button onClick={() => setSelectedBreed('')} className="hover:opacity-70"><X size={12} /></button>
+              {selectedBreeds.map(b => (
+                <span key={b} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  🐾 {b}
+                  <button onClick={() => setSelectedBreeds(selectedBreeds.filter(x => x !== b))} className="hover:opacity-70"><X size={12} /></button>
                 </span>
-              )}
+              ))}
               {selectedCity && (
                 <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
                   <MapPin size={10} /> {selectedCity}
