@@ -79,7 +79,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
             <Heart size={15} className="text-gray-400 hover:text-red-500 transition-colors" />
           </button>
 
-            {/* Bottom: Name, Breed & Shelter */}
+          {/* Bottom: Name, Breed & Shelter */}
+          <div className="absolute bottom-3 left-4 right-4 z-20 text-white">
             <h3 className="font-bold text-lg mb-0.5 leading-tight">{listing.name}</h3>
             <p className="text-xs text-white/85">
               {listing.breed} • {listing.animalType === 'kopek' ? 'Köpek' : listing.animalType === 'kedi' ? 'Kedi' : 'Kuş'}
