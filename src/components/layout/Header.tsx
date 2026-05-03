@@ -28,17 +28,13 @@ const navLinks = [
   { href: '/magaza', label: 'Mağaza', emoji: '🛍️' },
 ];
 
-// Mock auth state - will be replaced with real auth
-const useAuth = () => ({
-  user: { name: 'Ayşe Yılmaz', email: 'ayse@example.com' },
-  isLoggedIn: true,
-});
-
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  // Mock Auth State
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -88,62 +84,82 @@ export default function Header() {
             </nav>
 
             {/* Right actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              
+              {/* İlan Ver Butonu */}
+              <Link href="/ilan-ver">
+                <Button size="sm" variant="gradient" leftIcon={<Plus size={16} />} className="hidden sm:flex shadow-brand px-4 py-2 text-sm">
+                  İlan Ver
+                </Button>
+              </Link>
 
+              <div className="hidden sm:block w-px h-6 bg-[var(--border)] mx-1"></div>
 
               {/* Cart */}
               <Link
                 href="/sepet"
-                className="relative flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
+                className="relative flex items-center justify-center w-10 h-10 rounded-full text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
               >
-                <ShoppingCart size={18} />
-                {/* Cart badge */}
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">3</span>
+                <ShoppingCart size={20} />
+                <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">3</span>
               </Link>
 
               {isLoggedIn ? (
-                <>
+                <div className="flex items-center gap-2">
                   {/* Notifications */}
                   <Link
                     href="/bildirimler"
-                    className="relative flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
+                    className="relative hidden sm:flex items-center justify-center w-10 h-10 rounded-full text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
                   >
-                    <Bell size={18} />
-                    {/* Notification badge */}
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[var(--danger)] rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+                    <Bell size={20} />
+                    <span className="absolute top-0 right-0 w-4 h-4 bg-[var(--danger)] rounded-full border-2 border-[var(--surface)] text-white text-[9px] font-bold flex items-center justify-center">2</span>
                   </Link>
 
                   {/* Messages */}
                   <Link
                     href="/profil/mesajlar"
-                    className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
+                    className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle size={20} />
                   </Link>
 
-                  {/* Create listing */}
-                  <Link href="/ilan-ver">
-                    <Button size="sm" variant="gradient" leftIcon={<Plus size={16} />} className="hidden sm:flex shadow-brand">
-                      İlan Ver
-                    </Button>
-                  </Link>
-
-                  {/* Profile dropdown */}
-                  <Link href="/profil">
-                    <div className="w-9 h-9 gradient-brand rounded-xl flex items-center justify-center cursor-pointer hover:shadow-brand transition-shadow">
+                  {/* Profile Dropdown */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setProfileOpen(!profileOpen)}
+                      className="w-10 h-10 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] rounded-full flex items-center justify-center cursor-pointer hover:shadow-brand transition-all ring-2 ring-transparent hover:ring-[var(--brand-primary-light)]"
+                    >
                       <User size={18} className="text-white" />
-                    </div>
-                  </Link>
-                </>
+                    </button>
+
+                    {profileOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-[var(--border)] py-2 z-50 animate-fade-in">
+                        <div className="px-4 py-2 border-b border-[var(--border)] mb-1">
+                          <p className="text-sm font-bold text-[var(--foreground)]">Ayşe Yılmaz</p>
+                          <p className="text-xs text-[var(--foreground-muted)]">ayse@example.com</p>
+                        </div>
+                        <Link href="/profil" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--foreground-muted)] hover:bg-gray-50 hover:text-[var(--foreground)] transition-colors">
+                          <User size={16} /> Hesabım
+                        </Link>
+                        <button 
+                          onClick={() => { setIsLoggedIn(false); setProfileOpen(false); }} 
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors mt-1"
+                        >
+                          <LogOut size={16} /> Çıkış Yap
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <>
-                  <Link href="/login" className="hidden sm:block whitespace-nowrap">
-                    <Button variant="ghost" size="sm">Giriş Yap</Button>
-                  </Link>
-                  <Link href="/register" className="whitespace-nowrap">
-                    <Button size="sm" className="shadow-sm">Üye Ol</Button>
-                  </Link>
-                </>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setIsLoggedIn(true)} className="hidden sm:block whitespace-nowrap text-sm font-semibold hover:text-[var(--brand-primary)] px-2 transition-colors">
+                    Giriş Yap
+                  </button>
+                  <button onClick={() => setIsLoggedIn(true)} className="whitespace-nowrap bg-[var(--foreground)] text-[var(--surface)] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[var(--foreground)]/90 transition-colors shadow-sm">
+                    Üye Ol
+                  </button>
+                </div>
               )}
 
               {/* Mobile menu */}
