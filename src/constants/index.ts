@@ -68,12 +68,14 @@ export const LOSS_TIME_OPTIONS = [
 ] as const;
 
 export const AGE_OPTIONS = [
-  { value: '0-6ay', label: '0-6 Ay' },
-  { value: '6ay-1yil', label: '6 Ay - 1 Yıl' },
-  { value: '1-3yil', label: '1-3 Yıl' },
-  { value: '3-7yil', label: '3-7 Yıl' },
-  { value: '7+yil', label: '7+ Yıl' },
   { value: 'bilinmiyor', label: 'Bilinmiyor' },
+  { value: '0-3ay', label: '0 - 3 Aylık' },
+  { value: '3-6ay', label: '3 - 6 Aylık' },
+  { value: '6-12ay', label: '6 - 12 Aylık' },
+  { value: '1', label: '1 Yaş' },
+  { value: '2', label: '2 Yaş' },
+  { value: '3', label: '3 Yaş' },
+  { value: '4+', label: '4+ Yaş' },
 ] as const;
 
 export const HOUSING_OPTIONS = [
@@ -101,6 +103,16 @@ export const CITIES = [
   'Sivas', 'Şırnak', 'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli',
   'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak',
 ];
+
+export const DISTRICTS_BY_CITY: Record<string, string[]> = {
+  'İstanbul': ['Kadıköy', 'Beşiktaş', 'Şişli', 'Üsküdar', 'Maltepe', 'Sarıyer', 'Pendik', 'Ümraniye', 'Ataşehir', 'Bakırköy', 'Fatih', 'Beylikdüzü'],
+  'Ankara': ['Çankaya', 'Keçiören', 'Yenimahalle', 'Mamak', 'Etimesgut', 'Gölbaşı', 'Altındağ', 'Sincan'],
+  'İzmir': ['Karşıyaka', 'Konak', 'Bornova', 'Buca', 'Balçova', 'Çiğli', 'Gaziemir', 'Urla'],
+  'Antalya': ['Muratpaşa', 'Kepez', 'Konyaaltı', 'Alanya', 'Manavgat', 'Kemer', 'Kaş'],
+  'Bursa': ['Nilüfer', 'Osmangazi', 'Yıldırım', 'Mudanya', 'Gemlik', 'İnegöl'],
+  'Adana': ['Seyhan', 'Yüreğir', 'Çukurova', 'Sarıçam'],
+  'Eskişehir': ['Odunpazarı', 'Tepebaşı'],
+};
 
 export const DOG_BREEDS = [
   'Akbaş', 'Alman Çoban Köpeği', 'Beagle', 'Border Collie', 'Boxer', 'Bulldog',

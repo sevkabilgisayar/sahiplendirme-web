@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button';
 import AdBanner from '@/components/ui/AdBanner';
 import {
   CITIES, AGE_OPTIONS, GENDER_OPTIONS, ANIMAL_TYPES, LISTING_TYPES, OWNER_TYPES,
-  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS,
+  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS, DISTRICTS_BY_CITY
 } from '@/constants';
 
 const BREEDS_BY_ANIMAL: Record<string, string[]> = {
@@ -18,7 +18,7 @@ const BREEDS_BY_ANIMAL: Record<string, string[]> = {
   kus: BIRD_BREEDS,
 };
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 12;
 
 export default function ListingsPageWrapper() {
   return (
@@ -48,11 +48,14 @@ function ListingsPageInner() {
   const [selectedAnimals, setSelectedAnimals] = useState<string[]>(
     searchParams.get('tur') ? [searchParams.get('tur')!] : []
   );
-  const [selectedCity, setSelectedCity] = useState(searchParams.get('sehir') || '');
+  const [selectedCities, setSelectedCities] = useState<string[]>(
+    searchParams.get('sehir') ? [searchParams.get('sehir')!] : []
+  );
+  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedOwnerType, setSelectedOwnerType] = useState('');
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
-  const [selectedAge, setSelectedAge] = useState('');
+  const [selectedAges, setSelectedAges] = useState<string[]>([]);
 
   // Available breeds based on selected animal types
   const availableBreeds = useMemo(() => {
@@ -61,6 +64,19 @@ function ListingsPageInner() {
     return [];
   }, [selectedAnimals]);
 
+  // Available districts based on selected cities
+  const availableDistricts = useMemo(() => {
+    let districts: string[] = [];
+    selectedCities.forEach(city => {
+      if (DISTRICTS_BY_CITY[city]) {
+        districts = [...districts, ...DISTRICTS_BY_CITY[city]];
+      } else {
+        districts.push('Merkez'); // Fallback if no districts predefined
+      }
+    });
+    return districts;
+  }, [selectedCities]);
+
   const toggleFilter = (arr: string[], val: string, setter: (v: string[]) => void) => {
     setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
     setPage(1);
@@ -68,23 +84,33 @@ function ListingsPageInner() {
     if (setter === setSelectedAnimals) {
       setSelectedBreeds([]);
     }
+    // İl değişirse ilçeleri temizle
+    if (setter === setSelectedCities) {
+      setSelectedDistricts([]);
+    }
   };
 
   const clearAll = () => {
     setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
-    setSelectedCity(''); setSelectedGender(''); setSelectedOwnerType('');
-    setSelectedBreeds([]); setSelectedAge('');
+    setSelectedCities([]); setSelectedDistricts([]); setSelectedGender(''); setSelectedOwnerType('');
+    setSelectedBreeds([]); setSelectedAges([]);
     setPage(1);
   };
 
-  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCity || selectedGender || selectedOwnerType || selectedBreeds.length || selectedAge;
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerType || selectedBreeds.length || selectedAges.length;
 
   // All listings (duplicated for demo volume)
-  const allListings = [
-    ...mockListings,
-    ...mockListings.map(l => ({ ...l, id: `${l.id}-b`, city: 'Ankara' })),
-    ...mockListings.slice(0, 6).map(l => ({ ...l, id: `${l.id}-c`, city: 'İzmir' })),
-  ];
+  const allListings = useMemo(() => {
+    const attachDistrict = (l: any) => {
+      const cityDistricts = DISTRICTS_BY_CITY[l.city] || ['Merkez'];
+      return { ...l, district: l.district || cityDistricts[Math.floor(Math.random() * cityDistricts.length)] };
+    };
+    return [
+      ...mockListings.map(attachDistrict),
+      ...mockListings.map(l => attachDistrict({ ...l, id: `${l.id}-b`, city: 'Ankara' })),
+      ...mockListings.slice(0, 6).map(l => attachDistrict({ ...l, id: `${l.id}-c`, city: 'İzmir' })),
+    ];
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...allListings];
@@ -94,12 +120,14 @@ function ListingsPageInner() {
       result = result.filter(l =>
         l.name.toLowerCase().includes(q) ||
         l.breed.toLowerCase().includes(q) ||
-        l.city.toLowerCase().includes(q)
+        l.city.toLowerCase().includes(q) ||
+        (l.district && l.district.toLowerCase().includes(q))
       );
     }
     if (selectedTypes.length) result = result.filter(l => selectedTypes.includes(l.type));
     if (selectedAnimals.length) result = result.filter(l => selectedAnimals.includes(l.animalType));
-    if (selectedCity) result = result.filter(l => l.city === selectedCity);
+    if (selectedCities.length) result = result.filter(l => selectedCities.includes(l.city));
+    if (selectedDistricts.length) result = result.filter(l => selectedDistricts.includes(l.district));
     if (selectedGender) result = result.filter(l => l.gender === selectedGender);
     if (selectedOwnerType) result = result.filter(l => l.ownerType === selectedOwnerType);
     if (selectedBreeds.length) result = result.filter(l => selectedBreeds.includes(l.breed));
@@ -109,7 +137,7 @@ function ListingsPageInner() {
     if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
 
     return result;
-  }, [search, selectedTypes, selectedAnimals, selectedCity, selectedGender, selectedOwnerType, selectedBreeds, selectedAge, sort]);
+  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerType, selectedBreeds, selectedAges, sort, allListings]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -215,19 +243,73 @@ function ListingsPageInner() {
         </div>
       </div>
 
-      {/* Şehir */}
-      <div className="mb-2">
-        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Şehir</h3>
-        <div className="relative">
-          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
-          <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setPage(1); }}
-            className="w-full h-10 pl-9 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]">
-            <option value="">Tüm Şehirler</option>
-            {CITIES.map((city) => <option key={city} value={city}>{city}</option>)}
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+      {/* Yaş */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">Yaşı</h3>
+          {selectedAges.length > 0 && (
+            <button onClick={() => setSelectedAges([])} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+              Tümünü Kaldır
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+          {AGE_OPTIONS.map((age) => (
+            <label key={age.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" checked={selectedAges.includes(age.value)}
+                onChange={() => toggleFilter(selectedAges, age.value, setSelectedAges)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors leading-tight py-0.5">{age.label}</span>
+            </label>
+          ))}
         </div>
       </div>
+
+      {/* Şehir */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">İl Seçimi</h3>
+          {selectedCities.length > 0 && (
+            <button onClick={() => { setSelectedCities([]); setSelectedDistricts([]); }} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+              Tümünü Kaldır
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+          {CITIES.map(city => (
+            <label key={city} className="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" checked={selectedCities.includes(city)}
+                onChange={() => toggleFilter(selectedCities, city, setSelectedCities)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors leading-tight py-0.5">{city}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* İlçe */}
+      {selectedCities.length > 0 && availableDistricts.length > 0 && (
+        <div className="mb-2">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">İlçe Seçimi</h3>
+            {selectedDistricts.length > 0 && (
+              <button onClick={() => setSelectedDistricts([])} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+                Tümünü Kaldır
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            {availableDistricts.map(dist => (
+              <label key={dist} className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" checked={selectedDistricts.includes(dist)}
+                  onChange={() => toggleFilter(selectedDistricts, dist, setSelectedDistricts)}
+                  className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+                <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors leading-tight py-0.5">{dist}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -259,12 +341,24 @@ function ListingsPageInner() {
                   <button onClick={() => setSelectedBreeds(selectedBreeds.filter(x => x !== b))} className="hover:opacity-70"><X size={12} /></button>
                 </span>
               ))}
-              {selectedCity && (
-                <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  <MapPin size={10} /> {selectedCity}
-                  <button onClick={() => setSelectedCity('')} className="hover:opacity-70"><X size={12} /></button>
+              {selectedAges.map(a => (
+                <span key={a} className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  ⏳ {AGE_OPTIONS.find(x => x.value === a)?.label}
+                  <button onClick={() => setSelectedAges(selectedAges.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
                 </span>
-              )}
+              ))}
+              {selectedCities.map(c => (
+                <span key={c} className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  <MapPin size={10} /> {c}
+                  <button onClick={() => setSelectedCities(selectedCities.filter(x => x !== c))} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              ))}
+              {selectedDistricts.map(d => (
+                <span key={d} className="flex items-center gap-1 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                  📍 {d}
+                  <button onClick={() => setSelectedDistricts(selectedDistricts.filter(x => x !== d))} className="hover:opacity-70"><X size={12} /></button>
+                </span>
+              ))}
               <button onClick={clearAll} className="text-xs text-red-500 hover:underline font-medium px-2">Tümünü Temizle</button>
             </div>
           )}
@@ -348,7 +442,7 @@ function ListingsPageInner() {
             {/* Listings Grid */}
             {paginated.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
                   {paginated.map((listing) => (
                     <div key={listing.id} className="h-full">
                       <ListingCard listing={listing} />

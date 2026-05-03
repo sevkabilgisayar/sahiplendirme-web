@@ -112,7 +112,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <div className="flex items-center gap-2 text-[11px] text-gray-600 font-medium mb-3 flex-wrap">
             <span>{listing.gender === 'erkek' ? '♂ Erkek' : '♀ Dişi'}</span>
             <span className="text-gray-300">•</span>
-            <span>{listing.age}</span>
+            <span>{listing.age.replace('Yıl', 'Yaşında')}</span>
             {listing.type === 'kayip' && (
               <button
                 onClick={e => {
