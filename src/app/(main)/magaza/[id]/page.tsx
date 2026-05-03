@@ -77,9 +77,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
                 <CreditCard size={14} /> Kredi Kartı
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
-                🚪 Kapıda Ödeme
-              </div>
+
               <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
                 🏦 Havale/EFT
               </div>
