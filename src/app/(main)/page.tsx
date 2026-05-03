@@ -42,7 +42,7 @@ export default function HomePage() {
 
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight">
-              Doğru dostu bul,{' '}
+              Dostunu bul,{' '}
               <span className="text-gradient">sıcak bir yuva</span>{' '}
               ver 🐾
             </h1>
@@ -210,8 +210,8 @@ export default function HomePage() {
               <Button variant="outline" rightIcon={<ArrowRight size={14} />} className="hidden sm:flex text-sm h-9">Tümünü Gör</Button>
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 3).map((listing) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 4).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -239,8 +239,8 @@ export default function HomePage() {
               <p className="text-[var(--foreground-muted)] text-sm">Görenlerin iletişime geçmesi önemle rica olunur</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {featuredListings.filter(l => l.type === 'kayip').slice(0, 3).map((listing) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featuredListings.filter(l => l.type === 'kayip').slice(0, 4).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -268,8 +268,8 @@ export default function HomePage() {
               <p className="text-[var(--foreground-muted)] text-sm">Uyumlu eş arayan dostlarımız</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 3).map((listing) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 4).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>

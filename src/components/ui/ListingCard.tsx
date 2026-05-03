@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MapPin, ScanSearch, Eye, MessageCircle, ArrowRight, Shield, User } from 'lucide-react';
+import { Heart, MapPin, ScanSearch, Eye, MessageCircle, ArrowRight, Shield, User, Building2 } from 'lucide-react';
 import { Listing } from '@/types';
 
 interface ListingCardProps {
@@ -9,7 +9,6 @@ interface ListingCardProps {
 export default function ListingCard({ listing }: ListingCardProps) {
   const isSahibinde = listing.ownerType === 'sahibinde';
   
-  // Design details based on type
   let btnClass = 'bg-[#FF6B00] hover:bg-[#E65A00]';
   let borderClass = 'hover:border-[#FF6B00] border-gray-200';
   let icon = <Eye size={16} />;
@@ -25,17 +24,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
     borderClass = 'hover:border-purple-500 border-gray-200';
     btnText = 'Eşleştir';
   }
-
-  // Determine border color for card (mocking the screenshot where some are orange, green, yellow)
-  // Let's use a dynamic approach or just the type's color. The screenshot shows vibrant borders.
-  // We'll use a default border and colorful on hover to keep it clean.
   
   return (
     <Link href={`/ilan/${listing.id}`} className="group block h-full">
       <div className={`bg-white h-full flex flex-col rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${borderClass} overflow-hidden`}>
         
         {/* Image Area */}
-        <div className="relative aspect-[4/4] w-full overflow-hidden shrink-0 bg-slate-100">
+        <div className="relative aspect-square w-full overflow-hidden shrink-0 bg-slate-100">
           {listing.photos?.[0] ? (
             <img
               src={listing.photos[0]}
@@ -51,12 +46,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-          {/* Top Left Badges */}
+          {/* Top Left: Owner Type Badge */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm ${
               !isSahibinde ? 'bg-emerald-500 text-white' : 'bg-white text-gray-700'
             }`}>
-              {!isSahibinde ? <Shield size={12} /> : <User size={12} />}
+              {!isSahibinde ? <Building2 size={11} /> : <User size={11} />}
               {!isSahibinde ? 'Barınak' : 'Bireysel'}
             </span>
             
@@ -84,46 +79,40 @@ export default function ListingCard({ listing }: ListingCardProps) {
             <Heart size={15} className="text-gray-400 hover:text-red-500 transition-colors" />
           </button>
 
-          {/* Title & Breed inside Image */}
-          <div className="absolute bottom-3 left-4 z-20 text-white pr-4">
+          {/* Bottom: Name, Breed & Shelter */}
+          <div className="absolute bottom-3 left-4 right-4 z-20 text-white">
+            {/* Shelter Name — only for barinakta */}
+            {!isSahibinde && listing.shelterName && (
+              <div className="flex items-center gap-1 mb-1">
+                <Shield size={10} className="text-emerald-400 flex-shrink-0" />
+                <span className="text-[10px] text-emerald-300 font-semibold truncate">{listing.shelterName}</span>
+              </div>
+            )}
             <h3 className="font-bold text-lg mb-0.5 leading-tight">{listing.name}</h3>
-            <p className="text-xs text-white/90">
+            <p className="text-xs text-white/85">
               {listing.breed} • {listing.animalType === 'kopek' ? 'Köpek' : listing.animalType === 'kedi' ? 'Kedi' : 'Kuş'}
             </p>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="p-4 flex flex-col flex-1 bg-white">
-          {/* Row 1: Details and Location */}
-          <div className="flex justify-between items-center text-[11px] text-gray-500 mb-3">
-            <div className="flex items-center gap-1.5">
-              <span>{listing.gender === 'erkek' ? 'Erkek' : 'Dişi'}</span>
-              <span className="text-gray-300">•</span>
-              <span>{listing.age}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPin size={12} />
+        <div className="p-3 flex flex-col flex-1 bg-white">
+          {/* Row 1: İlan No + Details */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-bold text-gray-800 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded font-mono tracking-tight">
+              #{String(listing.id).padStart(5, '0')}
+            </span>
+            <div className="flex items-center gap-1 text-[11px] text-gray-500">
+              <MapPin size={11} />
               <span>{listing.city}</span>
             </div>
           </div>
 
-          {/* Row 2: Health Info */}
-          <div className="flex items-center gap-2 text-[10px] text-gray-600 font-medium mb-4 flex-wrap">
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Aşılı
-            </div>
-            {listing.type !== 'kayip' && (
-               <>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Kısır
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Pasaportlu
-                </div>
-               </>
-            )}
-            {/* Sadece kayıp ilanlarında AI Eşleştir butonu */}
+          {/* Row 2: Age & Gender */}
+          <div className="flex items-center gap-2 text-[11px] text-gray-600 font-medium mb-3 flex-wrap">
+            <span>{listing.gender === 'erkek' ? '♂ Erkek' : '♀ Dişi'}</span>
+            <span className="text-gray-300">•</span>
+            <span>{listing.age}</span>
             {listing.type === 'kayip' && (
               <button
                 onClick={e => {
@@ -131,19 +120,19 @@ export default function ListingCard({ listing }: ListingCardProps) {
                   e.stopPropagation();
                   window.location.href = '/ai-danisman/foto-eslestirme';
                 }}
-                className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors"
+                className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full hover:bg-violet-100 transition-colors ml-auto"
               >
-                <ScanSearch size={9} /> Fotoğrafla eşleştir
+                <ScanSearch size={9} /> Eşleştir
               </button>
             )}
           </div>
 
           {/* Spacer */}
-          <div className="mt-auto"></div>
+          <div className="mt-auto" />
 
           {/* Row 3: Action Buttons */}
           <div className="flex gap-2 items-center">
-            <button className={`flex-1 ${btnClass} text-white text-sm font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors`}>
+            <button className={`flex-1 ${btnClass} text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors`}>
               {icon}
               {btnText}
             </button>
@@ -151,10 +140,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
               className="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-500 transition-colors"
             >
-              <MessageCircle size={18} />
+              <MessageCircle size={16} />
             </button>
             <div className="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-500 transition-colors">
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </div>
           </div>
         </div>

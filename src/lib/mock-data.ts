@@ -1,5 +1,6 @@
 import { Listing } from '@/types';
 
+
 export const mockListings: Listing[] = [
   {
     id: '1', type: 'sahiplendirme', animalType: 'kopek', breed: 'Golden Retriever',
@@ -36,7 +37,7 @@ export const mockListings: Listing[] = [
   {
     id: '4', type: 'sahiplendirme', animalType: 'kedi', breed: 'Karışık/Melez',
     name: 'Pamuk', age: '6 Ay', gender: 'disi', city: 'Bursa',
-    ownerType: 'barinakta', emoji: '🐱', createdAt: '2024-01-12',
+    ownerType: 'barinakta', shelterName: 'Bursa Büyükşehir Barınağı', emoji: '🐱', createdAt: '2024-01-12',
     imageColor: 'from-rose-100 to-pink-200',
     photos: [
       'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&auto=format&fit=crop',
@@ -46,7 +47,7 @@ export const mockListings: Listing[] = [
   {
     id: '5', type: 'sahiplendirme', animalType: 'kopek', breed: 'Labrador',
     name: 'Max', age: '1 Yıl', gender: 'erkek', city: 'Antalya',
-    ownerType: 'barinakta', emoji: '🐶', createdAt: '2024-01-11',
+    ownerType: 'barinakta', shelterName: 'Antalya Hayvan Barınağı', emoji: '🐶', createdAt: '2024-01-11',
     imageColor: 'from-yellow-200 to-amber-300',
     photos: [
       'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&auto=format&fit=crop',
@@ -67,7 +68,7 @@ export const mockListings: Listing[] = [
   {
     id: '7', type: 'sahiplendirme', animalType: 'kedi', breed: 'Persian',
     name: 'Çilek', age: '4 Ay', gender: 'disi', city: 'İstanbul',
-    ownerType: 'barinakta', emoji: '🐱', createdAt: '2024-01-09',
+    ownerType: 'barinakta', shelterName: 'İstanbul Şişli Barınağı', emoji: '🐱', createdAt: '2024-01-09',
     imageColor: 'from-orange-100 to-amber-200',
     photos: [
       'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&auto=format&fit=crop',
@@ -118,11 +119,42 @@ export const mockListings: Listing[] = [
   {
     id: '12', type: 'sahiplendirme', animalType: 'kopek', breed: 'Beagle',
     name: 'Şeker', age: '1 Yıl', gender: 'disi', city: 'Antalya',
-    ownerType: 'barinakta', emoji: '🐶', createdAt: '2024-01-04',
+    ownerType: 'barinakta', shelterName: 'Antalya Büyükşehir Barınağı', emoji: '🐶', createdAt: '2024-01-04',
     imageColor: 'from-amber-100 to-orange-100',
     photos: [
       'https://images.unsplash.com/photo-1537942677486-01bf3c90e7e6?w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1583511655826-05700442f2ef?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Kayıp 4.
+  {
+    id: '13', type: 'kayip', animalType: 'kopek', breed: 'Alman Kurdu',
+    name: 'Rex', age: '4 Yıl', gender: 'erkek', city: 'Ankara',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-03',
+    imageColor: 'from-gray-300 to-slate-400',
+    reward: '3000',
+    photos: [
+      'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Çiftleştirme 4.
+  {
+    id: '14', type: 'ciftlestirme', animalType: 'kedi', breed: 'Maine Coon',
+    name: 'Oreo', age: '3 Yıl', gender: 'erkek', city: 'İzmir',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-02',
+    imageColor: 'from-stone-200 to-gray-300',
+    photos: [
+      'https://images.unsplash.com/photo-1508253578933-20b529302151?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Sahiplendirme 4. (barınaktan)
+  {
+    id: '15', type: 'sahiplendirme', animalType: 'kopek', breed: 'Melez',
+    name: 'Aslan', age: '5 Yıl', gender: 'erkek', city: 'İzmir',
+    ownerType: 'barinakta', shelterName: 'İzmir Konak Barınağı', emoji: '🐶', createdAt: '2024-01-01',
+    imageColor: 'from-amber-200 to-yellow-300',
+    photos: [
+      'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
     ],
   },
 ];

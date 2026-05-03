@@ -9,6 +9,8 @@ const footerLinks = {
       { href: '/ilanlar?kategori=kayip', label: 'Kayıp Hayvanlar' },
       { href: '/ilanlar?kategori=ciftlestirme', label: 'Çiftleştirme İlanları' },
       { href: '/hizmetler', label: 'Hizmetler' },
+      { href: '/magaza', label: 'Mağaza' },
+      { href: '/blog', label: 'Blog' },
     ],
   },
   ai: {
@@ -24,8 +26,10 @@ const footerLinks = {
     title: 'Hakkında',
     links: [
       { href: '/hakkimizda', label: 'Hakkımızda' },
+      { href: '/hakkimizda#iletisim', label: 'İletişim' },
       { href: '/paketler', label: 'Hizmet Paketleri' },
       { href: '/barinaklar', label: 'Barınaklar' },
+      { href: '/blog', label: 'Blog' },
     ],
   },
   legal: {
@@ -35,6 +39,7 @@ const footerLinks = {
       { href: '/gizlilik', label: 'Gizlilik Politikası' },
       { href: '/kullanim-sartlari', label: 'Kullanım Şartları' },
       { href: '/cerez', label: 'Çerez Politikası' },
+      { href: '/iptal-iade', label: 'İptal & İade Koşulları' },
     ],
   },
 };

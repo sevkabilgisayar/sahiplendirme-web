@@ -48,6 +48,7 @@ export interface Listing {
   viewCount?: number;
   applicationCount?: number;
   userId?: string;
+  shelterName?: string;    // Barınaktan sahiplendiriliyorsa barınak adı
 
   // Kayıp ilanı ek alanlar (Madde 6.1)
   reward?: string;
