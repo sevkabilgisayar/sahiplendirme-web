@@ -28,9 +28,9 @@ const duplicateItems = (arr: any[], count: number) => {
   return result.slice(0, count);
 };
 
-const BESTSELLERS = duplicateItems(mockStoreProducts.filter(p => p.isBestseller), 18);
-const FEATURED = duplicateItems(mockStoreProducts.filter(p => p.isFeatured), 18);
-const ON_SALE = duplicateItems(mockStoreProducts.filter(p => p.isOnSale), 18);
+const BESTSELLERS = duplicateItems(mockStoreProducts.filter(p => p.isBestseller), 12);
+const FEATURED = duplicateItems(mockStoreProducts.filter(p => p.isFeatured), 12);
+const ON_SALE = duplicateItems(mockStoreProducts.filter(p => p.isOnSale), 12);
 const ALL_PRODUCTS = duplicateItems(mockStoreProducts, 30);
 const SLIDER_PRODUCTS = mockStoreProducts.slice(0, 5);
 
@@ -180,7 +180,7 @@ export default function MagazaPage() {
         </div>
       </div>
 
-      {/* ── ÇOK SATANLAR (3 Satır) ── */}
+      {/* ── ÇOK SATANLAR (2 Satır) ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <SectionHeader icon={<Flame size={18} className="text-white"/>} title="Çok Satanlar" subtitle="Binlerce kullanıcının tercihi" color="bg-gradient-to-br from-rose-500 to-red-600" />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -216,7 +216,7 @@ export default function MagazaPage() {
         </div>
       </div>
 
-      {/* ── ÖNE ÇIKAN ÜRÜNLER (3 Satır) ── */}
+      {/* ── ÖNE ÇIKAN ÜRÜNLER (2 Satır) ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SectionHeader icon={<TrendingUp size={18} className="text-white"/>} title="Öne Çıkan Ürünler" subtitle="Editörün önerdiği seçimler" color="bg-gradient-to-br from-emerald-500 to-teal-600" />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
