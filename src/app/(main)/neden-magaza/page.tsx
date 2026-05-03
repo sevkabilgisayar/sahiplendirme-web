@@ -24,7 +24,7 @@ export default function NedenMagazaPage() {
             Sahiplendirme.com mağazanız ile ürünlerinizi doğru hedef kitleye satın, marka bilinirliğinizi artırın ve e-ticaret satışlarınızı katlayın.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/magaza-ac" className="bg-white text-indigo-900 font-bold px-8 py-4 rounded-xl hover:bg-indigo-50 transition-colors shadow-xl shadow-indigo-900/20 flex items-center justify-center gap-2">
+            <Link href="/register" className="bg-white text-indigo-900 font-bold px-8 py-4 rounded-xl hover:bg-indigo-50 transition-colors shadow-xl shadow-indigo-900/20 flex items-center justify-center gap-2">
               Hemen Mağaza Aç <ArrowRight size={18} />
             </Link>
             <Link href="/paketler" className="bg-indigo-800 border border-indigo-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">

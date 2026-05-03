@@ -46,7 +46,7 @@ const footerLinks = {
     title: 'Mağazalar',
     links: [
       { href: '/neden-magaza', label: 'Neden Mağaza?' },
-      { href: '/magaza-ac', label: 'Mağaza Açmak İstiyorum' },
+      { href: '/register', label: 'Mağaza Açmak İstiyorum' },
     ],
   },
 };
