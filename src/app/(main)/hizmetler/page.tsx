@@ -96,7 +96,7 @@ export default function HizmetlerPage() {
                 onClick={() => setSelectedCategory(selectedCategory === cat.value ? '' : cat.value)}
                 className={`flex items-center gap-2 py-2.5 px-5 rounded-full border-2 font-semibold text-sm transition-all ${
                   selectedCategory === cat.value
-                    ? 'gradient-brand text-white border-transparent shadow-brand scale-105'
+                    ? cat.activeBg + ' shadow-sm scale-105'
                     : 'border-[var(--border)] bg-white hover:border-[var(--brand-primary-light)]'
                 }`}
               >
@@ -179,7 +179,7 @@ export default function HizmetlerPage() {
                       ))}
                     </div>
                     <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
-                      <span className="text-xs text-[var(--brand-primary)] font-bold uppercase tracking-wider">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${SERVICE_CATEGORIES.find(c => c.value === service.category)?.color || 'text-[var(--brand-primary)]'}`}>
                         {SERVICE_CATEGORIES.find(c => c.value === service.category)?.emoji}{' '}
                         {SERVICE_CATEGORIES.find(c => c.value === service.category)?.label}
                       </span>

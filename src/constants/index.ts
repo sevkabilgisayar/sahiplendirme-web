@@ -48,11 +48,11 @@ export const ACCOUNT_TYPES = [
 ] as const;
 
 export const SERVICE_CATEGORIES = [
-  { value: 'veteriner', label: 'Veteriner', emoji: '🩺' },
-  { value: 'kuafor', label: 'Kuaför', emoji: '✂️' },
-  { value: 'egitmen', label: 'Eğitmen', emoji: '🎓' },
-  { value: 'pet-otel', label: 'Pet Otel', emoji: '🏨' },
-  { value: 'gezdirici', label: 'Gezdirici', emoji: '🦮' },
+  { value: 'veteriner', label: 'Veteriner', emoji: '🩺', color: 'text-blue-700 bg-blue-50 border-blue-200', activeBg: 'bg-blue-500 text-white border-transparent' },
+  { value: 'kuafor', label: 'Kuaför', emoji: '✂️', color: 'text-pink-700 bg-pink-50 border-pink-200', activeBg: 'bg-pink-500 text-white border-transparent' },
+  { value: 'egitmen', label: 'Eğitmen', emoji: '🎓', color: 'text-emerald-700 bg-emerald-50 border-emerald-200', activeBg: 'bg-emerald-500 text-white border-transparent' },
+  { value: 'pet-otel', label: 'Pet Otel', emoji: '🏨', color: 'text-purple-700 bg-purple-50 border-purple-200', activeBg: 'bg-purple-500 text-white border-transparent' },
+  { value: 'gezdirici', label: 'Gezdirici', emoji: '🦮', color: 'text-amber-700 bg-amber-50 border-amber-200', activeBg: 'bg-amber-500 text-white border-transparent' },
 ] as const;
 
 export const LOSS_TIME_OPTIONS = [
