@@ -96,6 +96,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ============ NASIL ÇALIŞIR ============ */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold font-display mb-3">Nasıl Çalışır?</h2>
+            <p className="text-[var(--foreground-muted)] max-w-xl mx-auto">Üç adımda can dostunuzu bulun ya da bir hayvanı sahiplendirmeye başlayın.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 relative">
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-orange-300 to-pink-300 z-0" />
+            {[
+              { step: 1, emoji: '📝', title: 'İlan Oluştur veya Ara', desc: 'Ücretsiz hesap açın. Sahiplendirme, kayıp veya çiftleştirme ilanı oluşturun. Ya da ilanları filtreleyin.', color: 'from-orange-400 to-amber-400' },
+              { step: 2, emoji: '🤖', title: 'AI ile Eşleşin', desc: 'Yapay zekâ danışmanımız sizin yaşam tarzınıza ve ihtiyaçlarınıza göre en uygun ilanları önerir.', color: 'from-pink-400 to-rose-400' },
+              { step: 3, emoji: '🏠', title: 'Yuva Bulun', desc: 'İlan sahibiyle mesajlaşın, başvurun ve can dostunuzu sıcak yuvasına kavuşturun!', color: 'from-purple-400 to-indigo-400' },
+            ].map((item) => (
+              <div key={item.step} className="flex flex-col items-center text-center relative z-10">
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center text-3xl mb-5 shadow-lg`}>
+                  {item.emoji}
+                </div>
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[var(--surface)] border-2 border-[var(--brand-primary)] flex items-center justify-center text-xs font-bold text-[var(--brand-primary)] hidden md:flex">
+                  {item.step}
+                </div>
+                <h3 className="text-xl font-bold font-display mb-3">{item.title}</h3>
+                <p className="text-[var(--foreground-muted)] text-sm leading-relaxed max-w-xs">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Link href="/register">
+              <Button size="lg" variant="gradient" className="shadow-brand" rightIcon={<ArrowRight size={18} />}>
+                Hemen Başla
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ============ STATS ============ */}
       <section className="py-12 bg-[var(--surface)] border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -157,42 +194,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============ NASIL ÇALIŞIR ============ */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display mb-3">Nasıl Çalışır?</h2>
-            <p className="text-[var(--foreground-muted)] max-w-xl mx-auto">Üç adımda can dostunuzu bulun ya da bir hayvanı sahiplendirmeye başlayın.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-orange-300 to-pink-300 z-0" />
-            {[
-              { step: 1, emoji: '📝', title: 'İlan Oluştur veya Ara', desc: 'Ücretsiz hesap açın. Sahiplendirme, kayıp veya çiftleştirme ilanı oluşturun. Ya da ilanları filtreleyin.', color: 'from-orange-400 to-amber-400' },
-              { step: 2, emoji: '🤖', title: 'AI ile Eşleşin', desc: 'Yapay zekâ danışmanımız sizin yaşam tarzınıza ve ihtiyaçlarınıza göre en uygun ilanları önerir.', color: 'from-pink-400 to-rose-400' },
-              { step: 3, emoji: '🏠', title: 'Yuva Bulun', desc: 'İlan sahibiyle mesajlaşın, başvurun ve can dostunuzu sıcak yuvasına kavuşturun!', color: 'from-purple-400 to-indigo-400' },
-            ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center relative z-10">
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center text-3xl mb-5 shadow-lg`}>
-                  {item.emoji}
-                </div>
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[var(--surface)] border-2 border-[var(--brand-primary)] flex items-center justify-center text-xs font-bold text-[var(--brand-primary)] hidden md:flex">
-                  {item.step}
-                </div>
-                <h3 className="text-xl font-bold font-display mb-3">{item.title}</h3>
-                <p className="text-[var(--foreground-muted)] text-sm leading-relaxed max-w-xs">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Link href="/register">
-              <Button size="lg" variant="gradient" className="shadow-brand" rightIcon={<ArrowRight size={18} />}>
-                Hemen Başla
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+
 
       {/* ============ ÖNE ÇIKAN SAHİPLENDİRME ============ */}
       <section className="py-16">

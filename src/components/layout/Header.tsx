@@ -61,16 +61,17 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 gradient-brand rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-brand transition-shadow">
-                <span className="text-lg">🐾</span>
-              </div>
-              <div>
-                <span className="text-xl font-bold font-display text-gradient">
-                  sahiplendirme
+            <Link href="/" className="flex items-center gap-1.5 group">
+              <div className="flex items-baseline tracking-tight">
+                <span className="text-2xl sm:text-[28px] font-extrabold font-display text-[#155294]">
+                  sahiplendirm
                 </span>
-                <span className="text-xl font-bold font-display text-[var(--foreground)]">
-                  .com
+                <span className="text-2xl sm:text-[28px] font-extrabold font-display text-[#f38118] relative inline-flex justify-center -ml-[1px]">
+                  e
+                  {/* Paw toes */}
+                  <div className="absolute -top-[5px] -left-[1px] w-[5px] h-[7px] bg-[#f38118] rounded-[45%] rotate-[-30deg]" />
+                  <div className="absolute -top-[8px] left-[50%] -translate-x-1/2 w-[6px] h-[8px] bg-[#f38118] rounded-[45%]" />
+                  <div className="absolute -top-[4px] -right-[1px] w-[5px] h-[7px] bg-[#f38118] rounded-[45%] rotate-[30deg]" />
                 </span>
               </div>
             </Link>

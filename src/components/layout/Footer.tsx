@@ -52,13 +52,18 @@ export default function Footer() {
         <div className="py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 gradient-brand rounded-xl flex items-center justify-center shadow-sm">
-                <span className="text-lg">🐾</span>
-              </div>
-              <div>
-                <span className="text-lg font-bold font-display text-gradient">sahiplendirme</span>
-                <span className="text-lg font-bold font-display text-[var(--foreground)]">.com</span>
+            <Link href="/" className="flex items-center gap-1.5 mb-4 group">
+              <div className="flex items-baseline tracking-tight">
+                <span className="text-2xl font-extrabold font-display text-[#155294]">
+                  sahiplendirm
+                </span>
+                <span className="text-2xl font-extrabold font-display text-[#f38118] relative inline-flex justify-center -ml-[1px]">
+                  e
+                  {/* Paw toes */}
+                  <div className="absolute -top-[4px] -left-[1px] w-[4px] h-[6px] bg-[#f38118] rounded-[45%] rotate-[-30deg]" />
+                  <div className="absolute -top-[6px] left-[50%] -translate-x-1/2 w-[5px] h-[7px] bg-[#f38118] rounded-[45%]" />
+                  <div className="absolute -top-[3px] -right-[1px] w-[4px] h-[6px] bg-[#f38118] rounded-[45%] rotate-[30deg]" />
+                </span>
               </div>
             </Link>
             <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">
