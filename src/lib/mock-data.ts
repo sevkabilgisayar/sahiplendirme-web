@@ -160,9 +160,123 @@ export const mockListings: Listing[] = [
       'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Ek Kayıp İlanları (5-8)
+  {
+    id: '16', type: 'kayip', animalType: 'kedi', breed: 'Siyam',
+    name: 'Gölge', age: '1 Yıl', gender: 'disi', city: 'Antalya',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-01',
+    imageColor: 'from-blue-200 to-indigo-300',
+    reward: '1500',
+    photos: [
+      'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '17', type: 'kayip', animalType: 'kopek', breed: 'Pug',
+    name: 'Pofuduk', age: '3 Yıl', gender: 'erkek', city: 'İstanbul',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-02',
+    imageColor: 'from-orange-100 to-amber-200',
+    reward: '2000',
+    photos: [
       'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&auto=format&fit=crop',
     ],
   },
+  {
+    id: '18', type: 'kayip', animalType: 'kus', breed: 'Sultan Papağanı',
+    name: 'Limon', age: '6 Ay', gender: 'erkek', city: 'İzmir',
+    ownerType: 'sahibinde', emoji: '🦜', createdAt: '2024-01-03',
+    imageColor: 'from-yellow-200 to-amber-300',
+    reward: '500',
+    photos: [
+      'https://images.unsplash.com/photo-1544923408-75c5cef46f14?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '19', type: 'kayip', animalType: 'kedi', breed: 'British Shorthair',
+    name: 'Duman', age: '2 Yıl', gender: 'erkek', city: 'Ankara',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-04',
+    imageColor: 'from-gray-200 to-slate-300',
+    reward: '1000',
+    photos: [
+      'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Ek Çiftleştirme İlanları (4-8)
+  {
+    id: '20', type: 'ciftlestirme', animalType: 'kopek', breed: 'Husky',
+    name: 'Buz', age: '3 Yıl', gender: 'erkek', city: 'Erzurum',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-01',
+    imageColor: 'from-sky-200 to-blue-300',
+    photos: [
+      'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '21', type: 'ciftlestirme', animalType: 'kedi', breed: 'Scottish Fold',
+    name: 'Mırmır', age: '2 Yıl', gender: 'disi', city: 'İstanbul',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-02',
+    imageColor: 'from-rose-100 to-pink-200',
+    photos: [
+      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '22', type: 'ciftlestirme', animalType: 'kopek', breed: 'Pomeranian',
+    name: 'Teddy', age: '1.5 Yıl', gender: 'erkek', city: 'Antalya',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-03',
+    imageColor: 'from-amber-200 to-orange-300',
+    photos: [
+      'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '23', type: 'ciftlestirme', animalType: 'kedi', breed: 'Sfenks',
+    name: 'Firavun', age: '4 Yıl', gender: 'erkek', city: 'İzmir',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-04',
+    imageColor: 'from-stone-200 to-gray-300',
+    photos: [
+      'https://images.unsplash.com/photo-1513245543132-31f507417b26?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '24', type: 'ciftlestirme', animalType: 'kopek', breed: 'Cocker Spaniel',
+    name: 'Fındık', age: '2.5 Yıl', gender: 'disi', city: 'Bursa',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-05',
+    imageColor: 'from-yellow-200 to-amber-200',
+    photos: [
+      'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
+    ],
+  },
+  // Ek Sahiplendirme İlanları (Eksikleri tamamlamak için)
+  {
+    id: '25', type: 'sahiplendirme', animalType: 'kedi', breed: 'Melez',
+    name: 'Gece', age: '1 Yıl', gender: 'erkek', city: 'Ankara',
+    ownerType: 'barinakta', shelterName: 'Çankaya Barınağı', emoji: '🐱', createdAt: '2024-01-06',
+    imageColor: 'from-gray-300 to-slate-400',
+    photos: [
+      'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '26', type: 'sahiplendirme', animalType: 'kopek', breed: 'Terrier',
+    name: 'Zıpzıp', age: '6 Ay', gender: 'erkek', city: 'İstanbul',
+    ownerType: 'sahibinde', emoji: '🐶', createdAt: '2024-01-07',
+    imageColor: 'from-emerald-100 to-green-200',
+    photos: [
+      'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&auto=format&fit=crop',
+    ],
+  },
+  {
+    id: '27', type: 'sahiplendirme', animalType: 'kedi', breed: 'Tekir',
+    name: 'Zeytin', age: '2 Ay', gender: 'disi', city: 'İzmir',
+    ownerType: 'sahibinde', emoji: '🐱', createdAt: '2024-01-08',
+    imageColor: 'from-orange-100 to-amber-100',
+    photos: [
+      'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=800&auto=format&fit=crop',
+    ],
+  }
 ];
 
 export const mockStoreProducts = [

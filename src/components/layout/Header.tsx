@@ -128,16 +128,10 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  {/* Always show İlan Ver for guests too */}
-                  <Link href="/ilan-ver" className="hidden md:block">
-                    <Button size="sm" variant="outline" leftIcon={<Plus size={14} />}>
-                      İlan Ver
-                    </Button>
-                  </Link>
-                  <Link href="/login" className="hidden sm:block">
+                  <Link href="/login" className="hidden sm:block whitespace-nowrap">
                     <Button variant="ghost" size="sm">Giriş Yap</Button>
                   </Link>
-                  <Link href="/register">
+                  <Link href="/register" className="whitespace-nowrap">
                     <Button size="sm" className="shadow-sm">Üye Ol</Button>
                   </Link>
                 </>
@@ -182,9 +176,11 @@ export default function Header() {
 
               <div className="border-t border-[var(--border)] my-2" />
 
-              <Link href="/ilan-ver">
-                <Button fullWidth variant="gradient" leftIcon={<Plus size={16} />}>İlan Ver</Button>
-              </Link>
+              {isLoggedIn && (
+                <Link href="/ilan-ver">
+                  <Button fullWidth variant="gradient" leftIcon={<Plus size={16} />}>İlan Ver</Button>
+                </Link>
+              )}
 
               {!isLoggedIn && (
                 <div className="flex gap-2">

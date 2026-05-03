@@ -46,7 +46,7 @@ export default function HomePage() {
 
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight">
-              Doğru dostu bul,{' '}
+              Doğru dostunu bul,{' '}
               <span className="text-gradient">sıcak bir yuva</span>{' '}
               ver 🐾
             </h1>
@@ -450,7 +450,7 @@ export default function HomePage() {
               <div className="font-bold text-base mb-1">🐾 Uzman mı olmak istiyorsunuz?</div>
               <p className="text-violet-100 text-sm">Platforma katılın, binlerce hayvan severle buluşun.</p>
             </div>
-            <Link href="/hizmetler/kayit">
+            <Link href="/register">
               <div className="flex items-center gap-2 bg-white text-violet-700 font-bold text-sm px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all whitespace-nowrap">
                 Uzman Olarak Kayıt Ol <ArrowRight size={14} />
               </div>
