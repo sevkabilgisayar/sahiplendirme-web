@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { ArrowRight, Search, Heart, MapPin, Sparkles, Shield, Zap, Star, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -19,6 +20,8 @@ const stats = [
 ];
 
 export default function HomePage() {
+  const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null);
+
   return (
     <div className="overflow-x-hidden">
 
@@ -223,7 +226,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 4).map((listing) => (
+            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -252,7 +255,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'kayip').slice(0, 4).map((listing) => (
+            {featuredListings.filter(l => l.type === 'kayip').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -281,7 +284,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 4).map((listing) => (
+            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -312,7 +315,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {mockStoreProducts.slice(0, 4).map((p) => (
+            {mockStoreProducts.slice(0, 8).map((p) => (
               <Link key={p.id} href={`/magaza/${p.id}`} className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group cursor-pointer block">
                 <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
                   <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
@@ -359,21 +362,22 @@ export default function HomePage() {
               { emoji: '🏨', label: 'Pet Otel', cat: 'pet-otel', bg: 'bg-purple-50 text-purple-700 border-purple-200' },
               { emoji: '🦨', label: 'Gezdirici', cat: 'gezdirici', bg: 'bg-amber-50 text-amber-700 border-amber-200' },
             ].map(c => (
-              <Link
+              <button
                 key={c.cat}
-                href={`/hizmetler?kategori=${c.cat}`}
-                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${c.bg} hover:shadow-sm hover:scale-105 transition-all`}
+                onClick={() => setActiveServiceCat(activeServiceCat === c.cat ? null : c.cat)}
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${c.bg} hover:shadow-sm hover:scale-105 transition-all ${activeServiceCat === c.cat ? 'ring-2 ring-violet-500 shadow-md scale-105' : ''}`}
               >
                 {c.emoji} {c.label}
-              </Link>
+              </button>
             ))}
           </div>
 
-          {/* Service cards — featured first, 2-row layout, up to 6 */}
+          {/* Service cards — filtered, 2-row layout, up to 8 */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {mockServices.filter(s => s.featured).slice(0, 2).concat(
-              mockServices.filter(s => !s.featured).slice(0, 2)
-            ).slice(0, 4).map(service => (
+            {(activeServiceCat 
+              ? mockServices.filter(s => s.category === activeServiceCat)
+              : mockServices.filter(s => s.featured).concat(mockServices.filter(s => !s.featured))
+            ).slice(0, 8).map(service => (
               <Link key={service.id} href={`/hizmetler/${service.id}`} className="group">
                 <div className={`bg-white rounded-2xl border-2 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col ${
                   service.featured ? 'border-violet-200 hover:border-violet-400' : 'border-[var(--border)] hover:border-violet-300'

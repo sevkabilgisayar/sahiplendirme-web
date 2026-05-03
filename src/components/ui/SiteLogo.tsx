@@ -12,12 +12,11 @@ interface SiteLogoProps {
  * Kod karmaşasından ve CSS hizalama hatalarından tamamen kurtarır.
  */
 export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
-  // Logonun genişlik boyutlarını prop'a göre ayarlıyoruz
-  // Slogan (Yaşamak güzeldir...) olduğu için biraz daha geniş tutmak iyi olur
-  const width = size === 'sm' ? 150 : size === 'lg' ? 260 : 200;
+  // Logonun boyutlarını büyüttük (slogan okunur olsun diye)
+  const width = size === 'sm' ? 200 : size === 'lg' ? 400 : 320;
   
-  // Aspect ratio'nun korunması için yaklaşık height (Görsel otomatik oranlanır)
-  const height = size === 'sm' ? 50 : size === 'lg' ? 86 : 66;
+  // Aspect ratio'ya uygun yeni yükseklikler
+  const height = size === 'sm' ? 65 : size === 'lg' ? 130 : 100;
 
   return (
     <div className="flex items-center">
@@ -27,7 +26,7 @@ export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
         width={width} 
         height={height}
         className="object-contain"
-        priority // Logonun gecikmeden (lazy load olmadan) anında yüklenmesi için
+        priority // Logonun gecikmeden yüklenmesi için
       />
     </div>
   );
