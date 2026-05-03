@@ -226,6 +226,15 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ============ AD BANNER 1 ============ */}
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
+        <AdBanner 
+          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
+          linkUrl="#" 
+          altText="Reklam 1" 
+        />
+      </div>
+
       {/* ============ ÖNE ÇIKAN KAYIP ============ */}
       <section className="py-16 bg-red-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -254,6 +263,15 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ============ AD BANNER 2 ============ */}
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
+        <AdBanner 
+          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
+          linkUrl="#" 
+          altText="Reklam 2" 
+        />
+      </div>
 
       {/* ============ ÖNE ÇIKAN ÇİFTLEŞTİRME ============ */}
       <section className="py-16">
