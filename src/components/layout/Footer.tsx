@@ -10,7 +10,6 @@ const footerLinks = {
       { href: '/ilanlar?kategori=ciftlestirme', label: 'Çiftleştirme İlanları' },
       { href: '/hizmetler', label: 'Hizmetler' },
       { href: '/magaza', label: 'Mağaza' },
-      { href: '/blog', label: 'Blog' },
     ],
   },
   ai: {
