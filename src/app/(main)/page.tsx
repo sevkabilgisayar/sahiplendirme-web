@@ -197,6 +197,15 @@ export default function HomePage() {
 
 
 
+      {/* ============ AD BANNER - ORTA ============ */}
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
+        <AdBanner 
+          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
+          linkUrl="#" 
+          altText="Pet İhtiyaçları" 
+        />
+      </div>
+
       {/* ============ ÖNE ÇIKAN SAHİPLENDİRME ============ */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -284,14 +293,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============ AD BANNER ============ */}
-      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto my-8">
-        <AdBanner 
-          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
-          linkUrl="#" 
-          altText="Pet İhtiyaçları" 
-        />
-      </div>
 
       {/* ============ MAĞAZA VİTRİN ============ */}
       <section className="py-16 bg-emerald-50/50">
@@ -369,10 +370,10 @@ export default function HomePage() {
           </div>
 
           {/* Service cards — featured first, 2-row layout, up to 6 */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {mockServices.filter(s => s.featured).slice(0, 3).concat(
-              mockServices.filter(s => !s.featured).slice(0, 3)
-            ).slice(0, 6).map(service => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {mockServices.filter(s => s.featured).slice(0, 2).concat(
+              mockServices.filter(s => !s.featured).slice(0, 2)
+            ).slice(0, 4).map(service => (
               <Link key={service.id} href={`/hizmetler/${service.id}`} className="group">
                 <div className={`bg-white rounded-2xl border-2 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col ${
                   service.featured ? 'border-violet-200 hover:border-violet-400' : 'border-[var(--border)] hover:border-violet-300'
