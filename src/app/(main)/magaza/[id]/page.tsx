@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
 import Link from 'next/link';
-import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -24,6 +24,8 @@ const mockInstallments = [
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState('description');
+  const [selectedVariant, setSelectedVariant] = useState('3 KG');
+  const [selectedImage, setSelectedImage] = useState(0);
 
   const product = mockStoreProducts.find((p) => p.id === parseInt(params.id)) || mockStoreProducts[0];
   const avgRating = mockReviews.reduce((a, r) => a + r.rating, 0) / mockReviews.length;
@@ -32,6 +34,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   // Benzer Ürünler (aynı markadan veya rastgele 4 ürün)
   const relatedProducts = mockStoreProducts.filter(p => p.id !== product.id).slice(0, 4);
+
+  const mockImages = [
+    product.photo,
+    'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop',
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--background)] py-10">
@@ -48,14 +57,45 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
         {/* Main Grid */}
         <div className="grid lg:grid-cols-2 gap-12 mb-16">
-          {/* Image */}
-          <div className="bg-[var(--surface-secondary)] rounded-3xl p-8 flex items-center justify-center border border-[var(--border)] overflow-hidden relative">
-            {product.tag && (
-              <span className="absolute top-4 left-4 bg-rose-500 text-white font-bold px-3 py-1 rounded-xl text-sm z-10">
-                {product.tag}
-              </span>
-            )}
-            <img src={product.photo} alt={product.name} className="w-full h-auto object-cover rounded-2xl shadow-sm mix-blend-multiply max-h-[500px]" />
+          {/* Image Gallery */}
+          <div className="flex flex-col gap-4">
+            {/* Ana Görsel */}
+            <div className="bg-[var(--surface-secondary)] rounded-3xl p-8 flex items-center justify-center border border-[var(--border)] overflow-hidden relative group h-[400px] sm:h-[500px]">
+              {product.tag && (
+                <span className="absolute top-4 left-4 bg-rose-500 text-white font-bold px-3 py-1 rounded-xl text-sm z-10 shadow-sm">
+                  {product.tag}
+                </span>
+              )}
+              <img src={mockImages[selectedImage]} alt={product.name} className="w-full h-full object-contain rounded-2xl mix-blend-multiply transition-opacity duration-300" />
+              
+              <button 
+                onClick={() => setSelectedImage(prev => (prev === 0 ? mockImages.length - 1 : prev - 1))}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-[var(--border)] rounded-full flex items-center justify-center text-[var(--foreground)] opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-gray-50"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={() => setSelectedImage(prev => (prev === mockImages.length - 1 ? 0 : prev + 1))}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-[var(--border)] rounded-full flex items-center justify-center text-[var(--foreground)] opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-gray-50"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Küçük Resimler (Thumbnails) */}
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar py-1">
+              {mockImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(idx)}
+                  className={`w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-2xl border-2 overflow-hidden bg-[var(--surface-secondary)] transition-all p-2 ${
+                    selectedImage === idx ? 'border-[var(--brand-primary)]' : 'border-transparent hover:border-[var(--border)]'
+                  }`}
+                >
+                  <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-contain mix-blend-multiply opacity-80 hover:opacity-100 transition-opacity" />
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Details */}
@@ -73,9 +113,32 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               </div>
             </div>
 
-            <div className="flex items-baseline gap-4 mb-4">
+            <div className="flex items-baseline gap-4 mb-6">
               <span className="text-4xl font-bold text-emerald-600">₺{product.price}</span>
               {product.oldPrice && <span className="text-xl line-through text-[var(--foreground-muted)]">₺{product.oldPrice}</span>}
+            </div>
+
+            {/* ── VARYASYON SEÇİMİ ── */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-[var(--foreground)]">Ağırlık / Boyut Seçin</span>
+                <span className="text-xs text-[var(--foreground-muted)] underline cursor-pointer">Beden Tablosu</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['1.5 KG', '3 KG', '10 KG', '15 KG'].map(v => (
+                  <button 
+                    key={v}
+                    onClick={() => setSelectedVariant(v)}
+                    className={`px-4 py-2.5 rounded-xl border-2 font-bold transition-all ${
+                      selectedVariant === v 
+                        ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] bg-emerald-50' 
+                        : 'border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Kargo ve Stok Bilgisi */}
