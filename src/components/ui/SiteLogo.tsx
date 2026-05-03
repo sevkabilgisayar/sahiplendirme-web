@@ -4,97 +4,87 @@ interface SiteLogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * Logo: "sahiplendirme" — mavi + turuncu "e" pati şekliyle
+ * Pati parmakları "e"nin x-yüksekliği içinde konumlandırılır,
+ * header overflow sorununu önlemek için SVG kullanılır.
+ */
 export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
-  const fontSizes: Record<string, number> = { sm: 18, md: 24, lg: 30 };
-  const fs = fontSizes[size];
+  const fs = size === 'sm' ? 18 : size === 'lg' ? 32 : 24;
 
-  // Paw toe dimensions scale with font size
-  const toeW = Math.round(fs * 0.18);
-  const toeH = Math.round(fs * 0.25);
-  const toeGap = Math.round(fs * 0.05);
-  const toeOffset = Math.round(fs * 0.28); // how far above the letter
+  // Parmak boyutları font boyutuyla orantılı
+  const toeRx = fs * 0.085;   // yatay yarıçap
+  const toeRy = fs * 0.13;    // dikey yarıçap
+  const gap   = fs * 0.07;    // parmaklararası boşluk
+
+  // "e" harfi SVG içinde çizilir — x-yüksekliği yaklaşık %68
+  const eH     = fs;           // SVG yüksekliği = font boyutu
+  const eBaseY = eH;           // baseline SVG'nin altında
+
+  // 3 parmak merkezi — "e"nin üst kenarına oturur
+  const xMid   = toeRx * 2 + gap; // "e"nin genişliğinin yaklaşık yarısı
+  const toeTop = toeRy + 1;       // SVG üstünden biraz içeride
+
+  const toe1 = { cx: xMid - toeRx - gap, cy: toeTop + 1, rot: -18 };
+  const toe2 = { cx: xMid,               cy: toeTop - 1, rot: 0   };
+  const toe3 = { cx: xMid + toeRx + gap, cy: toeTop + 1, rot: 18  };
+
+  const svgW = fs * 0.64; // "e" harfinin genişliği
 
   return (
     <span
       style={{
         display: 'inline-flex',
         alignItems: 'baseline',
-        lineHeight: 1,
         fontWeight: 900,
+        lineHeight: 1,
         letterSpacing: '-0.01em',
-        overflow: 'visible',
       }}
     >
-      {/* sahiplendirm — dark blue */}
-      <span style={{ color: '#155294', fontSize: fs }}>sahiplendirm</span>
-
-      {/* e — orange, with paw toes above */}
-      <span
-        style={{
-          position: 'relative',
-          display: 'inline-block',
-          overflow: 'visible',
-          color: '#f38118',
-          fontSize: fs,
-          // extra top padding so toes don't get clipped by parent flex
-          paddingTop: toeOffset + toeH + 2,
-          marginTop: -(toeOffset + toeH + 2),
-        }}
-      >
-        {/* Three paw toes — left, center, right */}
-        <span
-          aria-hidden
-          style={{
-            position: 'absolute',
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: toeGap,
-            marginBottom: 2,
-            overflow: 'visible',
-          }}
-        >
-          {/* Left toe — shorter, angled left */}
-          <span
-            style={{
-              display: 'block',
-              width: toeW,
-              height: toeH - 1,
-              background: '#f38118',
-              borderRadius: '50%',
-              transform: 'rotate(-18deg)',
-              marginBottom: 1,
-            }}
-          />
-          {/* Center toe — tallest */}
-          <span
-            style={{
-              display: 'block',
-              width: toeW + 1,
-              height: toeH + 2,
-              background: '#f38118',
-              borderRadius: '50%',
-            }}
-          />
-          {/* Right toe — shorter, angled right */}
-          <span
-            style={{
-              display: 'block',
-              width: toeW,
-              height: toeH - 1,
-              background: '#f38118',
-              borderRadius: '50%',
-              transform: 'rotate(18deg)',
-              marginBottom: 1,
-            }}
-          />
-        </span>
-
-        {/* The letter itself */}
-        e
+      {/* Mavi kısım */}
+      <span style={{ color: '#155294', fontSize: fs, fontFamily: 'inherit' }}>
+        sahiplendirm
       </span>
+
+      {/* Turuncu "e" + pati parmakları — SVG ile kesin konum */}
+      <svg
+        width={svgW + 4}
+        height={eH + toeRy * 2 + 2}
+        viewBox={`0 0 ${svgW + 4} ${eH + toeRy * 2 + 2}`}
+        style={{
+          display: 'inline-block',
+          verticalAlign: 'text-bottom',
+          overflow: 'visible',
+          marginLeft: -1,
+          marginBottom: 0,
+        }}
+        aria-hidden
+      >
+        {/* Pati parmakları */}
+        {[toe1, toe2, toe3].map((t, i) => (
+          <ellipse
+            key={i}
+            cx={t.cx}
+            cy={t.cy + toeRy + 1}
+            rx={toeRx}
+            ry={toeRy}
+            fill="#f38118"
+            transform={`rotate(${t.rot}, ${t.cx}, ${t.cy + toeRy + 1})`}
+          />
+        ))}
+
+        {/* "e" harfi */}
+        <text
+          x={0}
+          y={eH + toeRy * 2 + 1}
+          fill="#f38118"
+          fontFamily="inherit"
+          fontWeight={900}
+          fontSize={fs}
+        >
+          e
+        </text>
+      </svg>
     </span>
   );
 }
