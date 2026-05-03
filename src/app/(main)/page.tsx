@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Search, Heart, MapPin, Sparkles, Shield, Zap, Star } from 'lucide-react';
+import { ArrowRight, Search, Heart, MapPin, Sparkles, Shield, Zap, Star, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import ListingCard from '@/components/ui/ListingCard';
 import AdBanner from '@/components/ui/AdBanner';
 import { mockListings as featuredListings, mockStoreProducts } from '@/lib/mock-data';
+import { mockServices } from '@/app/(main)/hizmetler/page';
 
 const stats = [
   { value: '12.000+', label: 'Mutlu Hayvan', emoji: '🐾' },
@@ -327,6 +328,128 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ HİZMETLER VİTRİNİ ============ */}
+      <section className="py-16 bg-gradient-to-br from-violet-50/60 via-white to-fuchsia-50/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-8 h-8 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center text-lg">⭐</span>
+                <h2 className="text-2xl font-bold font-display text-[var(--foreground)]">Hizmetler Vitrini</h2>
+                <span className="bg-violet-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ONAYLANMIŞ</span>
+              </div>
+              <p className="text-[var(--foreground-muted)] text-sm">Veteriner, groomer, eğitmen, pet otel ve gezdirici — onaylı profesyoneller</p>
+            </div>
+            <Link href="/hizmetler">
+              <Button className="bg-violet-600 hover:bg-violet-700 text-white" rightIcon={<ArrowRight size={14}/>}>Tüm Hizmetler</Button>
+            </Link>
+          </div>
+
+          {/* Category quick filter pills */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {[
+              { emoji: '🩺', label: 'Veteriner', cat: 'veteriner', bg: 'bg-blue-50 text-blue-700 border-blue-200' },
+              { emoji: '✂️', label: 'Pet Kuaför', cat: 'kuafor', bg: 'bg-pink-50 text-pink-700 border-pink-200' },
+              { emoji: '🎓', label: 'Eğitmen', cat: 'egitmen', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+              { emoji: '🏨', label: 'Pet Otel', cat: 'pet-otel', bg: 'bg-purple-50 text-purple-700 border-purple-200' },
+              { emoji: '🦨', label: 'Gezdirici', cat: 'gezdirici', bg: 'bg-amber-50 text-amber-700 border-amber-200' },
+            ].map(c => (
+              <Link
+                key={c.cat}
+                href={`/hizmetler?kategori=${c.cat}`}
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${c.bg} hover:shadow-sm hover:scale-105 transition-all`}
+              >
+                {c.emoji} {c.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Service cards — featured first, 2-row layout, up to 6 */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {mockServices.filter(s => s.featured).slice(0, 3).concat(
+              mockServices.filter(s => !s.featured).slice(0, 3)
+            ).slice(0, 6).map(service => (
+              <Link key={service.id} href={`/hizmetler/${service.id}`} className="group">
+                <div className={`bg-white rounded-2xl border-2 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col ${
+                  service.featured ? 'border-violet-200 hover:border-violet-400' : 'border-[var(--border)] hover:border-violet-300'
+                }`}>
+                  {/* Top row */}
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-sm`}>
+                      {service.emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <span className="font-bold text-sm leading-tight line-clamp-1">{service.name}</span>
+                        {service.verified && <CheckCircle size={13} className="text-blue-500 flex-shrink-0" />}
+                        {service.featured && (
+                          <span className="text-[9px] font-bold text-violet-600 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded-full">⭐ Öne Çıkan</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-[var(--foreground-muted)] mb-1.5">
+                        <MapPin size={10} className="flex-shrink-0" />
+                        {service.district}, {service.city}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5 text-orange-500 font-bold text-[11px]">
+                          <Star size={10} className="fill-orange-500" />
+                          {service.rating}
+                        </div>
+                        <span className="text-[10px] text-[var(--foreground-muted)]">({service.reviews} yorum)</span>
+                        <span className="text-[11px] text-emerald-600 font-bold ml-auto">{service.price}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About */}
+                  <p className="text-xs text-[var(--foreground-muted)] leading-relaxed mb-3 line-clamp-2">{service.about}</p>
+
+                  {/* Services list */}
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {service.services.slice(0, 3).map(sv => (
+                      <span key={sv} className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[var(--surface-secondary)] text-[var(--foreground-muted)] px-2 py-1 rounded-full border border-[var(--border)]">
+                        <span className="w-1 h-1 rounded-full bg-violet-400 inline-block" />
+                        {sv}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {service.tags.slice(0, 3).map(tag => (
+                      <span key={tag} className="text-[10px] font-medium text-violet-600 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">{tag}</span>
+                    ))}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-auto pt-3 border-t border-[var(--border)] flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-[10px] text-[var(--foreground-muted)]">
+                      <span>📞 {service.phone}</span>
+                    </div>
+                    <span className="text-xs text-violet-600 group-hover:text-violet-700 font-semibold flex items-center gap-0.5 transition-colors">
+                      Profili Gör <ArrowRight size={11} />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Bottom CTA strip */}
+          <div className="mt-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-white">
+              <div className="font-bold text-base mb-1">🐾 Uzman mı olmak istiyorsunuz?</div>
+              <p className="text-violet-100 text-sm">Platforma katılın, binlerce hayvan severle buluşun.</p>
+            </div>
+            <Link href="/hizmetler/kayit">
+              <div className="flex items-center gap-2 bg-white text-violet-700 font-bold text-sm px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all whitespace-nowrap">
+                Uzman Olarak Kayıt Ol <ArrowRight size={14} />
+              </div>
+            </Link>
           </div>
         </div>
       </section>
