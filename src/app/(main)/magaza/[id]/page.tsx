@@ -508,7 +508,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               </div>
             </div>
           )}
-        </div> {/* card wrapper */}
+        </div> {/* Tab Content End */}
+      </div> {/* Card Wrapper End */}
 
         {/* ============ BENZER ÜRÜNLER ============ */}
         <div className="mt-16 pt-10 border-t border-[var(--border)]">

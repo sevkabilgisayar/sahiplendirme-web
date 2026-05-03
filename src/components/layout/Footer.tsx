@@ -61,7 +61,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2">
             <Link href="/" className="inline-flex mb-4" style={{ overflow: 'visible' }}>
-              <SiteLogo size="md" />
+              <SiteLogo size="lg" />
             </Link>
             <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">
               Sahiplendirme, kayıp hayvan ve çiftleştirme ilanları için yapay zekâ destekli platform.
