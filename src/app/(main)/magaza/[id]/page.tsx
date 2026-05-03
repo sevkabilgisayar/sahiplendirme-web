@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
+import Link from 'next/link';
 import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/ui/ProductCard';
