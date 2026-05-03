@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { mockStoreProducts } from '@/lib/mock-data';
 import Link from 'next/link';
-import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle } from 'lucide-react';
+import { ChevronRight, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -63,14 +63,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <div className="text-sm text-emerald-600 font-bold mb-2 uppercase tracking-wide">{product.brand}</div>
             <h1 className="text-3xl sm:text-4xl font-bold font-display text-[var(--foreground)] mb-4">{product.name}</h1>
             
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center gap-0.5">
-                {[1,2,3,4,5].map(i => (
-                  <Star key={i} size={16} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
-                ))}
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-sm text-[var(--foreground-muted)]">Satıcı:</span>
+              <Link href="/satici/pati-dunyasi" className="text-sm font-bold text-[var(--brand-primary)] hover:underline">
+                Pati Dünyası
+              </Link>
+              <div className="flex items-center justify-center bg-green-500 text-white min-w-[28px] h-5 rounded text-[11px] font-bold ml-1 shadow-sm">
+                9.8
               </div>
-              <span className="text-sm font-bold text-yellow-600">{avgRating.toFixed(1)}</span>
-              <span className="text-sm text-[var(--foreground-muted)] underline cursor-pointer" onClick={() => setActiveTab('reviews')}>{mockReviews.length} Değerlendirme</span>
             </div>
 
             <div className="flex items-baseline gap-4 mb-4">
@@ -78,21 +78,46 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {product.oldPrice && <span className="text-xl line-through text-[var(--foreground-muted)]">₺{product.oldPrice}</span>}
             </div>
 
-            {/* Ödeme Seçenekleri */}
+            {/* Kargo ve Stok Bilgisi */}
             <div className="flex items-center gap-3 mb-6 flex-wrap">
-              <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
-                <CreditCard size={14} /> Kredi Kartı
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
+                <Truck size={14} /> Bugün Kargoda
               </div>
 
-              <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
-                🏦 Havale/EFT
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
+                <span>🔥</span> Son 3 Ürün
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button size="lg" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20" rightIcon={<ShoppingBag size={18} />}>
                 Sepete Ekle
               </Button>
+            </div>
+
+            {/* ── SATICI BİLGİSİ ── */}
+            <div className="flex items-center gap-4 mb-10 p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-secondary)]/50">
+              <Link href="/satici/pati-dunyasi" className="w-12 h-12 bg-white border border-[var(--border)] rounded-full flex items-center justify-center font-bold text-lg text-[var(--brand-primary)] shadow-sm hover:scale-105 transition-transform">
+                PD
+              </Link>
+              <div className="flex-1">
+                <div className="text-xs text-[var(--foreground-muted)] mb-0.5">Satıcı:</div>
+                <Link href="/satici/pati-dunyasi" className="font-bold text-[var(--foreground)] hover:text-[var(--brand-primary)] flex items-center gap-1.5 transition-colors">
+                  Pati Dünyası
+                  <span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                    <CheckCircle size={10} /> Onaylı
+                  </span>
+                </Link>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] text-[var(--foreground-muted)] mb-1 uppercase tracking-wide font-medium">Mağaza Puanı</div>
+                <div className="inline-flex items-center justify-center bg-green-500 text-white min-w-[36px] h-7 rounded-lg text-sm font-bold shadow-sm mb-2">
+                  9.8
+                </div>
+              </div>
+              <button onClick={() => setActiveTab('qa')} className="hidden sm:flex items-center gap-2 px-4 py-2.5 border border-[var(--border)] bg-white rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm ml-2">
+                <MessageSquare size={16} className="text-blue-500" /> Satıcıya Sor
+              </button>
             </div>
 
             {/* Kargo & İade ikonları */}
@@ -144,6 +169,16 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             }`}
           >
             Değerlendirmeler ({mockReviews.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('qa')}
+            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === 'qa'
+                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            Soru & Cevap (2)
           </button>
           <button
             onClick={() => setActiveTab('return-policy')}
@@ -301,6 +336,43 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                       </div>
                     </div>
                     <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'qa' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
+                <div>
+                  <h3 className="text-lg font-bold text-[var(--foreground)]">Satıcıya Sorunuz mu Var?</h3>
+                  <p className="text-sm text-[var(--foreground-muted)] mt-1">Pati Dünyası mağazasına ürünle ilgili aklınıza takılanları sorabilirsiniz.</p>
+                </div>
+                <Button leftIcon={<MessageSquare size={16} />}>Soru Sor</Button>
+              </div>
+
+              {/* Soru Listesi */}
+              <div className="space-y-4">
+                {[
+                  { id: 1, q: "Hangi kargo ile gönderim sağlıyorsunuz?", a: "Merhaba, MNG ve Yurtiçi kargo ile çalışmaktayız. İlginiz için teşekkür ederiz.", date: "12 Ocak 2024" },
+                  { id: 2, q: "Son kullanma tarihi nedir?", a: "Merhabalar, güncel stoklarımızın SKT'si 08/2025'tir. Gönül rahatlığıyla tercih edebilirsiniz.", date: "5 Ocak 2024" },
+                ].map(qa => (
+                  <div key={qa.id} className="p-6 bg-white border border-[var(--border)] rounded-2xl shadow-sm">
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 text-lg">S</div>
+                      <div className="flex-1">
+                        <div className="text-xs text-[var(--foreground-muted)] mb-1">{qa.date}</div>
+                        <div className="font-medium text-[var(--foreground)] mb-5">{qa.q}</div>
+                        
+                        <div className="bg-gray-50 p-4 rounded-xl border border-[var(--border)] relative before:absolute before:-top-2 before:left-6 before:w-4 before:h-4 before:bg-gray-50 before:border-l before:border-t before:border-[var(--border)] before:rotate-45">
+                          <div className="font-bold text-sm text-[var(--brand-primary)] mb-1 flex items-center gap-1.5">
+                            Pati Dünyası <span className="bg-emerald-100 text-emerald-700 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">Satıcı</span>
+                          </div>
+                          <div className="text-sm text-[var(--foreground-muted)]">{qa.a}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
