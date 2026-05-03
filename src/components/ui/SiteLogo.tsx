@@ -5,86 +5,49 @@ interface SiteLogoProps {
 }
 
 /**
- * Logo: "sahiplendirme" — mavi + turuncu "e" pati şekliyle
- * Pati parmakları "e"nin x-yüksekliği içinde konumlandırılır,
- * header overflow sorununu önlemek için SVG kullanılır.
+ * SiteLogo - "Farklı Metod"
+ * "sahiplendirm" kelimesi normal yazılır.
+ * "e" harfi bir pati yastığı (pad) gibi davranır,
+ * Üstüne gerçek organik 4 adet pati parmağı (toes) SVG olarak eklenir.
+ * Bu sayede "e" harfi komple bir pati figürüne dönüşür.
  */
 export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
-  const fs = size === 'sm' ? 18 : size === 'lg' ? 32 : 24;
-
-  // Parmak boyutları font boyutuyla orantılı
-  const toeRx = fs * 0.085;   // yatay yarıçap
-  const toeRy = fs * 0.13;    // dikey yarıçap
-  const gap   = fs * 0.07;    // parmaklararası boşluk
-
-  // "e" harfi SVG içinde çizilir — x-yüksekliği yaklaşık %68
-  const eH     = fs;           // SVG yüksekliği = font boyutu
-  const eBaseY = eH;           // baseline SVG'nin altında
-
-  // 3 parmak merkezi — "e"nin üst kenarına oturur
-  const xMid   = toeRx * 2 + gap; // "e"nin genişliğinin yaklaşık yarısı
-  const toeTop = toeRy + 1;       // SVG üstünden biraz içeride
-
-  const toe1 = { cx: xMid - toeRx - gap, cy: toeTop + 1, rot: -18 };
-  const toe2 = { cx: xMid,               cy: toeTop - 1, rot: 0   };
-  const toe3 = { cx: xMid + toeRx + gap, cy: toeTop + 1, rot: 18  };
-
-  const svgW = fs * 0.64; // "e" harfinin genişliği
+  const isSm = size === 'sm';
+  const isLg = size === 'lg';
+  
+  // Metin boyutları
+  const fsText = isSm ? 'text-[20px]' : isLg ? 'text-[36px]' : 'text-[28px]';
+  // Parmak SVG genişliği - e harfinin genişliğine uygun olacak şekilde
+  const toesWidth = isSm ? 16 : isLg ? 30 : 22;
+  const toesHeight = toesWidth * 0.55; // Orantılı yükseklik
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'baseline',
-        fontWeight: 900,
-        lineHeight: 1,
-        letterSpacing: '-0.01em',
-      }}
-    >
-      {/* Mavi kısım */}
-      <span style={{ color: '#155294', fontSize: fs, fontFamily: 'inherit' }}>
-        sahiplendirm
-      </span>
+    <div className={`flex items-end font-display font-extrabold tracking-tight ${fsText}`}>
+      {/* Mavi Kısım */}
+      <span className="text-[#155294] leading-none">sahiplendirm</span>
 
-      {/* Turuncu "e" + pati parmakları — SVG ile kesin konum */}
-      <svg
-        width={svgW + 4}
-        height={eH + toeRy * 2 + 2}
-        viewBox={`0 0 ${svgW + 4} ${eH + toeRy * 2 + 2}`}
-        style={{
-          display: 'inline-block',
-          verticalAlign: 'text-bottom',
-          overflow: 'visible',
-          marginLeft: -1,
-          marginBottom: 0,
-        }}
-        aria-hidden
-      >
-        {/* Pati parmakları */}
-        {[toe1, toe2, toe3].map((t, i) => (
-          <ellipse
-            key={i}
-            cx={t.cx}
-            cy={t.cy + toeRy + 1}
-            rx={toeRx}
-            ry={toeRy}
-            fill="#f38118"
-            transform={`rotate(${t.rot}, ${t.cx}, ${t.cy + toeRy + 1})`}
-          />
-        ))}
-
-        {/* "e" harfi */}
-        <text
-          x={0}
-          y={eH + toeRy * 2 + 1}
-          fill="#f38118"
-          fontFamily="inherit"
-          fontWeight={900}
-          fontSize={fs}
+      {/* Turuncu Pati "e" */}
+      <div className="flex flex-col items-center justify-end leading-none ml-[1px]">
+        {/* 4 Organik Pati Parmağı (Toes) */}
+        <svg 
+          width={toesWidth} 
+          height={toesHeight} 
+          viewBox="0 0 24 16" 
+          fill="currentColor" 
+          className="text-[#f38118] z-10"
+          style={{ marginBottom: '-8%' }} // Parmakları "e" harfine yaklaştırır
+          aria-hidden="true"
         >
-          e
-        </text>
-      </svg>
-    </span>
+          {/* Gerçek pati parmak formları (organik damla şekli) */}
+          <path d="M11 6c0-2.2-1.3-4-3-4S5 3.8 5 6s1.3 4 3 4 3-1.8 3-4Z" />
+          <path d="M19 6c0-2.2-1.3-4-3-4s-3 1.8-3 4 1.3 4 3 4 3-1.8 3-4Z" />
+          <path d="M7 14c0-2.2-1.3-4-3-4S1 11.8 1 14s1.3 4 3 4 3-1.8 3-4Z" />
+          <path d="M23 14c0-2.2-1.3-4-3-4s-3 1.8-3 4 1.3 4 3 4 3-1.8 3-4Z" />
+        </svg>
+        
+        {/* e harfi (Pati Yastığı rolünde) */}
+        <span className="text-[#f38118] leading-[0.8]">e</span>
+      </div>
+    </div>
   );
 }
