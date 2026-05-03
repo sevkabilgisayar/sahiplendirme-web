@@ -52,7 +52,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               !isSahibinde ? 'bg-emerald-500 text-white' : 'bg-white text-gray-700'
             }`}>
               {!isSahibinde ? <Building2 size={11} /> : <User size={11} />}
-              {!isSahibinde ? 'Barınak' : 'Bireysel'}
+              {!isSahibinde ? (listing.shelterName || 'Barınak') : 'Bireysel'}
             </span>
             
             {listing.type === 'kayip' && (
@@ -79,15 +79,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             <Heart size={15} className="text-gray-400 hover:text-red-500 transition-colors" />
           </button>
 
-          {/* Bottom: Name, Breed & Shelter */}
-          <div className="absolute bottom-3 left-4 right-4 z-20 text-white">
-            {/* Shelter Name — only for barinakta */}
-            {!isSahibinde && listing.shelterName && (
-              <div className="flex items-center gap-1 mb-1">
-                <Shield size={10} className="text-emerald-400 flex-shrink-0" />
-                <span className="text-[10px] text-emerald-300 font-semibold truncate">{listing.shelterName}</span>
-              </div>
-            )}
+            {/* Bottom: Name, Breed & Shelter */}
             <h3 className="font-bold text-lg mb-0.5 leading-tight">{listing.name}</h3>
             <p className="text-xs text-white/85">
               {listing.breed} • {listing.animalType === 'kopek' ? 'Köpek' : listing.animalType === 'kedi' ? 'Kedi' : 'Kuş'}
@@ -99,7 +91,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <div className="p-3 flex flex-col flex-1 bg-white">
           {/* Row 1: İlan No + Details */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold text-gray-800 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded font-mono tracking-tight">
+            <span className="text-sm font-black text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20 px-2 py-0.5 rounded-md font-mono tracking-tight shadow-sm">
               #{String(listing.id).padStart(5, '0')}
             </span>
             <div className="flex items-center gap-1 text-[11px] text-gray-500">

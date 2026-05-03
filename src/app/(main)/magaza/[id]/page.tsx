@@ -105,126 +105,147 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
 
         {/* ============ ÜRÜN AÇIKLAMASI ============ */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold font-display mb-4 pb-3 border-b border-[var(--border)]">Ürün Açıklaması</h2>
-          <div className="prose prose-sm max-w-none text-[var(--foreground-muted)] leading-relaxed space-y-3">
-            <p>
-              <strong className="text-[var(--foreground)]">{product.name}</strong>, evcil hayvanınızın ihtiyaçlarını karşılamak için özenle tasarlanmıştır. 
-              Premium malzemeler kullanılarak üretilen bu ürün, uzun ömürlü kullanım için dayanıklı yapısı ile öne çıkmaktadır.
-            </p>
-            <p>
-              Veteriner kontrolünden geçmiş ve uluslararası kalite standartlarını karşılamış bu ürün, hem köpekler hem de kediler için idealdir. 
-              Can dostunuzun sağlığını ve mutluluğunu ön planda tutan <strong className="text-[var(--foreground)]">{product.brand}</strong> markasının güvencesiyle sunulmaktadır.
-            </p>
-            <ul className="list-disc list-inside space-y-1 mt-4">
-              <li>%100 doğal ve güvenli içerik</li>
-              <li>Veteriner onaylı formül</li>
-              <li>Kolay kullanım ve temizlik</li>
-              <li>Çevre dostu ambalaj</li>
-              <li>Türkiye'de dağıtım garantisi</li>
-            </ul>
-          </div>
+        <section className="mb-6">
+          <details open className="border border-[var(--border)] rounded-2xl overflow-hidden group">
+            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
+              <span className="font-bold text-[var(--foreground)] text-lg">Ürün Açıklaması</span>
+              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="px-6 py-5 prose prose-sm max-w-none text-[var(--foreground-muted)] leading-relaxed space-y-3">
+              <p>
+                <strong className="text-[var(--foreground)]">{product.name}</strong>, evcil hayvanınızın ihtiyaçlarını karşılamak için özenle tasarlanmıştır. 
+                Premium malzemeler kullanılarak üretilen bu ürün, uzun ömürlü kullanım için dayanıklı yapısı ile öne çıkmaktadır.
+              </p>
+              <p>
+                Veteriner kontrolünden geçmiş ve uluslararası kalite standartlarını karşılamış bu ürün, hem köpekler hem de kediler için idealdir. 
+                Can dostunuzun sağlığını ve mutluluğunu ön planda tutan <strong className="text-[var(--foreground)]">{product.brand}</strong> markasının güvencesiyle sunulmaktadır.
+              </p>
+              <ul className="list-disc list-inside space-y-1 mt-4">
+                <li>%100 doğal ve güvenli içerik</li>
+                <li>Veteriner onaylı formül</li>
+                <li>Kolay kullanım ve temizlik</li>
+                <li>Çevre dostu ambalaj</li>
+                <li>Türkiye'de dağıtım garantisi</li>
+              </ul>
+            </div>
+          </details>
         </section>
 
         {/* ============ TAKSİT SEÇENEKLERİ ============ */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold font-display mb-4 pb-3 border-b border-[var(--border)]">
-            <CreditCard size={20} className="inline mr-2 text-blue-500" />
-            Kredi Kartı Taksit Seçenekleri
-          </h2>
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[var(--surface-secondary)]">
-                  <th className="text-left px-4 py-3 font-semibold text-[var(--foreground)]">Banka</th>
-                  <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">3 Taksit</th>
-                  <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">6 Taksit</th>
-                  <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">9 Taksit</th>
-                  <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">12 Taksit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockInstallments.map((bank, i) => (
-                  <tr key={bank.bank} className={i % 2 === 0 ? 'bg-white' : 'bg-[var(--surface-secondary)]/50'}>
-                    <td className="px-4 py-3 font-medium flex items-center gap-2">
-                      <span>{bank.logo}</span> {bank.bank}
-                    </td>
-                    {[3, 6, 9, 12].map(n => (
-                      <td key={n} className="px-4 py-3 text-center text-emerald-700 font-semibold">
-                        ₺{installmentPrice(n)}
-                      </td>
+        <section className="mb-6">
+          <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
+            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
+              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
+                <CreditCard size={20} className="text-blue-500" />
+                Kredi Kartı Taksit Seçenekleri
+              </span>
+              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="px-6 py-5">
+              <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[var(--surface-secondary)]">
+                      <th className="text-left px-4 py-3 font-semibold text-[var(--foreground)]">Banka</th>
+                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">3 Taksit</th>
+                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">6 Taksit</th>
+                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">9 Taksit</th>
+                      <th className="text-center px-4 py-3 font-semibold text-[var(--foreground)]">12 Taksit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockInstallments.map((bank, i) => (
+                      <tr key={bank.bank} className={i % 2 === 0 ? 'bg-white' : 'bg-[var(--surface-secondary)]/50'}>
+                        <td className="px-4 py-3 font-medium flex items-center gap-2">
+                          <span>{bank.logo}</span> {bank.bank}
+                        </td>
+                        {[3, 6, 9, 12].map(n => (
+                          <td key={n} className="px-4 py-3 text-center text-emerald-700 font-semibold">
+                            ₺{installmentPrice(n)}
+                          </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-[var(--foreground-muted)] mt-2">* Fiyatlar aylık taksit tutarlarını göstermektedir. Faizsiz taksit bankaya göre değişebilir.</p>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-[var(--foreground-muted)] mt-2">* Fiyatlar aylık taksit tutarlarını göstermektedir. Faizsiz taksit bankaya göre değişebilir.</p>
+            </div>
+          </details>
         </section>
 
         {/* ============ DEĞERLENDİRMELER ============ */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold font-display mb-4 pb-3 border-b border-[var(--border)]">Değerlendirmeler</h2>
-          
-          {/* Özet */}
-          <div className="flex items-center gap-6 mb-8 p-5 bg-[var(--surface-secondary)] rounded-2xl">
-            <div className="text-center">
-              <div className="text-5xl font-bold text-yellow-500">{avgRating.toFixed(1)}</div>
-              <div className="flex items-center gap-0.5 justify-center mt-1">
-                {[1,2,3,4,5].map(i => (
-                  <Star key={i} size={14} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
-                ))}
-              </div>
-              <div className="text-xs text-[var(--foreground-muted)] mt-1">{mockReviews.length} yorum</div>
-            </div>
-            <div className="flex-1 space-y-1.5">
-              {[5,4,3,2,1].map(star => {
-                const count = mockReviews.filter(r => r.rating === star).length;
-                const pct = (count / mockReviews.length) * 100;
-                return (
-                  <div key={star} className="flex items-center gap-2 text-xs">
-                    <span className="w-3 text-right">{star}</span>
-                    <Star size={11} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
-                    </div>
-                    <span className="w-4 text-[var(--foreground-muted)]">{count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Yorum listesi */}
-          <div className="space-y-4">
-            {mockReviews.map(review => (
-              <div key={review.id} className="p-5 bg-white border border-[var(--border)] rounded-2xl">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-sm">{review.avatar}</div>
-                    <div>
-                      <div className="font-semibold text-sm">{review.name}</div>
-                      <div className="text-xs text-[var(--foreground-muted)]">{review.date}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-0.5">
+        <section className="mb-6">
+          <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
+            <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
+              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
+                <Star size={20} className="text-yellow-400 fill-yellow-400" />
+                Değerlendirmeler ({mockReviews.length})
+              </span>
+              <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="px-6 py-5">
+              {/* Özet */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-5 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
+                <div className="text-center sm:w-32">
+                  <div className="text-5xl font-bold text-yellow-500">{avgRating.toFixed(1)}</div>
+                  <div className="flex items-center gap-0.5 justify-center mt-1">
                     {[1,2,3,4,5].map(i => (
-                      <Star key={i} size={13} className={i <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                      <Star key={i} size={14} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                     ))}
                   </div>
+                  <div className="text-xs text-[var(--foreground-muted)] mt-1">{mockReviews.length} yorum</div>
                 </div>
-                <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">{review.text}</p>
+                <div className="flex-1 w-full space-y-1.5">
+                  {[5,4,3,2,1].map(star => {
+                    const count = mockReviews.filter(r => r.rating === star).length;
+                    const pct = (count / mockReviews.length) * 100;
+                    return (
+                      <div key={star} className="flex items-center gap-2 text-xs">
+                        <span className="w-3 text-right">{star}</span>
+                        <Star size={11} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="w-4 text-[var(--foreground-muted)]">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ))}
-          </div>
+
+              {/* Yorum listesi */}
+              <div className="space-y-4">
+                {mockReviews.map(review => (
+                  <div key={review.id} className="p-5 bg-white border border-[var(--border)] rounded-2xl">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-sm">{review.avatar}</div>
+                        <div>
+                          <div className="font-semibold text-sm">{review.name}</div>
+                          <div className="text-xs text-[var(--foreground-muted)]">{review.date}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        {[1,2,3,4,5].map(i => (
+                          <Star key={i} size={13} className={i <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </details>
         </section>
 
         {/* ============ İPTAL & İADE KOŞULLARI ============ */}
         <section className="mb-12">
           <details className="border border-[var(--border)] rounded-2xl overflow-hidden group">
             <summary className="flex items-center justify-between px-6 py-4 cursor-pointer bg-[var(--surface-secondary)] hover:bg-gray-100 transition-colors list-none">
-              <span className="font-bold text-[var(--foreground)] flex items-center gap-2">
-                <RefreshCw size={18} className="text-orange-500" />
+              <span className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
+                <RefreshCw size={20} className="text-orange-500" />
                 İptal & İade Koşulları
               </span>
               <ChevronDown size={18} className="text-[var(--foreground-muted)] group-open:rotate-180 transition-transform" />
