@@ -5,49 +5,61 @@ interface SiteLogoProps {
 }
 
 /**
- * SiteLogo - "Farklı Metod"
- * "sahiplendirm" kelimesi normal yazılır.
- * "e" harfi bir pati yastığı (pad) gibi davranır,
- * Üstüne gerçek organik 4 adet pati parmağı (toes) SVG olarak eklenir.
- * Bu sayede "e" harfi komple bir pati figürüne dönüşür.
+ * SiteLogo - Mükemmel SVG Kaynaşması
+ * Font kaymalarını ve kopuk durmayı engellemek için "e" harfi ve 3 pati parmağı 
+ * TEK BİR SVG kutusunun (viewBox) içinde piksel hassasiyetiyle birleştirildi.
  */
 export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
   const isSm = size === 'sm';
   const isLg = size === 'lg';
   
-  // Metin boyutları
+  // Ana metin boyutu
   const fsText = isSm ? 'text-[20px]' : isLg ? 'text-[36px]' : 'text-[28px]';
-  // Parmak SVG genişliği - e harfinin genişliğine uygun olacak şekilde
-  const toesWidth = isSm ? 16 : isLg ? 30 : 22;
-  const toesHeight = toesWidth * 0.55; // Orantılı yükseklik
+  
+  // SVG'nin kapsayacağı alan boyutu (e harfinin kaplayacağı fiziksel alan)
+  const svgWidth = isSm ? 22 : isLg ? 40 : 30;
+  const svgHeight = isSm ? 28 : isLg ? 52 : 38;
 
   return (
-    <div className={`flex items-end font-display font-extrabold tracking-tight ${fsText}`}>
+    <div className={`flex items-baseline font-display font-extrabold tracking-tight ${fsText}`}>
       {/* Mavi Kısım */}
-      <span className="text-[#155294] leading-none">sahiplendirm</span>
+      <span className="text-[#155294]">sahiplendirm</span>
 
-      {/* Turuncu Pati "e" */}
-      <div className="flex flex-col items-center justify-end leading-none ml-[1px]">
-        {/* 4 Organik Pati Parmağı (Toes) */}
-        <svg 
-          width={toesWidth} 
-          height={toesHeight} 
-          viewBox="0 0 24 16" 
-          fill="currentColor" 
-          className="text-[#f38118] z-10"
-          style={{ marginBottom: '-8%' }} // Parmakları "e" harfine yaklaştırır
-          aria-hidden="true"
-        >
-          {/* Gerçek pati parmak formları (organik damla şekli) */}
-          <path d="M11 6c0-2.2-1.3-4-3-4S5 3.8 5 6s1.3 4 3 4 3-1.8 3-4Z" />
-          <path d="M19 6c0-2.2-1.3-4-3-4s-3 1.8-3 4 1.3 4 3 4 3-1.8 3-4Z" />
-          <path d="M7 14c0-2.2-1.3-4-3-4S1 11.8 1 14s1.3 4 3 4 3-1.8 3-4Z" />
-          <path d="M23 14c0-2.2-1.3-4-3-4s-3 1.8-3 4 1.3 4 3 4 3-1.8 3-4Z" />
-        </svg>
+      {/* 
+        Turuncu Kısım: e harfi + 3 Parmak (Tamamen tek SVG içinde)
+        Bu sayede aralarında asla boşluk oluşmaz, havada uçuşmazlar.
+      */}
+      <svg 
+        width={svgWidth} 
+        height={svgHeight} 
+        viewBox="0 0 100 135" 
+        className="text-[#f38118]"
+        // Yazı ile aynı alt çizgiye (baseline) oturması için ince ayar
+        style={{ transform: 'translateY(14%)', marginLeft: '0.5px' }} 
+        aria-hidden="true"
+      >
+        {/* Sol Parmak - Sola Eğik */}
+        <ellipse cx="26" cy="45" rx="12" ry="18" transform="rotate(-25 26 45)" fill="currentColor" />
         
-        {/* e harfi (Pati Yastığı rolünde) */}
-        <span className="text-[#f38118] leading-[0.8]">e</span>
-      </div>
+        {/* Orta Parmak - Daha uzun ve dik */}
+        <ellipse cx="50" cy="28" rx="14" ry="21" fill="currentColor" />
+        
+        {/* Sağ Parmak - Sağa Eğik */}
+        <ellipse cx="74" cy="45" rx="12" ry="18" transform="rotate(25 74 45)" fill="currentColor" />
+        
+        {/* e harfinin kendisi - Parmakların tam altına yapışık */}
+        <text 
+          x="50" 
+          y="125" 
+          fontSize="115" 
+          fontWeight="900" 
+          fontFamily="inherit" 
+          fill="currentColor" 
+          textAnchor="middle"
+        >
+          e
+        </text>
+      </svg>
     </div>
   );
 }
