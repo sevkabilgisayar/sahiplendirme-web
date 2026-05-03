@@ -88,10 +88,7 @@ export default function Header() {
 
             {/* Right actions */}
             <div className="flex items-center gap-2">
-              {/* Search */}
-              <button className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] hover:text-[var(--foreground)] transition-colors">
-                <Search size={18} />
-              </button>
+
 
               {/* Cart */}
               <Link
