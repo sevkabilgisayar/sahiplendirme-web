@@ -300,6 +300,25 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <h4 className="font-bold text-[var(--foreground)] mb-2">Kullanım Talimatı:</h4>
                 <p>Paketi açtıktan sonra serin ve kuru bir yerde muhafaza ediniz. Ürün direkt güneş ışığına maruz bırakılmamalıdır. Günlük önerilen kullanım miktarını aşmayınız.</p>
               </div>
+
+              {/* ── DİĞER ÜRÜN BİLGİLERİ ── */}
+              <div className="not-prose mt-6">
+                <div className="inline-block bg-[var(--brand-primary)] text-white text-sm font-bold px-3 py-1 rounded-md mb-0">
+                  Diğer
+                </div>
+                <div className="border border-[var(--border)] rounded-b-xl rounded-tr-xl overflow-hidden">
+                  {[
+                    { label: 'Garanti Süresi (Ay)', value: '24' },
+                    { label: 'Yurt Dışı Satış', value: 'Yok' },
+                    { label: 'Stok Kodu', value: 'HBCV0000476LA0' },
+                  ].map((row, i) => (
+                    <div key={i} className={`flex items-center justify-between px-4 py-3 text-sm ${i % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-b border-[var(--border)] last:border-b-0`}>
+                      <span className="text-[var(--foreground-muted)]">{row.label}</span>
+                      <span className="font-medium text-[var(--foreground)] text-right">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
