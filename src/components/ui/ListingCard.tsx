@@ -29,7 +29,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               <img
                 src={listing.photos[0]}
                 alt={listing.name}
-                className="relative z-10 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-lg"
+                className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </>
           ) : (
@@ -38,7 +38,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             </span>
           )}
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${typeConf.color}`}>
               {typeConf.label}
             </span>
@@ -50,7 +50,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
           {/* Reward badge */}
           {listing.reward && (
-            <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">
+            <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm z-20">
               🏅 ₺{listing.reward} Ödül
             </div>
           )}
@@ -60,13 +60,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
               e.preventDefault();
               e.stopPropagation();
             }}
-            className="absolute bottom-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-sm z-10"
+            className="absolute bottom-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-sm z-20"
           >
             <Heart size={14} className="text-[var(--foreground-muted)]" />
           </button>
           {/* AI Eşleştirme Badge — sadece kayıp ilanlarda */}
           {listing.type === 'kayip' && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-violet-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-violet-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm z-20">
               <ScanSearch size={11} /> AI Eşleştirme
             </div>
           )}
