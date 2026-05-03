@@ -363,9 +363,14 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                 </div>
                 <div className="mb-6">
                   {listing.reward ? (
-                    <div>
-                      <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">KAYIP ÖDÜLÜ</div>
-                      <div className="text-4xl font-bold font-display text-[var(--foreground)]">₺{listing.reward}</div>
+                    <div className="flex flex-col gap-4">
+                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color} w-fit`}>
+                        <span className="text-lg font-bold">{listingTypeBadge.label}</span>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">KAYIP ÖDÜLÜ</div>
+                        <div className="text-4xl font-bold font-display text-[var(--foreground)]">₺{listing.reward}</div>
+                      </div>
                     </div>
                   ) : isCiftlestirme ? (
                     <div>
