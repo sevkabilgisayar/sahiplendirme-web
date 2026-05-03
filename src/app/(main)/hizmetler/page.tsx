@@ -214,8 +214,9 @@ export default function HizmetlerPage() {
             Veteriner, groomer, eğitmen, pet otel veya gezdirici olarak platforma katılın. Üyelik planlarımızı inceleyin, binlerce hayvan severin karşısına çıkın.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/paketler"><Button variant="gradient" size="lg" rightIcon={<ArrowRight size={16} />}>Üyelik Planlarını İncele</Button></Link>
-            <Link href="/register"><Button variant="outline" size="lg">Ücretsiz Üye Ol</Button></Link>
+            <Link href="/register">
+              <Button variant="gradient" size="lg" rightIcon={<ArrowRight size={16} />}>Hemen Üye Ol</Button>
+            </Link>
           </div>
           <div className="flex items-center justify-center gap-6 text-sm text-[var(--foreground-muted)] mt-6">
             <div className="flex items-center gap-1.5"><Shield size={14} className="text-emerald-500" /> Güvenli Ödeme</div>
