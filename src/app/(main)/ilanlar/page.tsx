@@ -18,7 +18,7 @@ const BREEDS_BY_ANIMAL: Record<string, string[]> = {
   kus: BIRD_BREEDS,
 };
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 16;
 
 export default function ListingsPageWrapper() {
   return (
