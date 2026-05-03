@@ -215,10 +215,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
 
         {/* ============ TABS ============ */}
-        <div className="border-b border-[var(--border)] mb-8 flex overflow-x-auto hide-scrollbar gap-8">
+        <div className="bg-white border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden mb-16">
+          {/* Tab Bar */}
+          <div className="border-b border-[var(--border)] flex overflow-x-auto hide-scrollbar gap-1 px-6 bg-gray-50">
           <button
             onClick={() => setActiveTab('description')}
-            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+            className={`py-4 px-4 font-bold text-sm whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'description'
                 ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
@@ -228,7 +230,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
           <button
             onClick={() => setActiveTab('installments')}
-            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+            className={`py-4 px-4 font-bold text-sm whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'installments'
                 ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
@@ -238,7 +240,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+            className={`py-4 px-4 font-bold text-sm whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'reviews'
                 ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
@@ -248,7 +250,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
           <button
             onClick={() => setActiveTab('qa')}
-            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+            className={`py-4 px-4 font-bold text-sm whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'qa'
                 ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
@@ -258,7 +260,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
           <button
             onClick={() => setActiveTab('return-policy')}
-            className={`pb-4 px-2 font-bold text-base whitespace-nowrap border-b-2 transition-colors ${
+            className={`py-4 px-4 font-bold text-sm whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'return-policy'
                 ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
@@ -268,8 +270,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
         </div>
 
-        {/* ============ TAB CONTENT ============ */}
-        <div className="min-h-[400px]">
+          {/* ============ TAB CONTENT ============ */}
+          <div className="p-6 min-h-[400px]">
           {activeTab === 'description' && (
             <div className="prose prose-sm sm:prose max-w-none text-[var(--foreground-muted)] leading-relaxed space-y-6">
               <p className="text-lg">
@@ -506,7 +508,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               </div>
             </div>
           )}
-        </div>
+        </div> {/* card wrapper */}
 
         {/* ============ BENZER ÜRÜNLER ============ */}
         <div className="mt-16 pt-10 border-t border-[var(--border)]">
