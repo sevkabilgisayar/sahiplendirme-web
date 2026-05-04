@@ -56,6 +56,18 @@ function getAIReply(question: string, listing: any): string {
   return `🤖 "${question}" sorunuz için: ${name} hakkında daha detaylı bilgi almak ister misiniz? Yaşam koşullarınızı (ev/daire, çocuk durumu, deneyim) paylaşırsanız kişiselleştirilmiş öneri sunabilirim.`;
 }
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return 'Bilinmiyor';
+  if (dateStr.includes('önce') || dateStr.includes('saat') || dateStr.includes('gün')) return dateStr;
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    return `${day} ${months[parseInt(month) - 1]} ${year}`;
+  }
+  return dateStr;
+}
+
 export default function ListingDetailClient({ listing }: { listing: any }) {
   const [activeImage, setActiveImage] = useState(0);
   const [isAdoptModalOpen, setIsAdoptModalOpen] = useState(false);
@@ -349,7 +361,7 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                 {/* İlan Tarihi */}
                 <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--border-subtle)] text-sm">
                   <span className="text-[var(--foreground-muted)] font-semibold flex items-center gap-1.5"><Clock size={14} /> İlan Tarihi</span>
-                  <span className="font-bold text-[var(--foreground)]">{listing.createdAt || '2 gün önce'}</span>
+                  <span className="font-bold text-[var(--foreground)]">{formatDate(listing.createdAt || '2 gün önce')}</span>
                 </div>
                 {/* İlan No */}
                 <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
