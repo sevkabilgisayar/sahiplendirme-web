@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import {
   ShoppingBag, Star, Truck, Shield, RefreshCw, Search,
-  ChevronDown, ChevronUp, SlidersHorizontal, X
+  ChevronDown, ChevronUp, SlidersHorizontal, X,
+  Zap, Flame, TrendingUp, Percent, Clock
 } from 'lucide-react';
 import { mockStoreProducts } from '@/lib/mock-data';
 import ProductCard from '@/components/ui/ProductCard';
@@ -18,6 +19,29 @@ const duplicateItems = (arr: any[], count: number) => {
 };
 
 const ALL_PRODUCTS = duplicateItems(mockStoreProducts, 30);
+const BESTSELLERS = duplicateItems(mockStoreProducts.filter(p => p.isBestseller), 12);
+const FEATURED = duplicateItems(mockStoreProducts.filter(p => p.isFeatured), 12);
+const ON_SALE = duplicateItems(mockStoreProducts.filter(p => p.isOnSale), 12);
+
+// Vitrin hero ürünleri
+const HERO_PRODUCTS = [
+  { id: 1, name: 'Royal Canin', subtitle: 'Irka özel formül', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%17', price: 289, color: 'from-amber-400 to-orange-500' },
+  { id: 3, name: 'Ortopedik Yatak', subtitle: 'Eklem dostları için', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%15', price: 379, color: 'from-violet-500 to-purple-600' },
+  { id: 7, name: 'Purina Pro Plan', subtitle: 'Kedi uzmanı mama', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%18', price: 319, color: 'from-teal-500 to-emerald-600' },
+  { id: 9, name: 'Otomatik Su Kabı', subtitle: 'Sürekli taze su', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%20', price: 450, color: 'from-blue-500 to-indigo-600' },
+];
+
+function SectionHeader({ icon, title, subtitle, color }: { icon: React.ReactNode; title: string; subtitle?: string; color: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-4 mt-8">
+      <div className={`w-9 h-9 rounded-2xl flex items-center justify-center ${color}`}>{icon}</div>
+      <div>
+        <h2 className="text-lg font-bold font-display">{title}</h2>
+        {subtitle && <p className="text-[10px] text-[var(--foreground-muted)]">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
 
 const CATEGORY_FILTERS = [
   { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248 },
@@ -280,17 +304,89 @@ export default function MagazaPage() {
             {/* Reklam Alanı */}
             <div className="mb-6"><AdBanner /></div>
 
-            {/* Ürün Grid */}
-            {sorted.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                {sorted.map(p => <ProductCard key={p.id} product={p} size="small" />)}
+            {/* Vitrinler veya Grid İçeriği */}
+            {activeFilterCount === 0 && search === '' ? (
+              <div className="space-y-10">
+                {/* Vitrin Hero */}
+                <div>
+                  <SectionHeader icon={<Zap size={16} className="text-white"/>} title="Vitrin Ürünleri" subtitle="Haftanın en beğenilen seçimleri" color="bg-gradient-to-br from-amber-400 to-orange-500" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {HERO_PRODUCTS.map(p => (
+                      <Link href={`/magaza/${p.id}`} key={p.id} className={`bg-gradient-to-br ${p.color} rounded-3xl p-5 text-white flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg overflow-hidden relative min-h-[160px]`}>
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20 bg-white rounded-full mix-blend-overlay"></div>
+                        <div className="flex items-start justify-between z-10 mb-2">
+                          <div className="text-[10px] font-bold bg-white/25 text-white px-2 py-0.5 rounded-full">{p.discount} İndirim</div>
+                          <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/20">
+                            <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+                          </div>
+                        </div>
+                        <div className="z-10">
+                          <div className="font-bold text-sm leading-tight">{p.name}</div>
+                          <div className="text-white/80 text-[10px] mb-1">{p.subtitle}</div>
+                          <div className="text-lg font-bold">₺{p.price}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Çok Satanlar */}
+                <div>
+                  <SectionHeader icon={<Flame size={16} className="text-white"/>} title="Çok Satanlar" subtitle="Binlerce kullanıcının tercihi" color="bg-gradient-to-br from-rose-500 to-red-600" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {BESTSELLERS.slice(0, 8).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                  </div>
+                </div>
+
+                {/* İndirimdekiler */}
+                <div className="bg-rose-50/50 border border-rose-100 rounded-3xl p-5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                        <Percent size={14} className="text-white"/>
+                      </div>
+                      <div>
+                        <h2 className="text-base font-bold font-display text-rose-700">Günün Fırsatları</h2>
+                        <p className="text-[10px] text-rose-500">Seçili ürünlerde dev indirimler</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-rose-600 font-medium bg-rose-100 px-2 py-1 rounded-full">
+                      <Clock size={10}/> Sınırlı süre
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 relative z-10">
+                    {ON_SALE.slice(0, 4).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                  </div>
+                </div>
+
+                {/* Öne Çıkanlar */}
+                <div>
+                  <SectionHeader icon={<TrendingUp size={16} className="text-white"/>} title="Öne Çıkan Ürünler" subtitle="Editörün önerdiği seçimler" color="bg-gradient-to-br from-emerald-500 to-teal-600" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {FEATURED.slice(0, 4).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                  </div>
+                </div>
+
+                {/* Tüm Ürünler Başlık */}
+                <SectionHeader icon={<ShoppingBag size={16} className="text-emerald-600"/>} title="Tüm Ürünler" color="bg-emerald-100" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {sorted.map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="text-5xl mb-4">🔍</div>
-                <div className="font-bold text-lg text-[var(--foreground)] mb-2">Ürün bulunamadı</div>
-                <p className="text-[var(--foreground-muted)] text-sm">Filtrelerinizi değiştirerek tekrar deneyin.</p>
-              </div>
+              /* Sadece Filtrelenmiş Ürün Grid */
+              sorted.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {sorted.map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="text-5xl mb-4">🔍</div>
+                  <div className="font-bold text-lg text-[var(--foreground)] mb-2">Ürün bulunamadı</div>
+                  <p className="text-[var(--foreground-muted)] text-sm">Filtrelerinizi değiştirerek tekrar deneyin.</p>
+                </div>
+              )
             )}
 
             {/* Alt Reklam */}
