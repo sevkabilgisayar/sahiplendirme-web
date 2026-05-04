@@ -99,15 +99,15 @@ export default function HomePage() {
           </div>
 
           {/* Trust Badges */}
-          <div className="mt-16 w-full overflow-x-auto pb-4 hide-scrollbar">
-            <div className="flex justify-start md:justify-center gap-4 min-w-max px-4 md:px-0">
+          <div className="mt-16 w-full max-w-7xl mx-auto px-4 sm:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { icon: <Shield className="w-8 h-8 text-teal-700" />, title: 'Güvenli İlan Sistemi', desc: 'Doğrulanmış kullanıcılar ve güvenli iletişim ile içiniz rahat.' },
                 { icon: <Search className="w-8 h-8 text-orange-500" />, title: 'Kayıp İlanları', desc: 'Kayıp dostlarınızı hızlıca bulun, topluluğumuz size destek olsun.' },
                 { icon: <div className="text-blue-700 text-3xl">🏛️</div>, title: 'Onaylı Barınaklar', desc: 'Denetlenen barınaklar ve derneklerle güvenli sahiplendirme.' },
                 { icon: <div className="text-teal-700 text-3xl">👥</div>, title: 'Hayvansever Topluluk', desc: 'Hayvanseverlerle tanışın, deneyim paylaşın, birlikte iyilik yapalım.' },
               ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[var(--border)] w-[300px] flex-shrink-0 shadow-sm">
+                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[var(--border)] w-full shadow-sm">
                   <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 flex-shrink-0">
                     {badge.icon}
                   </div>
