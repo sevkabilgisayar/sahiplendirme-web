@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import {
   ShoppingBag, Star, Truck, Shield, RefreshCw, Search,
   ChevronDown, ChevronUp, SlidersHorizontal, X
@@ -199,6 +200,28 @@ export default function MagazaPage() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── VİTRİNLER (POPÜLER KATEGORİLER) ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-2">
+        <h2 className="text-xl font-bold font-display text-[var(--foreground)] mb-4">Popüler Kategoriler</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {CATEGORY_FILTERS.map((cat) => (
+            <div 
+              key={cat.label}
+              onClick={() => toggleCat(cat.label)}
+              className={cn(
+                "bg-white border rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1 text-center h-[104px]",
+                selectedCats.includes(cat.label) 
+                  ? "border-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)] bg-orange-50/50" 
+                  : "border-[var(--border)]"
+              )}
+            >
+              <span className="text-3xl">{cat.emoji}</span>
+              <span className="text-xs font-bold text-[var(--foreground)] leading-tight">{cat.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
