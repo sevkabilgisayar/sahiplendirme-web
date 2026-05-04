@@ -56,6 +56,7 @@ function ListingsPageInner() {
   const [selectedOwnerTypes, setSelectedOwnerTypes] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedAges, setSelectedAges] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   // Available breeds based on selected animal types
   const availableBreeds = useMemo(() => {
@@ -93,11 +94,11 @@ function ListingsPageInner() {
   const clearAll = () => {
     setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
     setSelectedCities([]); setSelectedDistricts([]); setSelectedGender(''); setSelectedOwnerTypes([]);
-    setSelectedBreeds([]); setSelectedAges([]);
+    setSelectedBreeds([]); setSelectedAges([]); setSelectedDate('');
     setPage(1);
   };
 
-  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerTypes.length || selectedBreeds.length || selectedAges.length;
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerTypes.length || selectedBreeds.length || selectedAges.length || selectedDate;
 
   // All listings (duplicated for demo volume)
   const allListings = useMemo(() => {
@@ -131,13 +132,22 @@ function ListingsPageInner() {
     if (selectedGender) result = result.filter(l => l.gender === selectedGender);
     if (selectedOwnerTypes.length) result = result.filter(l => selectedOwnerTypes.includes(l.ownerType));
     if (selectedBreeds.length) result = result.filter(l => selectedBreeds.includes(l.breed));
+    if (selectedDate) {
+      result = result.filter(l => {
+        if (!l.createdAt) return true;
+        if (selectedDate === '24saat') return l.createdAt.includes('saat') || l.createdAt.includes('dk') || l.createdAt.includes('dakika');
+        if (selectedDate === '1hafta') return !l.createdAt.includes('ay') && !l.createdAt.includes('yıl');
+        if (selectedDate === '1ay') return !l.createdAt.includes('yıl');
+        return true;
+      });
+    }
 
     if (sort === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     if (sort === 'oldest') result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
 
     return result;
-  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerTypes, selectedBreeds, selectedAges, sort, allListings]);
+  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerTypes, selectedBreeds, selectedAges, selectedDate, sort, allListings]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -245,6 +255,21 @@ function ListingsPageInner() {
               <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors py-0.5">
                 {o.value === 'sahibinde' ? '🏠' : '🏛️'} {o.label}
               </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* İlan Tarihi */}
+      <div className="mb-6 border-b border-[var(--border)] pb-5">
+        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">İlan Tarihi</h3>
+        <div className="flex flex-col gap-2">
+          {[{ value: '', label: 'Tümü' }, { value: '24saat', label: 'Son 24 Saat' }, { value: '1hafta', label: 'Son 1 Hafta' }, { value: '1ay', label: 'Son 1 Ay' }].map(d => (
+            <label key={d.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="radio" checked={selectedDate === d.value}
+                onChange={() => { setSelectedDate(d.value); setPage(1); }}
+                className="w-4 h-4 rounded-full border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)]" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors py-0.5">{d.label}</span>
             </label>
           ))}
         </div>

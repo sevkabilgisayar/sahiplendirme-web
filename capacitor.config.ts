@@ -3,20 +3,15 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.sahiplendirme.app',
   appName: 'Sahiplendirme',
-  webDir: 'out',
-  server: {
-    // Vercel'deki canlı siteyi WebView olarak aç
-    url: 'https://sahiplendirme-web.vercel.app',
-    cleartext: false,
-  },
+  webDir: '../mobile-app/dist',
   android: {
     allowMixedContent: false,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F5F5F7',
     initialFocus: true,
   },
   ios: {
     scrollEnabled: true,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F5F5F7',
   },
 };
 

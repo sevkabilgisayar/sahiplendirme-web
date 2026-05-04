@@ -234,7 +234,7 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               <div className="flex items-center gap-4 text-[var(--foreground-muted)] font-medium flex-wrap">
                 <span className="flex items-center gap-1"><MapPin size={16} className="text-[var(--brand-primary)]" />{listing.location.address}</span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {listing.viewCount || 124} görüntülenme</span>
-                <span className="flex items-center gap-1"><Clock size={14} /> {listing.createdAt || '2 gün önce'}</span>
+                <span className="flex items-center gap-1"><Clock size={14} /> İlan Tarihi: {listing.createdAt || '2 gün önce'}</span>
                 <span className="ml-auto text-[10px] font-mono bg-[var(--surface-secondary)] border border-[var(--border)] px-2 py-0.5 rounded-md text-[var(--foreground-muted)] select-all cursor-pointer" title="İlan numarası">
                   #İlan {String(listing.id).padStart(5, '0')}
                 </span>
@@ -374,7 +374,6 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                     </div>
                   ) : isCiftlestirme ? (
                     <div>
-                      <div className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">ÇİFTLEŞTİRME</div>
                       <div className="text-2xl font-bold font-display text-purple-600">💕 Eşleştirme İlanı</div>
                     </div>
                   ) : (
@@ -422,6 +421,25 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                   <div className="flex gap-3">
                     <Button variant="outline" className="flex-1 h-12" leftIcon={<Phone size={18} />}>Ara</Button>
                     <Button variant="outline" className="flex-1 h-12" leftIcon={<Mail size={18} />}>Mesaj</Button>
+                  </div>
+
+                  {/* Owner Info (Moved inside action card) */}
+                  <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-secondary)] my-2">
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="w-12 h-12 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                        {listing.owner.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-bold text-[var(--foreground)] flex items-center gap-1 text-sm">
+                          {listing.owner.name} <CheckCircle size={14} className="text-blue-500" />
+                        </div>
+                        <div className="text-[11px] text-[var(--foreground-muted)]">{listing.ownerType === 'sahibinde' ? 'Bireysel Üye' : 'Kurumsal / Barınak'}</div>
+                        <div className="text-[11px] text-[var(--foreground-muted)] mt-0.5">Üyelik: {listing.owner.memberSince}</div>
+                      </div>
+                    </div>
+                    <Link href="#" className="text-[11px] font-semibold text-[var(--brand-primary)] hover:underline block text-center">
+                      Kullanıcının diğer ilanları →
+                    </Link>
                   </div>
 
                   {/* AI Danışman Butonu + Panel - sadece sahiplendirme ve çiftleştirmede */}
@@ -506,24 +524,7 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                 </div>
               </Card>
 
-              {/* Owner Info */}
-              <Card className="p-5 border-[var(--border)] bg-[var(--surface-secondary)]">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-xl shadow-sm">
-                    {listing.owner.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-[var(--foreground)] flex items-center gap-1">
-                      {listing.owner.name} <CheckCircle size={14} className="text-blue-500" />
-                    </div>
-                    <div className="text-xs text-[var(--foreground-muted)]">{listing.ownerType === 'sahibinde' ? 'Bireysel Üye' : 'Kurumsal / Barınak'}</div>
-                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5">Üyelik: {listing.owner.memberSince}</div>
-                  </div>
-                </div>
-                <Link href="#" className="text-sm font-semibold text-[var(--brand-primary)] hover:underline block text-center mt-2">
-                  Kullanıcının diğer ilanları →
-                </Link>
-              </Card>
+              {/* Owner Info removed from here */}
 
               {/* Warning + Report Desktop */}
               <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 gap-3 text-orange-800 text-sm hidden lg:flex flex-col shadow-sm">
