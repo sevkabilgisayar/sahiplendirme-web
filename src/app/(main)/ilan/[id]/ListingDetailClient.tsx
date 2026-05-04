@@ -234,7 +234,6 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               <div className="flex items-center gap-4 text-[var(--foreground-muted)] font-medium flex-wrap">
                 <span className="flex items-center gap-1"><MapPin size={16} className="text-[var(--brand-primary)]" />{listing.location.address}</span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {listing.viewCount || 124} görüntülenme</span>
-                <span className="flex items-center gap-1"><Clock size={14} /> İlan Tarihi: {listing.createdAt || '2 gün önce'}</span>
                 <span className="ml-auto text-[10px] font-mono bg-[var(--surface-secondary)] border border-[var(--border)] px-2 py-0.5 rounded-md text-[var(--foreground-muted)] select-all cursor-pointer" title="İlan numarası">
                   #İlan {String(listing.id).padStart(5, '0')}
                 </span>
@@ -347,6 +346,11 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
               {/* Action Card */}
               <Card className="p-6 border-[var(--border)] shadow-md">
+                {/* İlan Tarihi */}
+                <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--border-subtle)] text-sm">
+                  <span className="text-[var(--foreground-muted)] font-semibold flex items-center gap-1.5"><Clock size={14} /> İlan Tarihi</span>
+                  <span className="font-bold text-[var(--foreground)]">{listing.createdAt || '2 gün önce'}</span>
+                </div>
                 {/* İlan No */}
                 <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
                   <span className="text-sm text-[var(--foreground-muted)] font-semibold">İlan No</span>
