@@ -11,6 +11,7 @@ import ListingCard from '@/components/ui/ListingCard';
 import AdBanner from '@/components/ui/AdBanner';
 import { mockListings as featuredListings, mockStoreProducts } from '@/lib/mock-data';
 import { mockServices } from '@/app/(main)/hizmetler/page';
+import MobileHomePage from '@/components/mobile/MobileHomePage';
 
 const stats = [
   { value: '12.000+', label: 'Mutlu Hayvan', emoji: '🐾' },
@@ -23,7 +24,14 @@ export default function HomePage() {
   const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null);
 
   return (
-    <div className="overflow-x-hidden">
+    <>
+      {/* ====== MOBİL NATIVE UYGULAMA GÖRÜNÜMÜ ====== */}
+      <div className="md:hidden">
+        <MobileHomePage />
+      </div>
+
+      {/* ====== MASAÜSTÜ WEB GÖRÜNÜMÜ ====== */}
+      <div className="hidden md:block overflow-x-hidden">
 
       {/* ============ HERO ============ */}
       <section className="relative min-h-[90vh] flex items-center">
@@ -717,6 +725,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </div>
+      </div> {/* end desktop wrapper */}
+    </>
   );
 }

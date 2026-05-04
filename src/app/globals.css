@@ -138,3 +138,15 @@
 .leaflet-popup-content-wrapper { border-radius: 0.75rem !important; }
 
 *:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+
+/* Mobile native app utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
