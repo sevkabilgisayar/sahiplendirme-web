@@ -230,12 +230,12 @@ export default function HomePage() {
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Link href="/ilanlar?kategori=sahiplendirme" className="sm:hidden">
-              <Button variant="outline">Tümünü Gör</Button>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=sahiplendirme" className="w-full sm:w-auto sm:hidden">
+              <Button variant="outline" fullWidth>Tümünü Gör</Button>
             </Link>
-            <Link href="/ilan-ver">
-              <Button variant="gradient" rightIcon={<Zap size={14}/>}>Hemen Sahiplendirme İlanı Ver</Button>
+            <Link href="/ilan-ver" className="w-full sm:w-auto">
+              <Button variant="gradient" fullWidth rightIcon={<Zap size={14}/>}>Hemen Sahiplendirme İlanı Ver</Button>
             </Link>
           </div>
         </div>
@@ -259,12 +259,12 @@ export default function HomePage() {
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Link href="/ilanlar?kategori=kayip">
-              <Button variant="outline">Kayıp İlanlarını İncele</Button>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=kayip" className="w-full sm:w-auto">
+              <Button variant="outline" fullWidth>Kayıp İlanlarını İncele</Button>
             </Link>
-            <Link href="/ilan-ver">
-              <Button className="bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/20" rightIcon={<Zap size={14}/>}>Kayıp İlanı Ver</Button>
+            <Link href="/ilan-ver" className="w-full sm:w-auto">
+              <Button className="bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/20 w-full" rightIcon={<Zap size={14}/>}>Kayıp İlanı Ver</Button>
             </Link>
           </div>
         </div>
@@ -288,9 +288,9 @@ export default function HomePage() {
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Link href="/ilanlar?kategori=ciftlestirme">
-              <Button variant="outline">Tüm Eşleştirmeleri Gör</Button>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/ilanlar?kategori=ciftlestirme" className="w-full sm:w-auto">
+              <Button variant="outline" fullWidth>Tüm Eşleştirmeleri Gör</Button>
             </Link>
           </div>
         </div>
@@ -470,7 +470,9 @@ export default function HomePage() {
               </div>
               <p className="text-[var(--foreground-muted)] text-sm">Türkiye genelindeki belediye ve resmi barınaklar</p>
             </div>
-            <Button variant="outline" rightIcon={<ArrowRight size={14}/>}>Tüm Barınaklar</Button>
+            <Link href="/barinaklar" className="hidden sm:block">
+              <Button variant="outline" rightIcon={<ArrowRight size={14}/>}>Tüm Barınaklar</Button>
+            </Link>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -491,6 +493,11 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-6 flex sm:hidden items-center justify-center">
+            <Link href="/barinaklar" className="w-full">
+              <Button variant="outline" fullWidth rightIcon={<ArrowRight size={14}/>}>Tüm Barınaklar</Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -38,7 +38,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         'bg-[var(--brand-secondary)] text-white hover:opacity-90 focus-visible:ring-[var(--brand-secondary)]',
       outline:
-        'border-2 border-[var(--brand-primary)] text-[var(--brand-primary)] bg-transparent hover:bg-[var(--brand-primary-light)] focus-visible:ring-[var(--brand-primary)]',
+        'border border-orange-200 bg-orange-50/50 text-orange-700 hover:bg-orange-100/80 hover:border-orange-300 focus-visible:ring-[var(--brand-primary)] shadow-sm font-semibold rounded-2xl',
       ghost:
         'text-[var(--foreground-muted)] bg-transparent hover:bg-[var(--neutral-100)] hover:text-[var(--foreground)] focus-visible:ring-[var(--brand-primary)]',
       danger:
