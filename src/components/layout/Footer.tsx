@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import SiteLogo from '@/components/ui/SiteLogo';
+import { usePathname } from 'next/navigation';
 
 const footerLinks = {
   platform: {
@@ -26,7 +29,7 @@ const footerLinks = {
     title: 'Hakkında',
     links: [
       { href: '/hakkimizda', label: 'Hakkımızda' },
-      { href: '/hakkimizda#iletisim', label: 'İletişim' },
+      { href: '/iletisim', label: 'İletişim' },
       { href: '/paketler', label: 'Hizmet Paketleri' },
       { href: '/barinaklar', label: 'Barınaklar' },
       { href: '/blog', label: 'Blog' },
@@ -52,6 +55,9 @@ const footerLinks = {
 };
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname === '/abonelik-odeme') return null;
+
   return (
     <footer className="bg-[var(--surface)] border-t border-[var(--border)] mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

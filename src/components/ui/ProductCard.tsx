@@ -11,7 +11,7 @@ export default function ProductCard({ product, size = 'normal' }: { product: any
     <Link href={`/magaza/${product.id}`} className={`bg-[var(--surface)] border border-[var(--border)] rounded-2xl flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group cursor-pointer overflow-hidden ${size === 'small' ? 'p-3' : 'p-4'}`}>
       <div className="relative">
         <div className={`w-full bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform ${size === 'small' ? 'h-24' : 'h-36'}`}>
-          <img src={product.photo} alt={product.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+          <img src={product.image || product.photo} alt={product.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
         </div>
         {product.tag && (
           <span className={`absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
@@ -38,7 +38,19 @@ export default function ProductCard({ product, size = 'normal' }: { product: any
       <button
         onClick={(e) => { 
           e.preventDefault(); 
-          setInCart(true); 
+          setInCart(true);
+          
+          // Add to local storage cart
+          const currentCart = JSON.parse(localStorage.getItem('pet_cart') || '[]');
+          const existing = currentCart.find((item: any) => item.id === product.id);
+          
+          if (existing) {
+            existing.quantity += 1;
+            localStorage.setItem('pet_cart', JSON.stringify(currentCart));
+          } else {
+            localStorage.setItem('pet_cart', JSON.stringify([...currentCart, { ...product, quantity: 1 }]));
+          }
+
           toast.success(`${product.name} sepete eklendi!`);
           setTimeout(() => setInCart(false), 2000); 
         }}

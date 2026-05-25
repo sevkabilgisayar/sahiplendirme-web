@@ -1,0 +1,466 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String    @unique
+  password      String
+  phone         String?
+  city          String?
+  district      String?
+  address       String?
+  storeDescription String?
+  accountType   String    @default("bireysel") // bireysel, barinak, profesyonel
+  role          String    @default("user") // user, admin
+  avatar        String?
+  isBanned      Boolean   @default(false)
+  banReason     String?
+  status        String    @default("active") // active, pending, rejected
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Notification Preferences
+  notifyNewMessages Boolean @default(true)
+  notifyApplications Boolean @default(true)
+  notifyEmails      Boolean @default(true)
+  notifyCampaigns   Boolean @default(true)
+
+  // Subscription
+  subscriptionEndsAt DateTime?
+  allowedServices    String? // egitmen,gezdirici gibi satın alınan paketler
+
+  listings      Listing[]
+  sentMessages  Message[] @relation("SentMessages")
+  receivedMsgs  Message[] @relation("ReceivedMessages")
+  applications  Application[] @relation("UserApplications")
+  reports       Report[]
+  notifications Notification[]
+  orders        Order[]
+  products      Product[] @relation("UserProducts")
+  services      Service[] @relation("UserServices")
+  sightings     Sighting[]
+  favorites     Favorite[]
+  reviews       ProductReview[]
+  bookings      Booking[]
+  coupons       Coupon[]
+  storeApps     StoreApplication[]
+}
+
+model Listing {
+  id              String   @id @default(uuid())
+  type            String   // sahiplendirme, kayip, ciftlestirme
+  animal          String   // kedi, kopek, diger
+  title           String
+  name            String?
+  breed           String?
+  age             String?
+  gender          String?
+  description     String
+  city            String
+  district        String?
+  neighborhood    String?
+  locationPrivacy String?  @default("yaklasik")
+  photos          String   // JSON string of URLs (SQLite does not support String[])
+  status          String   @default("pending") // pending, approved, rejected, resolved
+  aiScore         Int?     @default(0)
+  
+  // Custom contact fields for Admin-created guest listings
+  contactName     String?
+  contactPhone    String?
+  
+  // Specific fields for Kayıp
+  lossTime        String?
+  hasReward       Boolean  @default(false)
+  rewardAmount    String?
+  
+  viewCount       Int      @default(0)
+  latitude        Float?
+  longitude       Float?
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  messages        Message[]
+  applications    Application[]
+  reports         Report[]
+  sightings       Sighting[]
+  favorites       Favorite[]
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  content     String
+  isRead      Boolean  @default(false)
+  
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  listingId   String?
+  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  message     String
+  status      String   @default("pending") // pending, approved, rejected
+  
+  applicantId String
+  applicant   User     @relation("UserApplications", fields: [applicantId], references: [id], onDelete: Cascade)
+  
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+model Sighting {
+  id          String   @id @default(uuid())
+  note        String
+  location    String
+  seenAt      String   // "Dün", "2 Gün Önce" vb. veya tarih
+  contactInfo String?  // Anonim ihbarlar için opsiyonel
+
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  reporterId  String?
+  reporter    User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  reason      String
+  detail      String?
+  status      String   @default("open") // open, resolved
+  
+  reporterId  String
+  reporter    User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  type        String   // message, application, system
+  content     String
+  isRead      Boolean  @default(false)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  brand       String
+  category    String   // kopek, kedi, kus vb.
+  price       Float
+  oldPrice    Float?
+  description String
+  image       String
+  images      String?  // JSON string array for gallery
+  stock       Int      @default(10)
+  rating      Float    @default(5.0)
+  reviewCount Int      @default(0)
+  
+  sellerId    String?
+  seller      User?    @relation("UserProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      OrderItem[]
+  favorites   Favorite[]
+  reviews     ProductReview[]
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  totalAmount Float
+  status      String   @default("hazirlaniyor") // hazirlaniyor, kargoda, teslim
+  billingInfo String?  // JSON string for billing details
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  items       OrderItem[]
+  
+  createdAt   DateTime @default(now())
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  price     Float
+  
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Favorite {
+  id          String   @id @default(uuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // İlan veya ürnün biri olacak, diğeri null
+  listingId   String?
+  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@unique([userId, productId])
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   // veteriner, kuafor, egitmen, pet-otel, gezdirici
+  about       String
+  city        String
+  district    String
+  address     String
+  phone       String
+  price       String
+  rating      Float    @default(5.0)
+  reviews     Int      @default(0)
+  verified    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  services    String   // JSON string or comma separated
+  tags        String   // JSON string or comma separated
+  image       String?  // Avatar or shop photo
+  latitude    Float?   // Harita için enlem
+  longitude   Float?   // Harita için boylam
+  
+  userId      String?
+  user        User?    @relation("UserServices", fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  bookings    Booking[]
+}
+
+model Booking {
+  id          String   @id @default(uuid())
+  date        String
+  time        String
+  status      String   @default("bekliyor") // bekliyor, onaylandi, tamamlandi, iptal
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+}
+
+model Shelter {
+  id          String   @id @default(uuid())
+  name        String
+  city        String
+  district    String
+  address     String
+  phone       String
+  website     String?
+  about       String
+  image       String?
+  capacity    Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+}
+
+model Banner {
+  id          String   @id @default(uuid())
+  title       String
+  imageUrl    String
+  linkUrl     String?
+  position    String   @default("home_middle") // e.g., home_middle, home_bottom
+  isActive    Boolean  @default(true)
+  clicks      Int      @default(0)
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  
+  stats       BannerDailyStat[]
+}
+
+model BannerDailyStat {
+  id          String   @id @default(uuid())
+  bannerId    String
+  banner      Banner   @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  date        String   // YYYY-MM-DD
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+
+  @@unique([bannerId, date])
+}
+
+model Package {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  features    String   // JSON string of features
+  maxListings Int      @default(0)
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model AdminLog {
+  id          String   @id @default(uuid())
+  actionType  String   // INFO, WARNING, DANGER, SUCCESS
+  message     String
+  adminEmail  String
+  createdAt   DateTime @default(now())
+}
+
+model ProductReview {
+  id          String   @id @default(uuid())
+  rating      Int      @default(5)
+  text        String
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String
+  image       String?
+  category    String
+  readTime    String
+  author      String
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  viewCount   Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Coupon {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  discount    Float
+  type        String   // percentage, fixed
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  validUntil  DateTime
+  isUsed      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id    String @id @default("singleton")
+  
+  // --- Genel Site Bilgileri ---
+  siteName        String  @default("Sahiplendirme.com")
+  siteDescription String  @default("Türkiye'nin en büyük hayvan sahiplendirme platformu")
+  siteUrl         String  @default("https://sahiplendirme.com")
+  logoUrl         String?
+  faviconUrl      String?
+  footerText      String  @default("© 2025 Sahiplendirme.com - Tüm hakları saklıdır.")
+  
+  // --- Anasayfa Hero İçeriği ---
+  heroTitle       String  @default("Doğru dostunu bul, sıcak bir yuva ver 🐾")
+  heroSubtitle    String  @default("Köpek, kedi ve kuş sahiplendirme ilanları. Kayıp hayvan ihbarları. Çiftleştirme eşleştirme. Yapay zekâ ile anında doğru cevap.")
+  
+  // --- SEO Ayarları ---
+  metaTitle       String  @default("Sahiplendirme.com | Hayvan Sahiplen")
+  metaDescription String  @default("Sahiplendirilmeyi bekleyen binlerce sevimli dostun olduğu Türkiye'nin en büyük platformu.")
+  metaKeywords    String  @default("hayvan sahiplendirme, kedi sahiplen, köpek sahiplen, kayıp hayvan")
+  ogImageUrl      String?
+  googleAnalyticsId String?
+  googleSearchConsoleKey String?
+  robotsTxt       String  @default("User-agent: *\nAllow: /")
+  
+  // --- Mail (SMTP) Ayarları ---
+  smtpHost        String  @default("")
+  smtpPort        Int     @default(587)
+  smtpUser        String  @default("")
+  smtpPass        String  @default("")
+  smtpFromName    String  @default("Sahiplendirme.com")
+  smtpFromEmail   String  @default("noreply@sahiplendirme.com")
+  smtpSecure      Boolean @default(false)
+  
+  // --- İletişim Bilgileri ---
+  contactEmail    String  @default("info@sahiplendirme.com")
+  contactPhone    String  @default("")
+  contactAddress  String  @default("")
+  instagramUrl    String  @default("")
+  twitterUrl      String  @default("")
+  facebookUrl     String  @default("")
+  
+  // --- Site Durumu ---
+  maintenanceMode Boolean @default(false)
+  maintenanceMsg  String  @default("Sitemiz bakım çalışması nedeniyle geçici olarak kapalıdır. Kısa süre içinde geri döneceğiz.")
+  allowNewRegistrations Boolean @default(true)
+  requireEmailVerification Boolean @default(false)
+  
+  updatedAt       DateTime @updatedAt
+}
+
+model StoreApplication {
+  id           String   @id @default(uuid())
+  companyName  String
+  taxNumber    String
+  taxOffice    String
+  companyType  String
+  city         String
+  district     String
+  address      String
+  contactName  String
+  email        String
+  phone        String
+  storeName    String
+  
+  vergiLevhasi String?
+  imzaSirkusu  String?
+  markaTescil  String?
+  
+  status       String   @default("pending") // pending, approved, rejected
+  
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

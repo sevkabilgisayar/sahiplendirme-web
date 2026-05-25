@@ -4,6 +4,7 @@ export const ANIMAL_TYPES = [
   { value: 'kopek', label: 'Köpek', emoji: '🐶' },
   { value: 'kedi', label: 'Kedi', emoji: '🐱' },
   { value: 'kus', label: 'Kuş', emoji: '🐦' },
+  { value: 'diger', label: 'Diğer', emoji: '🐾' },
 ] as const;
 
 export const GENDER_OPTIONS = [
@@ -135,6 +136,11 @@ export const BIRD_BREEDS = [
   'Karışık/Melez', 'Bilinmiyor',
 ];
 
+export const OTHER_BREEDS = [
+  'Tavşan', 'Hamster', 'Gine Domuzu', 'Balık', 'Kaplumbağa', 'İguana',
+  'Ferret', 'Diğer/Bilinmiyor',
+];
+
 export const PHOTO_MAX = 10;
 export const PHOTO_MIN = 1;
-export const DESCRIPTION_MIN_CHARS = 30;
+export const DESCRIPTION_MIN_CHARS = 10;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, MessageSquare, ClipboardList, AlertTriangle, Package, Settings, Check, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -32,16 +32,51 @@ const typeColors: Record<string, string> = {
 };
 
 export default function BildirimlerPage() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    fetch('/api/notifications')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.notifications) {
+          // Gelen veriyi frontend yapısına göre düzenle
+          const formatted = data.notifications.map((n: any) => ({
+            id: n.id,
+            type: n.type || 'sistem',
+            title: n.type === 'message' ? 'Yeni Mesaj' : n.type === 'application' ? 'Yeni Başvuru' : 'Sistem Bildirimi',
+            message: n.content,
+            time: new Date(n.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+            read: n.isRead,
+            link: n.type === 'message' ? '/profil/mesajlar' : '/profil'
+          }));
+          setNotifications(formatted);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  const markRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  const remove = (id: string) => setNotifications(prev => prev.filter(n => n.id !== id));
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    fetch('/api/notifications', { method: 'PATCH' }).catch(console.error);
+  };
+  
+  const markRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    fetch(`/api/notifications/${id}`, { method: 'PATCH' }).catch(console.error);
+  };
+  
+  const remove = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    fetch(`/api/notifications/${id}`, { method: 'DELETE' }).catch(console.error);
+  };
 
   const filtered = filter === 'all' ? notifications : filter === 'unread' ? notifications.filter(n => !n.read) : notifications.filter(n => n.type === filter);
+
 
   return (
     <div className="bg-[var(--background)] min-h-screen py-10">

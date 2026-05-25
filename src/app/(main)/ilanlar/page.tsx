@@ -4,18 +4,18 @@ import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, ChevronDown, MapPin, SlidersHorizontal, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import ListingCard from '@/components/ui/ListingCard';
-import { mockListings } from '@/lib/mock-data';
 import Button from '@/components/ui/Button';
 import AdBanner from '@/components/ui/AdBanner';
 import {
   CITIES, AGE_OPTIONS, GENDER_OPTIONS, ANIMAL_TYPES, LISTING_TYPES, OWNER_TYPES,
-  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS, DISTRICTS_BY_CITY
+  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS, OTHER_BREEDS, DISTRICTS_BY_CITY
 } from '@/constants';
 
 const BREEDS_BY_ANIMAL: Record<string, string[]> = {
   kopek: DOG_BREEDS,
   kedi: CAT_BREEDS,
   kus: BIRD_BREEDS,
+  diger: OTHER_BREEDS,
 };
 
 const ITEMS_PER_PAGE = 16;
@@ -52,16 +52,44 @@ function ListingsPageInner() {
     searchParams.get('sehir') ? [searchParams.get('sehir')!] : []
   );
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-  const [selectedGender, setSelectedGender] = useState('');
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedOwnerTypes, setSelectedOwnerTypes] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [selectedAges, setSelectedAges] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
 
+  useEffect(() => {
+    // URL değiştiğinde state'leri URL parametrelerine göre güncelle
+    const kategori = searchParams.get('kategori');
+    if (kategori) setSelectedTypes([kategori]);
+    else setSelectedTypes([]);
+
+    const tur = searchParams.get('tur');
+    if (tur) setSelectedAnimals([tur]);
+    else setSelectedAnimals([]);
+
+    const sehir = searchParams.get('sehir');
+    if (sehir) setSelectedCities([sehir]);
+    else setSelectedCities([]);
+
+    const q = searchParams.get('q');
+    if (q) setSearch(q);
+    else setSearch('');
+
+    // URL'den geldiğimizde diğer yerel filtreleri sıfırla ki kafa karışıklığı olmasın
+    setSelectedDistricts([]);
+    setSelectedGenders([]);
+    setSelectedOwnerTypes([]);
+    setSelectedBreeds([]);
+    setSelectedAges([]);
+    setSelectedDate('');
+    setPage(1);
+  }, [searchParams]);
+
   // Available breeds based on selected animal types
   const availableBreeds = useMemo(() => {
     if (selectedAnimals.length === 1) return BREEDS_BY_ANIMAL[selectedAnimals[0]] || [];
-    if (selectedAnimals.length === 0) return [...DOG_BREEDS, ...CAT_BREEDS, ...BIRD_BREEDS];
+    if (selectedAnimals.length === 0) return [...DOG_BREEDS, ...CAT_BREEDS, ...BIRD_BREEDS, ...OTHER_BREEDS];
     return [];
   }, [selectedAnimals]);
 
@@ -93,24 +121,39 @@ function ListingsPageInner() {
 
   const clearAll = () => {
     setSearch(''); setSelectedTypes([]); setSelectedAnimals([]);
-    setSelectedCities([]); setSelectedDistricts([]); setSelectedGender(''); setSelectedOwnerTypes([]);
+    setSelectedCities([]); setSelectedDistricts([]); setSelectedGenders([]); setSelectedOwnerTypes([]);
     setSelectedBreeds([]); setSelectedAges([]); setSelectedDate('');
     setPage(1);
   };
 
-  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGender || selectedOwnerTypes.length || selectedBreeds.length || selectedAges.length || selectedDate;
+  const hasFilters = search || selectedTypes.length || selectedAnimals.length || selectedCities.length || selectedDistricts.length || selectedGenders.length || selectedOwnerTypes.length || selectedBreeds.length || selectedAges.length || selectedDate;
 
-  // All listings (duplicated for demo volume)
-  const allListings = useMemo(() => {
-    const attachDistrict = (l: any) => {
-      const cityDistricts = DISTRICTS_BY_CITY[l.city] || ['Merkez'];
-      return { ...l, district: l.district || cityDistricts[Math.floor(Math.random() * cityDistricts.length)] };
+  const [allListings, setAllListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/listings');
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.listings.map((l: any) => ({
+            ...l,
+            photos: JSON.parse(l.photos || '[]'),
+            owner: l.user ? `${l.user.firstName} ${l.user.lastName}` : 'Kullanıcı',
+            ownerType: l.user?.accountType === 'barinak' ? 'barinakta' : 'sahibinde',
+            animalType: l.animal,
+          }));
+          setAllListings(formatted);
+        }
+      } catch (error) {
+        console.error('Listings error:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    return [
-      ...mockListings.map(attachDistrict),
-      ...mockListings.map(l => attachDistrict({ ...l, id: `${l.id}-b`, city: 'Ankara' })),
-      ...mockListings.slice(0, 6).map(l => attachDistrict({ ...l, id: `${l.id}-c`, city: 'İzmir' })),
-    ];
+    fetchListings();
   }, []);
 
   const filtered = useMemo(() => {
@@ -119,17 +162,17 @@ function ListingsPageInner() {
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(l =>
-        l.name.toLowerCase().includes(q) ||
-        l.breed.toLowerCase().includes(q) ||
-        l.city.toLowerCase().includes(q) ||
-        (l.district && l.district.toLowerCase().includes(q))
+        (l.name || '').toLowerCase().includes(q) ||
+        (l.breed || '').toLowerCase().includes(q) ||
+        (l.city || '').toLowerCase().includes(q) ||
+        (l.district || '').toLowerCase().includes(q)
       );
     }
     if (selectedTypes.length) result = result.filter(l => selectedTypes.includes(l.type));
     if (selectedAnimals.length) result = result.filter(l => selectedAnimals.includes(l.animalType));
     if (selectedCities.length) result = result.filter(l => selectedCities.includes(l.city));
     if (selectedDistricts.length) result = result.filter(l => selectedDistricts.includes(l.district));
-    if (selectedGender) result = result.filter(l => l.gender === selectedGender);
+    if (selectedGenders.length) result = result.filter(l => selectedGenders.includes(l.gender));
     if (selectedOwnerTypes.length) result = result.filter(l => selectedOwnerTypes.includes(l.ownerType));
     if (selectedBreeds.length) result = result.filter(l => selectedBreeds.includes(l.breed));
     if (selectedDate) {
@@ -147,7 +190,7 @@ function ListingsPageInner() {
     if (sort === 'reward') result.sort((a, b) => (Number(b.reward) || 0) - (Number(a.reward) || 0));
 
     return result;
-  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGender, selectedOwnerTypes, selectedBreeds, selectedAges, selectedDate, sort, allListings]);
+  }, [search, selectedTypes, selectedAnimals, selectedCities, selectedDistricts, selectedGenders, selectedOwnerTypes, selectedBreeds, selectedAges, selectedDate, sort, allListings]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -221,17 +264,24 @@ function ListingsPageInner() {
 
       {/* Cinsiyet */}
       <div className="mb-6 border-b border-[var(--border)] pb-5">
-        <h3 className="font-semibold text-sm mb-3 text-[var(--foreground-muted)] uppercase tracking-wide">Cinsiyet</h3>
-        <div className="flex gap-2">
-          {[{ value: '', label: 'Tümü' }, ...GENDER_OPTIONS].map(g => (
-            <button key={g.value} onClick={() => { setSelectedGender(g.value); setPage(1); }}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                selectedGender === g.value
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                  : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--brand-primary-light)]'
-              }`}>
-              {g.label}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm text-[var(--foreground-muted)] uppercase tracking-wide">Cinsiyet</h3>
+          {selectedGenders.length > 0 && (
+            <button onClick={() => setSelectedGenders([])} className="text-[10px] text-[var(--brand-primary)] hover:underline font-bold">
+              Tümünü Kaldır
             </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          {GENDER_OPTIONS.map(g => (
+            <label key={g.value} className="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" checked={selectedGenders.includes(g.value)}
+                onChange={() => toggleFilter(selectedGenders, g.value, setSelectedGenders)}
+                className="w-4 h-4 rounded border-[var(--border)] text-[var(--brand-primary)] accent-[var(--brand-primary)] flex-shrink-0" />
+              <span className="text-sm group-hover:text-[var(--brand-primary)] transition-colors py-0.5">
+                {g.value === 'erkek' ? '♂️' : g.value === 'disi' ? '♀️' : '❓'} {g.label}
+              </span>
+            </label>
           ))}
         </div>
       </div>
@@ -352,54 +402,7 @@ function ListingsPageInner() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold font-display text-[var(--foreground)] mb-4">İlanlar</h1>
 
-          {/* Active filters chips */}
-          {hasFilters && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedTypes.map(t => (
-                <span key={t} className="flex items-center gap-1 bg-[var(--brand-primary)] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                  {LISTING_TYPES.find(x => x.value === t)?.label}
-                  <button onClick={() => setSelectedTypes(selectedTypes.filter(x => x !== t))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedAnimals.map(a => (
-                <span key={a} className="flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  {ANIMAL_TYPES.find(x => x.value === a)?.emoji} {ANIMAL_TYPES.find(x => x.value === a)?.label}
-                  <button onClick={() => setSelectedAnimals(selectedAnimals.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedBreeds.map(b => (
-                <span key={b} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  🐾 {b}
-                  <button onClick={() => setSelectedBreeds(selectedBreeds.filter(x => x !== b))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedAges.map(a => (
-                <span key={a} className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  ⏳ {AGE_OPTIONS.find(x => x.value === a)?.label}
-                  <button onClick={() => setSelectedAges(selectedAges.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedOwnerTypes.map(o => (
-                <span key={o} className="flex items-center gap-1 bg-stone-100 text-stone-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  {o === 'sahibinde' ? '🏠' : '🏛️'} {OWNER_TYPES.find(x => x.value === o)?.label}
-                  <button onClick={() => setSelectedOwnerTypes(selectedOwnerTypes.filter(x => x !== o))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedCities.map(c => (
-                <span key={c} className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  <MapPin size={10} /> {c}
-                  <button onClick={() => setSelectedCities(selectedCities.filter(x => x !== c))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              {selectedDistricts.map(d => (
-                <span key={d} className="flex items-center gap-1 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                  📍 {d}
-                  <button onClick={() => setSelectedDistricts(selectedDistricts.filter(x => x !== d))} className="hover:opacity-70"><X size={12} /></button>
-                </span>
-              ))}
-              <button onClick={clearAll} className="text-xs text-red-500 hover:underline font-medium px-2">Tümünü Temizle</button>
-            </div>
-          )}
+
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
@@ -461,6 +464,73 @@ function ListingsPageInner() {
 
           {/* ORTA İÇERİK */}
           <div className="flex-1 max-w-7xl px-4 sm:px-6 lg:px-8">
+            
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-2">
+                {hasFilters && (
+                  <>
+                    {selectedTypes.map(t => (
+                      <span key={t} className="flex items-center gap-1 bg-[var(--brand-primary)] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {LISTING_TYPES.find(x => x.value === t)?.label}
+                        <button onClick={() => setSelectedTypes(selectedTypes.filter(x => x !== t))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedAnimals.map(a => (
+                      <span key={a} className="flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {ANIMAL_TYPES.find(x => x.value === a)?.emoji} {ANIMAL_TYPES.find(x => x.value === a)?.label}
+                        <button onClick={() => setSelectedAnimals(selectedAnimals.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedBreeds.map(b => (
+                      <span key={b} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        🐾 {b}
+                        <button onClick={() => setSelectedBreeds(selectedBreeds.filter(x => x !== b))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedAges.map(a => (
+                      <span key={a} className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        ⏳ {AGE_OPTIONS.find(x => x.value === a)?.label}
+                        <button onClick={() => setSelectedAges(selectedAges.filter(x => x !== a))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedGenders.map(g => (
+                      <span key={g} className="flex items-center gap-1 bg-pink-100 text-pink-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {g === 'erkek' ? '♂️' : g === 'disi' ? '♀️' : '❓'} {GENDER_OPTIONS.find(x => x.value === g)?.label}
+                        <button onClick={() => setSelectedGenders(selectedGenders.filter(x => x !== g))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedOwnerTypes.map(o => (
+                      <span key={o} className="flex items-center gap-1 bg-stone-100 text-stone-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {o === 'sahibinde' ? '🏠' : '🏛️'} {OWNER_TYPES.find(x => x.value === o)?.label}
+                        <button onClick={() => setSelectedOwnerTypes(selectedOwnerTypes.filter(x => x !== o))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedCities.map(c => (
+                      <span key={c} className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        <MapPin size={10} /> {c}
+                        <button onClick={() => setSelectedCities(selectedCities.filter(x => x !== c))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    {selectedDistricts.map(d => (
+                      <span key={d} className="flex items-center gap-1 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        📍 {d}
+                        <button onClick={() => setSelectedDistricts(selectedDistricts.filter(x => x !== d))} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                    <button onClick={clearAll} className="text-xs text-red-500 hover:underline font-medium px-2">Tümünü Temizle</button>
+                  </>
+                )}
+              </div>
+              
+              {/* Results count moved here */}
+              <div className="flex-shrink-0 pt-1.5">
+                <span className="text-sm text-[var(--foreground-muted)]">
+                  Toplam <strong className="text-[var(--foreground)]">{filtered.length}</strong> ilan bulundu
+                  {totalPages > 1 && <span className="ml-1">· Sayfa {page}/{totalPages}</span>}
+                </span>
+              </div>
+            </div>
+
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Filter Sidebar */}
               <aside className={`lg:w-64 flex-shrink-0 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
@@ -469,13 +539,6 @@ function ListingsPageInner() {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Results count */}
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-sm text-[var(--foreground-muted)]">
-                Toplam <strong className="text-[var(--foreground)]">{filtered.length}</strong> ilan bulundu
-                {totalPages > 1 && <span className="ml-1">· Sayfa {page}/{totalPages}</span>}
-              </span>
-            </div>
 
             {/* Listings Grid */}
             {paginated.length > 0 ? (
@@ -530,6 +593,11 @@ function ListingsPageInner() {
                   </div>
                 )}
               </>
+            ) : loading ? (
+              <div className="text-center py-20">
+                <div className="w-10 h-10 border-4 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-sm text-[var(--foreground-muted)]">İlanlar yükleniyor...</p>
+              </div>
             ) : (
               /* Empty State */
               <div className="text-center py-20">

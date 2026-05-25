@@ -32,12 +32,25 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      // TODO: API call
-      await new Promise((r) => setTimeout(r, 1200));
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const resData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(resData.error || 'Giriş yapılamadı');
+      }
+
       toast.success('Giriş başarılı! Yönlendiriliyorsunuz...');
-      router.push('/');
-    } catch {
-      toast.error('E-posta veya şifre hatalı.');
+      // Global state güncellemesi eklenebilir veya sadece sayfayı yenileyebiliriz
+      setTimeout(() => {
+        window.location.href = '/profil';
+      }, 1000);
+    } catch (error: any) {
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }

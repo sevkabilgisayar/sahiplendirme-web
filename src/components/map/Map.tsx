@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect } from 'react';
 import L from 'leaflet';
@@ -22,9 +22,29 @@ interface MapProps {
   zoom?: number;
   popupText?: string;
   className?: string;
+  onLocationSelect?: (lat: number, lng: number) => void;
 }
 
-export default function Map({ center, zoom = 13, popupText, className = "w-full h-full" }: MapProps) {
+function RecenterAutomatically({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
+}
+
+function ClickHandler({ onLocationSelect }: { onLocationSelect?: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      if (onLocationSelect) {
+        onLocationSelect(e.latlng.lat, e.latlng.lng);
+      }
+    },
+  });
+  return null;
+}
+
+export default function Map({ center, zoom = 13, popupText, className = "w-full h-full", onLocationSelect }: MapProps) {
   useEffect(() => {
     // Optional client-side only initialization logic
   }, []);
@@ -48,6 +68,8 @@ export default function Map({ center, zoom = 13, popupText, className = "w-full 
             </Popup>
           )}
         </Marker>
+        <RecenterAutomatically center={center} />
+        {onLocationSelect && <ClickHandler onLocationSelect={onLocationSelect} />}
       </MapContainer>
     </div>
   );

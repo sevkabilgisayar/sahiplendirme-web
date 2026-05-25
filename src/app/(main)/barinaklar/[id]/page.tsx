@@ -1,15 +1,27 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Heart, MapPin, Phone, Mail, Share2, Shield, Info, CheckCircle, ExternalLink } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import ListingCard from '@/components/ui/ListingCard';
-import { mockListings } from '@/lib/mock-data';
 
 export default function BarinakDetayPage() {
   const params = useParams();
   const id = params.id as string;
+
+  const [listings, setListings] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/listings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setListings(data.listings.slice(0, 3));
+        }
+      });
+  }, []);
 
   return (
     <div className="bg-[var(--background)] min-h-screen">
@@ -74,8 +86,12 @@ export default function BarinakDetayPage() {
                 <Button variant="outline" size="sm">Tümünü Gör</Button>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockListings.slice(0, 3).map(listing => (
-                  <ListingCard key={listing.id} listing={{ ...listing, ownerType: 'barinakta' }} />
+                {listings.map(listing => (
+                  <ListingCard key={listing.id} listing={{ 
+                    ...listing, 
+                    ownerType: 'barinakta',
+                    photos: listing.photos ? JSON.parse(listing.photos) : [] 
+                  }} />
                 ))}
               </div>
             </div>

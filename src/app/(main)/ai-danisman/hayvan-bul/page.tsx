@@ -5,21 +5,33 @@ import { Search, Sparkles, Home, Activity, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import ListingCard from '@/components/ui/ListingCard';
-import { mockListings } from '@/lib/mock-data';
 
 export default function AiHayvanBulPage() {
   const [prompt, setPrompt] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<typeof mockListings | null>(null);
+  const [results, setResults] = useState<any[] | null>(null);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!prompt.trim()) return;
     setIsSearching(true);
     setResults(null);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/listings?kategori=sahiplendirme');
+      const data = await res.json();
+      setTimeout(() => {
+        setIsSearching(false);
+        if (data.success) {
+          // AI simulation delay
+          setResults(data.listings.slice(0, 4).map((l:any) => ({
+             ...l, photos: l.photos ? JSON.parse(l.photos) : []
+          })));
+        } else {
+          setResults([]);
+        }
+      }, 1500);
+    } catch {
       setIsSearching(false);
-      setResults(mockListings.slice(0, 4));
-    }, 2000);
+    }
   };
 
   return (

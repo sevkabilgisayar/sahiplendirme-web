@@ -1,8 +1,8 @@
 // types/index.ts — Proje PLANI.docx'e göre genişletilmiş tip sistemi
 
 // ============ ENUMS ============
-export type ListingType = 'sahiplendirme' | 'kayip' | 'ciftlestirme';
-export type AnimalType = 'kopek' | 'kedi' | 'kus';
+export type ListingType = 'sahiplendirme' | 'kayip' | 'ciftlestirme' | 'diger';
+export type AnimalType = 'kopek' | 'kedi' | 'kus' | 'diger';
 export type Gender = 'erkek' | 'disi' | 'bilinmiyor';
 export type OwnerType = 'sahibinde' | 'barinakta';
 export type UserRole = 'admin' | 'moderator' | 'shelter' | 'provider' | 'user';
@@ -48,10 +48,12 @@ export interface Listing {
   viewCount?: number;
   applicationCount?: number;
   userId?: string;
+  user?: User;             // Added user relation
   shelterName?: string;    // Barınaktan sahiplendiriliyorsa barınak adı
 
   // Kayıp ilanı ek alanlar (Madde 6.1)
   reward?: string;
+  rewardAmount?: string | number; // Added rewardAmount since it's used in components
   hasReward?: boolean;
   lossTime?: string;       // bugün/dün/2 gün önce...
   lastSeenLocation?: Location;

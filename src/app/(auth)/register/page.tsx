@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Mail, Lock, User, ArrowRight, Check, Eye, EyeOff,
-  MapPin, Phone, Building2, Shield, Users,
+  MapPin, Phone, Building2, Shield, Users, ArrowLeft,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +18,7 @@ const schema = z.object({
   firstName: z.string().min(2, 'Ad en az 2 karakter olmalı'),
   lastName: z.string().min(2, 'Soyad en az 2 karakter olmalı'),
   email: z.string().email('Geçerli bir e-posta girin'),
-  phone: z.string().min(10, 'Geçerli bir telefon numarası girin'),
+  phone: z.string().regex(/^[0-9]{10}$/, 'Geçerli 10 haneli bir telefon numarası girin (Örn: 5551234567)'),
   city: z.string().min(1, 'Lütfen bir il seçin'),
   accountType: z.enum(['bireysel', 'barinak', 'profesyonel'], {
     message: 'Hesap türü seçmelisiniz',
@@ -67,9 +67,11 @@ export default function RegisterPage() {
   const totalFinal = totalFull - discountAmount;
 
   const toggleService = (value: string) => {
-    setSelectedServices(prev =>
-      prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
-    );
+    setSelectedServices(prev => {
+      const updated = prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value];
+      setValue('serviceType', updated.join(','), { shouldValidate: true });
+      return updated;
+    });
   };
 
   const {
@@ -107,11 +109,31 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1500));
-      toast.success('Üyelik oluşturuldu! E-postanızı doğrulayın.');
-      router.push('/verify-email');
-    } catch {
-      toast.error('Kayıt sırasında hata oluştu. Lütfen tekrar deneyin.');
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const resData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(resData.error || 'Kayıt yapılamadı');
+      }
+
+      if (data.accountType === 'profesyonel') {
+        toast.success('Üyelik oluşturuldu! Ödeme sayfasına yönlendiriliyorsunuz...');
+        setTimeout(() => {
+          window.location.href = `/abonelik-odeme?services=${selectedServices.join(',')}&cycle=${billingCycle}`;
+        }, 1000);
+      } else {
+        toast.success('Üyelik oluşturuldu! Profilinize yönlendiriliyorsunuz...');
+        setTimeout(() => {
+          window.location.href = '/profil';
+        }, 1000);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +143,18 @@ export default function RegisterPage() {
     'w-full h-12 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] transition-all';
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in relative">
+      <button 
+        type="button" 
+        onClick={() => router.back()} 
+        className="absolute left-0 top-0 p-2 -ml-2 sm:-ml-4 -mt-2 sm:-mt-4 text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] rounded-lg transition-all flex items-center gap-1.5 text-sm font-medium"
+      >
+        <ArrowLeft size={18} />
+        <span className="hidden sm:inline">Geri</span>
+      </button>
+
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 pt-8 sm:pt-4">
         <h1 className="text-3xl font-bold font-display text-[var(--foreground)] mb-2">
           Hesap Oluştur
         </h1>
@@ -409,8 +440,10 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {selectedServices.length === 0 && (
-              <p className="text-xs text-[var(--danger)]">Lütfen en az bir hizmet kategorisi seçin.</p>
+            {errors.serviceType && (
+              <p className="text-sm font-bold text-[var(--danger)] text-center p-2 bg-red-50 rounded-lg border border-red-200">
+                {errors.serviceType.message}
+              </p>
             )}
           </div>
         )}

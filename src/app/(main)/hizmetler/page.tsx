@@ -6,42 +6,57 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import AdBanner from '@/components/ui/AdBanner';
-import { CITIES, SERVICE_CATEGORIES } from '@/constants';
+import { CITIES, SERVICE_CATEGORIES, DISTRICTS_BY_CITY } from '@/constants';
 
-export const mockServices = [
-  { id: '1', category: 'veteriner', name: 'VetLife Veteriner Kliniği', city: 'İstanbul', district: 'Kadıköy', rating: 4.9, reviews: 128, verified: true, featured: true, tags: ['7/24 Acil', 'Ameliyat', 'Röntgen'], price: '200-800₺', emoji: '🩺', color: 'from-blue-100 to-indigo-200', about: '10 yılı aşkın tecrübemizle 7/24 hizmetinizdeyiz.', services: ['Muayene', 'Aşı', 'Acil Müdahale'], address: 'Moda Cad. No:1', phone: '0532 123 45 67', web: 'www.vetlife.com.tr', hours: { hafta: '09:00 - 20:00', cumartesi: '10:00 - 18:00', pazar: 'Kapalı' } },
-  { id: '2', category: 'kuafor', name: 'PawSpa Pet Kuaför', city: 'İstanbul', district: 'Beşiktaş', rating: 4.7, reviews: 85, verified: true, featured: true, tags: ['Banyo', 'Tıraş', 'Tırnak'], price: '150-400₺', emoji: '✂️', color: 'from-pink-100 to-rose-200', about: 'Premium grooming hizmetleri.', services: ['Banyo', 'Tıraş', 'Tırnak Kesimi'], address: 'Barbaros Bulvarı No:5', phone: '0533 987 65 43', web: 'www.pawspa.com', hours: { hafta: '10:00 - 19:00', cumartesi: '10:00 - 19:00', pazar: '12:00 - 17:00' } },
-  { id: '3', category: 'egitmen', name: 'K9 Köpek Eğitim Merkezi', city: 'Ankara', district: 'Çankaya', rating: 4.8, reviews: 62, verified: true, featured: false, tags: ['Temel Eğitim', 'Sosyalleşme'], price: '300-1200₺', emoji: '🎓', color: 'from-green-100 to-emerald-200', about: 'Pozitif pekiştirme ile eğitim.', services: ['Temel İtaat', 'İleri İtaat', 'Sosyalleşme'], address: 'Tunalı Hilmi No:10', phone: '0555 444 33 22', web: 'www.k9ankara.com', hours: { hafta: '08:00 - 18:00', cumartesi: '09:00 - 15:00', pazar: 'Kapalı' } },
-  { id: '4', category: 'pet-otel', name: 'Pamuklu Pet Hotel', city: 'İzmir', district: 'Bornova', rating: 4.6, reviews: 43, verified: false, featured: true, tags: ['Konaklama', 'Oyun Alanı', 'CCTV'], price: '150-350₺/gece', emoji: '🏨', color: 'from-purple-100 to-violet-200', about: 'Ev konforu ve CCTV güvencesi.', services: ['Günlük Bakım', 'Konaklama', 'Oyun Alanı'], address: 'Küçükpark Sokak No:3', phone: '0544 333 22 11', web: 'www.pamukluhotel.com', hours: { hafta: '7/24 Açık', cumartesi: '7/24 Açık', pazar: '7/24 Açık' } },
-  { id: '5', category: 'gezdirici', name: 'Köpek Gezdirme İstanbul', city: 'İstanbul', district: 'Şişli', rating: 4.5, reviews: 34, verified: true, featured: false, tags: ['Günlük Gezdirme', 'Grup/Tekil'], price: '100-200₺/gün', emoji: '🦮', color: 'from-amber-100 to-yellow-200', about: 'Sigortalı, eğitimli gezdirici.', services: ['Grup Gezdirme', 'Bireysel Gezdirme', 'Ev Ziyareti'], address: 'Büyükdere Cad. No:22', phone: '0505 555 44 33', web: '', hours: { hafta: '07:00 - 21:00', cumartesi: '08:00 - 20:00', pazar: '08:00 - 20:00' } },
-  { id: '6', category: 'veteriner', name: 'ZooCare Veteriner', city: 'Ankara', district: 'Kızılay', rating: 4.4, reviews: 97, verified: true, featured: false, tags: ['Aşılama', 'Muayene', 'Diş Bakımı'], price: '100-600₺', emoji: '🩺', color: 'from-cyan-100 to-sky-200', about: 'Ekzotik hayvan dahil tüm evcil hayvanlara hizmet.', services: ['Muayene', 'Aşı', 'Egzotik Hayvan'], address: 'Atatürk Bulvarı No:100', phone: '0312 123 45 67', web: 'www.zoocare.com.tr', hours: { hafta: '09:00 - 19:00', cumartesi: '09:00 - 15:00', pazar: 'Kapalı' } },
-  { id: '7', category: 'kuafor', name: 'Happy Paws Grooming', city: 'İzmir', district: 'Konak', rating: 4.8, reviews: 55, verified: true, featured: true, tags: ['Tam Bakım', 'Kedi Uzmanı'], price: '120-350₺', emoji: '✂️', color: 'from-fuchsia-100 to-pink-200', about: 'Organik ürünlerle tımar.', services: ['Tam Bakım', 'Kedi Tıraşı', 'Spa'], address: 'Alsancak Kıbrıs Şehitleri', phone: '0232 987 65 43', web: 'www.happypaws.com', hours: { hafta: '09:30 - 18:30', cumartesi: '10:00 - 18:00', pazar: 'Kapalı' } },
-  { id: '8', category: 'egitmen', name: 'Evde Köpek Eğitimi', city: 'İstanbul', district: 'Ataşehir', rating: 4.9, reviews: 18, verified: false, featured: false, tags: ['Evde Eğitim', 'Online Danışmanlık'], price: '500₺/seans', emoji: '🎓', color: 'from-lime-100 to-green-200', about: 'Evinize gelerek özel eğitim.', services: ['Evde Eğitim', 'Online Danışmanlık', 'Davranış Terapisi'], address: 'Ataşehir Bulvarı No:55', phone: '0535 777 88 99', web: '', hours: { hafta: '10:00 - 20:00', cumartesi: '10:00 - 18:00', pazar: '12:00 - 16:00' } },
-  { id: '9', category: 'pet-otel', name: 'Büyükada Pet Resort', city: 'İstanbul', district: 'Adalar', rating: 4.7, reviews: 29, verified: true, featured: true, tags: ['Ada Ortamı', 'VIP'], price: '400-600₺/gece', emoji: '🏨', color: 'from-blue-50 to-teal-200', about: 'VIP konaklama deneyimi.', services: ['VIP Oda', 'Geniş Oyun Alanı', 'Transfer'], address: 'Büyükada İskele Meydanı', phone: '0543 222 11 00', web: 'www.ada-petresort.com', hours: { hafta: '7/24 Açık', cumartesi: '7/24 Açık', pazar: '7/24 Açık' } },
-  { id: '10', category: 'gezdirici', name: 'PetWalk Ankara', city: 'Ankara', district: 'Mamak', rating: 4.3, reviews: 21, verified: true, featured: false, tags: ['Sabah/Akşam', 'GPS Takip'], price: '80-150₺/gün', emoji: '🦮', color: 'from-yellow-100 to-lime-100', about: 'GPS takipli güvenli gezdirme.', services: ['GPS Takip', 'Günlük Yürüyüş', 'Ev Ziyareti'], address: 'Mamak Merkez No:11', phone: '0555 123 99 88', web: '', hours: { hafta: '06:00 - 22:00', cumartesi: '07:00 - 21:00', pazar: '08:00 - 20:00' } },
-];
+import { useEffect } from 'react';
 
 export default function HizmetlerPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [sortOrder, setSortOrder] = useState('varsayilan'); // varsayilan, puana_gore, cok_yorum, yeniler
 
-  const hasFilters = search || selectedCategory || selectedCity;
+  const [allServices, setAllServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/services')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) setAllServices(data.services);
+      })
+      .catch(console.error);
+  }, []);
+
+  const hasFilters = search || selectedCategory || selectedCity || selectedDistrict || sortOrder !== 'varsayilan';
 
   const filtered = useMemo(() => {
-    let result = [...mockServices];
+    let result = [...allServices];
+    
+    // Filtreleme
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(s =>
         s.name.toLowerCase().includes(q) ||
         s.district.toLowerCase().includes(q) ||
-        s.tags.some(t => t.toLowerCase().includes(q))
+        s.tags.some((t: string) => t.toLowerCase().includes(q))
       );
     }
     if (selectedCategory) result = result.filter(s => s.category === selectedCategory);
     if (selectedCity) result = result.filter(s => s.city === selectedCity);
+    if (selectedDistrict) result = result.filter(s => s.district === selectedDistrict);
+
+    // Sıralama
+    if (sortOrder === 'puana_gore') {
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortOrder === 'cok_yorum') {
+      result.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+    } else if (sortOrder === 'yeniler') {
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
     return result;
-  }, [search, selectedCategory, selectedCity]);
+  }, [search, selectedCategory, selectedCity, selectedDistrict, sortOrder, allServices]);
 
   // Reklamın tam ortada çıkması için listenin yarısını hesaplıyoruz
   const middleIndex = Math.floor(filtered.length / 2);
@@ -49,7 +64,7 @@ export default function HizmetlerPage() {
   return (
     <div className="bg-[var(--background)] min-h-screen">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 border-b border-[var(--border)] py-10">
+      <div className="bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 border-b border-[var(--border)] pt-28 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             ⭐ Onaylı Uzmanlar · Güvenilir Hizmetler
@@ -74,7 +89,7 @@ export default function HizmetlerPage() {
                   <Search size={18} className="text-[var(--brand-primary)]" /> Filtrele
                 </h2>
                 {hasFilters && (
-                  <button onClick={() => { setSearch(''); setSelectedCategory(''); setSelectedCity(''); }} className="text-xs text-red-500 hover:underline font-medium">
+                  <button onClick={() => { setSearch(''); setSelectedCategory(''); setSelectedCity(''); setSelectedDistrict(''); setSortOrder('varsayilan'); }} className="text-xs text-red-500 hover:underline font-medium">
                     Temizle
                   </button>
                 )}
@@ -131,17 +146,53 @@ export default function HizmetlerPage() {
               </div>
 
               {/* Şehir Seçimi */}
-              <div>
+              <div className="mb-6">
                 <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-2">İl Seçimi</label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
                   <select 
                     value={selectedCity} 
-                    onChange={e => setSelectedCity(e.target.value)} 
+                    onChange={e => { setSelectedCity(e.target.value); setSelectedDistrict(''); }} 
                     className="w-full h-10 pl-9 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] cursor-pointer"
                   >
                     <option value="">Tüm Şehirler</option>
                     {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* İlçe Seçimi */}
+              <div className="mb-6">
+                <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-2">İlçe Seçimi</label>
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
+                  <select 
+                    value={selectedDistrict} 
+                    onChange={e => setSelectedDistrict(e.target.value)}
+                    disabled={!selectedCity || !DISTRICTS_BY_CITY[selectedCity]}
+                    className="w-full h-10 pl-9 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Tüm İlçeler</option>
+                    {selectedCity && DISTRICTS_BY_CITY[selectedCity]?.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Sıralama Seçimi */}
+              <div>
+                <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-2">Sıralama</label>
+                <div className="relative">
+                  <select 
+                    value={sortOrder} 
+                    onChange={e => setSortOrder(e.target.value)} 
+                    className="w-full h-10 px-3 pr-8 appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] cursor-pointer"
+                  >
+                    <option value="varsayilan">Önerilen (Varsayılan)</option>
+                    <option value="puana_gore">En Yüksek Puanlılar</option>
+                    <option value="cok_yorum">En Çok Yorum Alanlar</option>
+                    <option value="yeniler">En Yeniler</option>
                   </select>
                   <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none" />
                 </div>
@@ -195,7 +246,7 @@ export default function HizmetlerPage() {
                 <div className="text-5xl mb-4">🔍</div>
                 <h3 className="text-lg font-bold font-display mb-2">Kriterlere uygun hizmet bulunamadı</h3>
                 <p className="text-sm text-[var(--foreground-muted)] mb-4">Farklı bir il, kategori veya arama kelimesi deneyin.</p>
-                <Button variant="outline" onClick={() => { setSearch(''); setSelectedCategory(''); setSelectedCity(''); }}>Filtreleri Temizle</Button>
+                <Button variant="outline" onClick={() => { setSearch(''); setSelectedCategory(''); setSelectedCity(''); setSelectedDistrict(''); setSortOrder('varsayilan'); }}>Filtreleri Temizle</Button>
               </div>
             )}
           </div>

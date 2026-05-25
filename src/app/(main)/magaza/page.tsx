@@ -8,48 +8,17 @@ import {
   ChevronDown, ChevronUp, SlidersHorizontal, X,
   Zap, Flame, TrendingUp, Percent, Clock
 } from 'lucide-react';
-import { mockStoreProducts } from '@/lib/mock-data';
 import ProductCard from '@/components/ui/ProductCard';
 import AdBanner from '@/components/ui/AdBanner';
-
-const duplicateItems = (arr: any[], count: number) => {
-  const result: any[] = [];
-  while (result.length < count) result.push(...arr.map(a => ({ ...a, id: a.id + Math.random() })));
-  return result.slice(0, count);
-};
-
-const ALL_PRODUCTS = duplicateItems(mockStoreProducts, 30);
-const BESTSELLERS = duplicateItems(mockStoreProducts.filter(p => p.isBestseller), 12);
-const FEATURED = duplicateItems(mockStoreProducts.filter(p => p.isFeatured), 12);
-const ON_SALE = duplicateItems(mockStoreProducts.filter(p => p.isOnSale), 12);
-
-// Vitrin hero ürünleri
-const HERO_PRODUCTS = [
-  { id: 1, name: 'Royal Canin', subtitle: 'Irka özel formül', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%17', price: 289, color: 'from-amber-400 to-orange-500' },
-  { id: 3, name: 'Ortopedik Yatak', subtitle: 'Eklem dostları için', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%15', price: 379, color: 'from-violet-500 to-purple-600' },
-  { id: 7, name: 'Purina Pro Plan', subtitle: 'Kedi uzmanı mama', photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop', discount: '%18', price: 319, color: 'from-teal-500 to-emerald-600' },
-  { id: 9, name: 'Otomatik Su Kabı', subtitle: 'Sürekli taze su', photo: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&auto=format&fit=crop', discount: '%20', price: 450, color: 'from-blue-500 to-indigo-600' },
-];
-
-function SectionHeader({ icon, title, subtitle, color }: { icon: React.ReactNode; title: string; subtitle?: string; color: string }) {
-  return (
-    <div className="flex items-center gap-3 mb-4 mt-8">
-      <div className={`w-9 h-9 rounded-2xl flex items-center justify-center ${color}`}>{icon}</div>
-      <div>
-        <h2 className="text-lg font-bold font-display">{title}</h2>
-        {subtitle && <p className="text-[10px] text-[var(--foreground-muted)]">{subtitle}</p>}
-      </div>
-    </div>
-  );
-}
+import { useEffect } from 'react';
 
 const CATEGORY_FILTERS = [
-  { emoji: '🥩', label: 'Mama & Atıştırmalık', count: 248 },
-  { emoji: '🦮', label: 'Tasma & Gezdirme', count: 134 },
-  { emoji: '🛏️', label: 'Yatak & Yuva', count: 89 },
-  { emoji: '🧸', label: 'Oyuncak', count: 176 },
-  { emoji: '💊', label: 'Sağlık & Vitamin', count: 92 },
-  { emoji: '✂️', label: 'Bakım & Tımar', count: 67 },
+  { emoji: '🥩', label: 'Mama & Atıştırmalık' },
+  { emoji: '🦮', label: 'Tasma & Gezdirme' },
+  { emoji: '🛏️', label: 'Yatak & Yuva' },
+  { emoji: '🧸', label: 'Oyuncak' },
+  { emoji: '💊', label: 'Sağlık & Vitamin' },
+  { emoji: '✂️', label: 'Bakım & Tımar' },
 ];
 
 const BRANDS = ['Royal Canin', 'Purina Pro Plan', 'Hills', 'Brit', 'Josera', 'Farmina'];
@@ -79,15 +48,31 @@ export default function MagazaPage() {
   const [freeShipping, setFreeShipping] = useState(false);
   const [sortBy, setSortBy] = useState('featured');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setAllProducts(data.products);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleCat = (label: string) => setSelectedCats(prev => prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]);
   const toggleBrand = (b: string) => setSelectedBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
 
   const activeFilterCount = selectedCats.length + selectedBrands.length + (minRating > 0 ? 1 : 0) + (onlyDiscount ? 1 : 0) + (freeShipping ? 1 : 0);
 
-  const filtered = ALL_PRODUCTS.filter(p => {
+  const filtered = allProducts.filter(p => {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (onlyDiscount && !p.isOnSale) return false;
+    if (selectedCats.length > 0 && !selectedCats.includes(p.category)) return false;
+    if (selectedBrands.length > 0 && !selectedBrands.includes(p.brand)) return false;
+    if (onlyDiscount && !p.oldPrice) return false;
     if (minPrice && p.price < Number(minPrice)) return false;
     if (maxPrice && p.price > Number(maxPrice)) return false;
     if (minRating > 0 && p.rating < minRating) return false;
@@ -99,6 +84,29 @@ export default function MagazaPage() {
     if (sortBy === 'price-desc') return b.price - a.price;
     if (sortBy === 'rating') return b.rating - a.rating;
     return 0;
+  });
+
+  const dynamicCategories = CATEGORY_FILTERS.map(cat => ({
+    ...cat,
+    count: allProducts.filter(p => p.category === cat.label).length
+  }));
+
+  const heroProducts = allProducts.slice(0, 4).map((p, i) => {
+    const colors = [
+      'from-amber-400 to-orange-500',
+      'from-violet-500 to-purple-600',
+      'from-teal-500 to-emerald-600',
+      'from-blue-500 to-indigo-600'
+    ];
+    return {
+      id: p.id,
+      name: p.name,
+      subtitle: p.brand || 'Öne Çıkan',
+      photo: p.image || 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop',
+      discount: p.oldPrice ? `%${Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100)} İndirim` : 'Yeni',
+      price: p.price,
+      color: colors[i % colors.length]
+    };
   });
 
   const FilterPanel = () => (
@@ -119,7 +127,7 @@ export default function MagazaPage() {
         {/* Kategoriler */}
         <FilterSection title="Kategori">
           <div className="space-y-1.5">
-            {CATEGORY_FILTERS.map(cat => (
+            {dynamicCategories.map(cat => (
               <label key={cat.label} className="flex items-center gap-2 cursor-pointer group">
                 <input type="checkbox" checked={selectedCats.includes(cat.label)} onChange={() => toggleCat(cat.label)}
                   className="w-4 h-4 accent-emerald-500 rounded" />
@@ -231,7 +239,7 @@ export default function MagazaPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-2">
         <h2 className="text-xl font-bold font-display text-[var(--foreground)] mb-4">Popüler Kategoriler</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORY_FILTERS.map((cat) => (
+          {dynamicCategories.map((cat) => (
             <div 
               key={cat.label}
               onClick={() => toggleCat(cat.label)}
@@ -244,6 +252,7 @@ export default function MagazaPage() {
             >
               <span className="text-3xl">{cat.emoji}</span>
               <span className="text-xs font-bold text-[var(--foreground)] leading-tight">{cat.label}</span>
+              <span className="text-[10px] text-gray-400 mt-0.5">{cat.count} ürün</span>
             </div>
           ))}
         </div>
@@ -311,18 +320,18 @@ export default function MagazaPage() {
                 <div>
                   <SectionHeader icon={<Zap size={16} className="text-white"/>} title="Vitrin Ürünleri" subtitle="Haftanın en beğenilen seçimleri" color="bg-gradient-to-br from-amber-400 to-orange-500" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {HERO_PRODUCTS.map(p => (
+                    {heroProducts.map(p => (
                       <Link href={`/magaza/${p.id}`} key={p.id} className={`bg-gradient-to-br ${p.color} rounded-3xl p-5 text-white flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-lg overflow-hidden relative min-h-[160px]`}>
                         <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20 bg-white rounded-full mix-blend-overlay"></div>
                         <div className="flex items-start justify-between z-10 mb-2">
-                          <div className="text-[10px] font-bold bg-white/25 text-white px-2 py-0.5 rounded-full">{p.discount} İndirim</div>
+                          <div className="text-[10px] font-bold bg-white/25 text-white px-2 py-0.5 rounded-full">{p.discount}</div>
                           <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/20">
                             <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
                           </div>
                         </div>
                         <div className="z-10">
-                          <div className="font-bold text-sm leading-tight">{p.name}</div>
-                          <div className="text-white/80 text-[10px] mb-1">{p.subtitle}</div>
+                          <div className="font-bold text-sm leading-tight line-clamp-2">{p.name}</div>
+                          <div className="text-white/80 text-[10px] mb-1 line-clamp-1">{p.subtitle}</div>
                           <div className="text-lg font-bold">₺{p.price}</div>
                         </div>
                       </Link>
@@ -334,7 +343,7 @@ export default function MagazaPage() {
                 <div>
                   <SectionHeader icon={<Flame size={16} className="text-white"/>} title="Çok Satanlar" subtitle="Binlerce kullanıcının tercihi" color="bg-gradient-to-br from-rose-500 to-red-600" />
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {BESTSELLERS.slice(0, 8).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                    {allProducts.slice(0, 8).map(p => <ProductCard key={p.id} product={p} size="small" />)}
                   </div>
                 </div>
 
@@ -356,7 +365,7 @@ export default function MagazaPage() {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 relative z-10">
-                    {ON_SALE.slice(0, 4).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                    {allProducts.filter(p => p.oldPrice).slice(0, 4).map(p => <ProductCard key={p.id} product={p} size="small" />)}
                   </div>
                 </div>
 
@@ -364,7 +373,7 @@ export default function MagazaPage() {
                 <div>
                   <SectionHeader icon={<TrendingUp size={16} className="text-white"/>} title="Öne Çıkan Ürünler" subtitle="Editörün önerdiği seçimler" color="bg-gradient-to-br from-emerald-500 to-teal-600" />
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {FEATURED.slice(0, 4).map(p => <ProductCard key={p.id} product={p} size="small" />)}
+                    {allProducts.slice(4, 8).map(p => <ProductCard key={p.id} product={p} size="small" />)}
                   </div>
                 </div>
 

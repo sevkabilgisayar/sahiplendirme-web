@@ -1,18 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Star, MapPin, Phone, Mail, Globe, CheckCircle, Shield, Clock, ArrowLeft, ChevronRight, Share2, Image as ImageIcon, Play, X } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { mockServices } from '../page';
 import { SERVICE_CATEGORIES } from '@/constants';
+import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('@/components/map/Map'), { 
+  ssr: false, 
+  loading: () => <div className="h-full w-full bg-slate-100 flex items-center justify-center text-sm font-medium text-slate-400 animate-pulse">Harita Yükleniyor...</div>
+});
 
 export default function HizmetProviderDetayPage() {
   const params = useParams();
   const id = params.id as string;
-  const service = mockServices.find(s => s.id === id) || mockServices[0];
+  const [service, setService] = useState<any>(null);
+  const [similarServices, setSimilarServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/services')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          const found = d.services.find((s:any) => s.id === id) || d.services[0];
+          setService(found);
+          setSimilarServices(d.services.filter((s:any) => s.category === found.category && s.id !== found.id).slice(0, 3));
+        }
+      });
+  }, [id]);
+
+  if (!service) return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>;
+
   const catInfo = SERVICE_CATEGORIES.find(c => c.value === service.category);
   const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
 
@@ -169,10 +190,10 @@ export default function HizmetProviderDetayPage() {
           {/* Sidebar */}
           <div className="lg:w-80 space-y-5">
 
-            {/* Contact */}
-            <Card className="p-6 shadow-sm">
+            {/* Contact & Map */}
+            <Card className="p-6 shadow-sm overflow-hidden flex flex-col">
               <h3 className="font-bold text-base mb-4">İletişim Bilgileri</h3>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-5">
                 <div className="flex items-start gap-3">
                   <MapPin size={16} className="text-[var(--foreground-muted)] mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-[var(--foreground)]">{service.address}</div>
@@ -190,7 +211,15 @@ export default function HizmetProviderDetayPage() {
                   </div>
                 )}
               </div>
-              <div className="mt-5 flex gap-2">
+              
+              {/* Harita */}
+              {service.latitude && service.longitude && (
+                <div className="h-48 rounded-xl border border-[var(--border)] overflow-hidden mb-5 -mx-2">
+                  <Map center={[service.latitude, service.longitude]} zoom={14} popupText={service.name} />
+                </div>
+              )}
+
+              <div className="mt-auto flex gap-2">
                 <Button variant="gradient" fullWidth leftIcon={<Phone size={15} />}>Hemen Ara</Button>
                 <Button variant="outline" className="w-12 p-0 flex items-center justify-center flex-shrink-0"><Mail size={16} /></Button>
               </div>
@@ -202,15 +231,15 @@ export default function HizmetProviderDetayPage() {
               <ul className="text-sm space-y-2">
                 <li className="flex justify-between">
                   <span className="text-[var(--foreground-muted)]">Pzt – Cum</span>
-                  <span className="font-semibold">{service.hours.hafta}</span>
+                  <span className="font-semibold">{service.hours?.hafta || '09:00 - 18:00'}</span>
                 </li>
                 <li className="flex justify-between">
                   <span className="text-[var(--foreground-muted)]">Cumartesi</span>
-                  <span className="font-semibold">{service.hours.cumartesi}</span>
+                  <span className="font-semibold">{service.hours?.cumartesi || '09:00 - 14:00'}</span>
                 </li>
                 <li className="flex justify-between">
-                  <span className={service.hours.pazar === 'Kapalı' ? 'text-red-500' : 'text-[var(--foreground-muted)]'}>Pazar</span>
-                  <span className={`font-semibold ${service.hours.pazar === 'Kapalı' ? 'text-red-500' : ''}`}>{service.hours.pazar}</span>
+                  <span className={service.hours?.pazar === 'Kapalı' ? 'text-red-500' : 'text-[var(--foreground-muted)]'}>Pazar</span>
+                  <span className={`font-semibold ${service.hours?.pazar === 'Kapalı' ? 'text-red-500' : ''}`}>{service.hours?.pazar || 'Kapalı'}</span>
                 </li>
               </ul>
             </Card>
@@ -229,7 +258,7 @@ export default function HizmetProviderDetayPage() {
             <Card className="p-5">
               <h3 className="font-bold text-sm mb-4">Benzer Hizmetler</h3>
               <div className="space-y-3">
-                {mockServices.filter(s => s.category === service.category && s.id !== service.id).slice(0, 3).map(s => (
+                {similarServices.map(s => (
                   <Link key={s.id} href={`/hizmetler/${s.id}`} className="flex items-center gap-3 hover:bg-[var(--surface-secondary)] rounded-xl p-2 -mx-2 transition-colors">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center text-xl flex-shrink-0`}>{s.emoji}</div>
                     <div>

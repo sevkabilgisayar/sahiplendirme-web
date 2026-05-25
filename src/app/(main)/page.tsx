@@ -7,10 +7,9 @@ import Button from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 
+import { useEffect } from 'react';
 import ListingCard from '@/components/ui/ListingCard';
 import AdBanner from '@/components/ui/AdBanner';
-import { mockListings as featuredListings, mockStoreProducts } from '@/lib/mock-data';
-import { mockServices } from '@/app/(main)/hizmetler/page';
 
 const stats = [
   { value: '12.000+', label: 'Mutlu Hayvan', emoji: '🐾' },
@@ -21,6 +20,53 @@ const stats = [
 
 export default function HomePage() {
   const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null);
+  const [listings, setListings] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    // Fetch recent listings
+    fetch('/api/listings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setListings(data.listings);
+      })
+      .catch(console.error);
+
+    // Fetch store products
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setProducts(data.products);
+      })
+      .catch(console.error);
+
+    // Fetch services
+    fetch('/api/services')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setServices(data.services);
+      })
+      .catch(console.error);
+
+    // Fetch banners
+    fetch('/api/banners')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setBanners(data.banners);
+      })
+      .catch(console.error);
+      
+    // Fetch settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        setSettings(data);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="overflow-x-hidden">
@@ -45,15 +91,21 @@ export default function HomePage() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight">
-              Doğru dostunu bul,{' '}
-              <span className="text-gradient">sıcak bir yuva</span>{' '}
-              ver 🐾
-            </h1>
+            {settings?.heroTitle ? (
+              <h1 
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight"
+                dangerouslySetInnerHTML={{ __html: settings.heroTitle.replace('sıcak bir yuva', '<span class="text-gradient">sıcak bir yuva</span>') }}
+              />
+            ) : (
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6 leading-tight">
+                Doğru dostunu bul,{' '}
+                <span className="text-gradient">sıcak bir yuva</span>{' '}
+                ver 🐾
+              </h1>
+            )}
 
             <p className="text-lg sm:text-xl text-[var(--foreground-muted)] mb-10 max-w-2xl mx-auto leading-relaxed">
-              Köpek, kedi ve kuş sahiplendirme ilanları. Kayıp hayvan ihbarları. Çiftleştirme eşleştirme.
-              Yapay zekâ ile anında doğru cevap.
+              {settings?.heroSubtitle || 'Köpek, kedi ve kuş sahiplendirme ilanları. Kayıp hayvan ihbarları. Çiftleştirme eşleştirme. Yapay zekâ ile anında doğru cevap.'}
             </p>
 
             {/* Search bar — functional */}
@@ -225,9 +277,10 @@ export default function HomePage() {
       {/* ============ AD BANNER - ORTA ============ */}
       <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
         <AdBanner 
-          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
-          linkUrl="#" 
-          altText="Pet İhtiyaçları" 
+          id={banners.find(b => b.position === 'home_middle')?.id}
+          imageUrl={banners.find(b => b.position === 'home_middle')?.imageUrl} 
+          linkUrl={banners.find(b => b.position === 'home_middle')?.linkUrl || '/reklam-ver'} 
+          altText={banners.find(b => b.position === 'home_middle')?.title || "Pet İhtiyaçları"} 
         />
       </div>
 
@@ -248,7 +301,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 8).map((listing) => (
+            {listings.filter(l => l.type === 'sahiplendirme').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -277,7 +330,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'kayip').slice(0, 8).map((listing) => (
+            {listings.filter(l => l.type === 'kayip').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -306,7 +359,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredListings.filter(l => l.type === 'ciftlestirme').slice(0, 8).map((listing) => (
+            {listings.filter(l => l.type === 'ciftlestirme').slice(0, 8).map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
@@ -337,7 +390,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {mockStoreProducts.slice(0, 8).map((p) => (
+            {products.slice(0, 8).map((p) => (
               <Link key={p.id} href={`/magaza/${p.id}`} className="bg-white border border-emerald-100 rounded-2xl p-4 flex flex-col hover:shadow-lg transition-all group cursor-pointer block">
                 <div className="w-full h-24 bg-emerald-50 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
                   <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
@@ -397,8 +450,8 @@ export default function HomePage() {
           {/* Service cards — filtered, 2-row layout, up to 8 */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {(activeServiceCat 
-              ? mockServices.filter(s => s.category === activeServiceCat)
-              : mockServices.filter(s => s.featured).concat(mockServices.filter(s => !s.featured))
+              ? services.filter(s => s.category === activeServiceCat)
+              : services.filter(s => s.featured).concat(services.filter(s => !s.featured))
             ).slice(0, 8).map(service => (
               <Link key={service.id} href={`/hizmetler/${service.id}`} className="group">
                 <div className={`bg-white rounded-2xl border-2 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col ${
@@ -527,9 +580,10 @@ export default function HomePage() {
       {/* ============ AD BANNER ============ */}
       <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <AdBanner 
-          imageUrl="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop" 
-          linkUrl="#" 
-          altText="Petshop İndirimi" 
+          id={banners.find(b => b.position === 'home_bottom')?.id}
+          imageUrl={banners.find(b => b.position === 'home_bottom')?.imageUrl} 
+          linkUrl={banners.find(b => b.position === 'home_bottom')?.linkUrl || '/reklam-ver'} 
+          altText={banners.find(b => b.position === 'home_bottom')?.title || "Petshop İndirimi"} 
         />
       </div>
 

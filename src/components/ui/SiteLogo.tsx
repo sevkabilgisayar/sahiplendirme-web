@@ -3,7 +3,7 @@
 import Image from 'next/image';
 
 interface SiteLogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 /**
@@ -13,20 +13,18 @@ interface SiteLogoProps {
  */
 export default function SiteLogo({ size = 'md' }: SiteLogoProps) {
   // Logonun boyutlarını büyüttük (slogan okunur olsun diye)
-  const width = size === 'sm' ? 200 : size === 'lg' ? 400 : 320;
+  const width = size === 'sm' ? 200 : size === 'lg' ? 400 : size === 'xl' ? 550 : 320;
   
   // Aspect ratio'ya uygun yeni yükseklikler
-  const height = size === 'sm' ? 65 : size === 'lg' ? 130 : 100;
+  const height = size === 'sm' ? 65 : size === 'lg' ? 130 : size === 'xl' ? 180 : 100;
 
   return (
     <div className="flex items-center">
-      <Image 
+      <img 
         src="/logo.png" 
         alt="Sahiplendirme.com Logo" 
-        width={width} 
-        height={height}
+        style={{ height: `${height}px`, width: 'auto', maxWidth: 'none' }}
         className="object-contain"
-        priority // Logonun gecikmeden yüklenmesi için
       />
     </div>
   );

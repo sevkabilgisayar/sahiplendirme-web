@@ -7,21 +7,24 @@ import { Card } from '@/components/ui/Card';
 import { CITIES } from '@/constants';
 import Link from 'next/link';
 
-const mockShelters = [
-  { id: '1', name: 'İstanbul Büyükşehir Belediyesi Hayvan Barınağı', city: 'İstanbul', district: 'Kısırkaya', phone: '0212 XXX XX XX', activeListings: 45, adopted: 312, verified: true, official: true, desc: 'Türkiye\'nin en büyük hayvan barınağı. Köpek, kedi ve diğer evcil hayvanlar.' },
-  { id: '2', name: 'Ankara Hayvan Hakları Derneği', city: 'Ankara', district: 'Çankaya', phone: '0312 XXX XX XX', activeListings: 28, adopted: 189, verified: true, official: false, desc: 'Gönüllü veterinerlerle çalışan sivil toplum kuruluşu.' },
-  { id: '3', name: 'İzmir Hayvanları Koruma Birliği', city: 'İzmir', district: 'Bornova', phone: '0232 XXX XX XX', activeListings: 19, adopted: 156, verified: true, official: false, desc: 'Sokak hayvanlarının kısırlaştırılması ve sahiplendirilmesi.' },
-  { id: '4', name: 'Antalya Patili Dostlar', city: 'Antalya', district: 'Muratpaşa', phone: '0242 XXX XX XX', activeListings: 12, adopted: 87, verified: false, official: false, desc: 'Akdeniz bölgesinde aktif hayvan koruma faaliyetleri.' },
-  { id: '5', name: 'Bursa Hayvan Severleri Derneği', city: 'Bursa', district: 'Nilüfer', phone: '0224 XXX XX XX', activeListings: 8, adopted: 64, verified: true, official: false, desc: 'Sahiplenme etkinlikleri ve farkındalık kampanyaları.' },
-  { id: '6', name: 'Konya Çevre ve Hayvan Derneği', city: 'Konya', district: 'Selçuklu', phone: '0332 XXX XX XX', activeListings: 22, adopted: 103, verified: true, official: true, desc: 'İç Anadolu\'nun en aktif hayvan koruma derneklerinden biri.' },
-];
+import { useEffect } from 'react';
 
 export default function BarınaklarPage() {
   const [selectedCity, setSelectedCity] = useState('');
   const [search, setSearch] = useState('');
+  const [allShelters, setAllShelters] = useState<any[]>([]);
   const [showOnlyVerified, setShowOnlyVerified] = useState(false);
 
-  const filtered = mockShelters.filter(s => {
+  useEffect(() => {
+    fetch('/api/shelters')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) setAllShelters(data.shelters);
+      })
+      .catch(console.error);
+  }, []);
+
+  const filtered = allShelters.filter(s => {
     if (selectedCity && s.city !== selectedCity) return false;
     if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.city.toLowerCase().includes(search.toLowerCase())) return false;
     if (showOnlyVerified && !s.verified) return false;
@@ -44,9 +47,9 @@ export default function BarınaklarPage() {
           {/* Stats strip */}
           <div className="flex gap-4 mt-6 flex-wrap">
             {[
-              { emoji: '🏛️', value: `${mockShelters.length}+`, label: 'Barınak' },
-              { emoji: '📋', value: `${mockShelters.reduce((a, s) => a + s.activeListings, 0)}+`, label: 'Aktif İlan' },
-              { emoji: '❤️', value: `${mockShelters.reduce((a, s) => a + s.adopted, 0)}+`, label: 'Sahiplenme' },
+              { emoji: '🏛️', value: `${allShelters.length}+`, label: 'Barınak' },
+              { emoji: '📋', value: `${allShelters.reduce((a, s) => a + (s.activeListings || 0), 0)}+`, label: 'Aktif İlan' },
+              { emoji: '❤️', value: `${allShelters.reduce((a, s) => a + (s.adopted || 0), 0)}+`, label: 'Sahiplenme' },
             ].map(s => (
               <div key={s.label} className="flex items-center gap-2 bg-white/80 border border-[var(--border)] rounded-xl px-4 py-2 shadow-sm">
                 <span className="text-xl">{s.emoji}</span>
@@ -119,7 +122,7 @@ export default function BarınaklarPage() {
                 <MapPin size={12} /> {shelter.district}, {shelter.city}
               </p>
 
-              <p className="text-sm text-[var(--foreground-muted)] mb-4 line-clamp-2 flex-1">{shelter.desc}</p>
+              <p className="text-sm text-[var(--foreground-muted)] mb-4 line-clamp-2 flex-1">{shelter.about}</p>
 
               {/* Stats */}
               <div className="flex items-center gap-4 mb-5 text-xs font-semibold">

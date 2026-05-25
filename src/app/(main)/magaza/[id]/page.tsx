@@ -1,17 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { mockStoreProducts } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, ChevronLeft, Star, ShoppingBag, Truck, Shield, RefreshCw, CreditCard, CheckCircle, MessageSquare, UserPlus, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ProductCard from '@/components/ui/ProductCard';
-
-const mockReviews = [
-  { id: 1, name: 'Ayşe K.', avatar: 'A', rating: 5, date: '2024-01-10', text: 'Harika ürün, köpeğim çok beğendi! Kalitesi gerçekten çok iyi, kesinlikle tavsiye ederim.' },
-  { id: 2, name: 'Mehmet T.', avatar: 'M', rating: 4, date: '2024-01-05', text: 'Kargo hızlıydı, ürün beklentilerimi karşıladı. Paketleme de güzeldi.' },
-  { id: 3, name: 'Selin A.', avatar: 'S', rating: 5, date: '2023-12-28', text: 'Çok memnun kaldım, kedim ilk günden alıştı. Tekrar sipariş vereceğim.' },
-];
 
 const mockInstallments = [
   { bank: 'World', logo: '🟣' },
@@ -28,20 +21,48 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const product = mockStoreProducts.find((p) => p.id === parseInt(params.id)) || mockStoreProducts[0];
-  const avgRating = mockReviews.reduce((a, r) => a + r.rating, 0) / mockReviews.length;
+  const [error, setError] = useState<string | null>(null);
 
-  const installmentPrice = (months: number) => (product.price / months).toFixed(2);
+  useEffect(() => {
+    fetch(`/api/products/${params.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.product) {
+          setProduct(data.product);
+          setRelatedProducts(data.relatedProducts || []);
+        } else {
+          setError(data.error || 'Ürün bulunamadı');
+        }
+      })
+      .catch(err => {
+        setError('Bağlantı hatası');
+      });
+  }, [params.id]);
 
-  // Benzer Ürünler (aynı markadan veya rastgele 4 ürün)
-  const relatedProducts = mockStoreProducts.filter(p => p.id !== product.id).slice(0, 4);
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>;
+  if (!product) return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>;
 
-  const mockImages = [
-    product.photo,
-    'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop',
-  ];
+  const reviews = product.reviews || [];
+  const avgRating = reviews.length > 0 ? reviews.reduce((a: any, r: any) => a + r.rating, 0) / reviews.length : 5.0;
+  
+  // Real gallery images or fallback
+  let galleryImages = [product.image];
+  if (product.images) {
+    try {
+      const parsed = JSON.parse(product.images);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        galleryImages = parsed;
+      }
+    } catch (e) {}
+  }
+  
+  if (galleryImages.length === 1) {
+    // If only one image exists, add fallback mock images just for visual demo so it doesn't look empty
+    galleryImages.push('https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&auto=format&fit=crop');
+    galleryImages.push('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop');
+  }
+
+  const mockImages = galleryImages;
 
   return (
     <div className="min-h-screen bg-[var(--background)] py-10">
@@ -246,7 +267,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
             }`}
           >
-            Değerlendirmeler ({mockReviews.length})
+            Değerlendirmeler ({(product.reviews || []).length})
           </button>
           <button
             onClick={() => setActiveTab('qa')}
@@ -383,18 +404,18 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {/* Özet */}
               <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 p-6 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
                 <div className="text-center sm:w-40 border-b sm:border-b-0 sm:border-r border-[var(--border)] pb-4 sm:pb-0 sm:pr-6">
-                  <div className="text-6xl font-bold text-yellow-500">{avgRating.toFixed(1)}</div>
+                  <div className="text-6xl font-bold text-yellow-500">{product.rating.toFixed(1)}</div>
                   <div className="flex items-center gap-1 justify-center mt-2">
                     {[1,2,3,4,5].map(i => (
-                      <Star key={i} size={16} className={i <= Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                      <Star key={i} size={16} className={i <= Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                     ))}
                   </div>
-                  <div className="text-sm font-medium text-[var(--foreground-muted)] mt-2">{mockReviews.length} değerlendirme</div>
+                  <div className="text-sm font-medium text-[var(--foreground-muted)] mt-2">{(product.reviews || []).length} değerlendirme</div>
                 </div>
                 <div className="flex-1 w-full space-y-2">
                   {[5,4,3,2,1].map(star => {
-                    const count = mockReviews.filter(r => r.rating === star).length;
-                    const pct = (count / mockReviews.length) * 100;
+                    const count = (product.reviews || []).filter((r: any) => r.rating === star).length;
+                    const pct = (product.reviews || []).length > 0 ? (count / (product.reviews || []).length) * 100 : 0;
                     return (
                       <div key={star} className="flex items-center gap-3 text-sm">
                         <span className="w-4 text-right font-medium">{star}</span>
@@ -411,15 +432,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
               {/* Yorum listesi */}
               <div className="space-y-4">
-                {mockReviews.map(review => (
+                {(product.reviews || []).length === 0 ? (
+                  <div className="text-center py-10 text-[var(--foreground-muted)]">Henüz değerlendirme yapılmamış. İlk değerlendiren siz olun!</div>
+                ) : (product.reviews || []).map((review: any) => (
                   <div key={review.id} className="p-6 bg-white border border-[var(--border)] rounded-2xl shadow-sm">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-base shadow-sm">{review.avatar}</div>
+                        <div className="w-10 h-10 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-base shadow-sm">{review.user?.firstName?.[0] || 'A'}</div>
                         <div>
-                          <div className="font-bold text-[var(--foreground)]">{review.name}</div>
+                          <div className="font-bold text-[var(--foreground)]">{review.user?.firstName} {review.user?.lastName}</div>
                           <div className="text-xs text-[var(--foreground-muted)] flex items-center gap-2 mt-0.5">
-                            {review.date}
+                            {new Date(review.createdAt).toLocaleDateString('tr-TR')}
                             <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] font-bold">
                               <CheckCircle size={10} /> Satın Aldı
                             </span>

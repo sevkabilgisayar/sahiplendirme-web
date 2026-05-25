@@ -1,32 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Sparkles, AlertCircle, RefreshCcw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import ListingCard from '@/components/ui/ListingCard';
-import { mockListings } from '@/lib/mock-data';
 
 export default function AiCiftlestirmePage() {
   const [selectedPet, setSelectedPet] = useState<string>('');
   const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<typeof mockListings | null>(null);
+  const [results, setResults] = useState<any[] | null>(null);
 
-  // Mock user pets
-  const myPets = [
-    { id: 'p1', name: 'Mia', type: 'kedi', breed: 'British Shorthair', gender: 'dişi', age: '2 Yaş' },
-    { id: 'p2', name: 'Tarçın', type: 'kedi', breed: 'Tekir', gender: 'erkek', age: '3 Yaş' },
-  ];
+  const [myPets, setMyPets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSearch = () => {
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.profile && data.profile.listings) {
+          setMyPets(data.profile.listings);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSearch = async () => {
     if (!selectedPet) return;
     setIsSearching(true);
     setResults(null);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/listings?kategori=ciftlestirme');
+      const data = await res.json();
+      setTimeout(() => {
+        setIsSearching(false);
+        if (data.success) {
+          // Sadece kedi ilanlarını (örnek olarak) filtreleyip döndür
+          setResults(data.listings.filter((l:any) => l.animal === 'kedi').slice(0, 2).map((l:any) => ({
+             ...l, photos: l.photos ? JSON.parse(l.photos) : []
+          })));
+        } else {
+          setResults([]);
+        }
+      }, 2000);
+    } catch {
       setIsSearching(false);
-      // Sadece kedi ilanlarını (örnek olarak) filtreleyip döndür
-      setResults(mockListings.filter(l => l.animalType === 'kedi').slice(0, 2));
-    }, 2000);
+    }
   };
 
   return (
@@ -54,23 +74,31 @@ export default function AiCiftlestirmePage() {
           <h2 className="text-lg font-bold mb-4">Hangi hayvanınız için eş arıyorsunuz?</h2>
           
           <div className="grid sm:grid-cols-2 gap-4 mb-6">
-            {myPets.map(pet => (
-              <button 
-                key={pet.id} 
-                onClick={() => setSelectedPet(pet.id)}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  selectedPet === pet.id ? 'border-pink-500 bg-pink-50' : 'border-[var(--border)] hover:border-pink-200'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg">{pet.name}</h3>
-                  <span className={`text-xs px-2 py-1 rounded-full font-bold ${pet.gender === 'dişi' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
-                    {pet.gender === 'dişi' ? '♀ Dişi' : '♂ Erkek'}
-                  </span>
-                </div>
-                <div className="text-sm text-[var(--foreground-muted)]">{pet.breed} • {pet.age}</div>
-              </button>
-            ))}
+            {loading ? (
+              <div className="text-sm text-[var(--foreground-muted)] col-span-2 text-center py-4">Evcil hayvanlarınız yükleniyor...</div>
+            ) : myPets.length === 0 ? (
+              <div className="text-sm text-[var(--foreground-muted)] col-span-2 text-center py-4 bg-white border border-[var(--border)] rounded-xl">
+                Kayıtlı evcil hayvanınız bulunmuyor. Lütfen önce profilinizden "İlan Ver" diyerek hayvanınızı sisteme ekleyin.
+              </div>
+            ) : (
+              myPets.map(pet => (
+                <button 
+                  key={pet.id} 
+                  onClick={() => setSelectedPet(pet.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    selectedPet === pet.id ? 'border-pink-500 bg-pink-50' : 'border-[var(--border)] hover:border-pink-200'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-lg">{pet.name || 'İsimsiz'}</h3>
+                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${pet.gender?.toLowerCase() === 'dişi' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
+                      {pet.gender?.toLowerCase() === 'dişi' ? '♀ Dişi' : '♂ Erkek'}
+                    </span>
+                  </div>
+                  <div className="text-sm text-[var(--foreground-muted)]">{pet.breed || 'Bilinmiyor'} • {pet.age || 'Bilinmiyor'}</div>
+                </button>
+              ))
+            )}
           </div>
 
           <div className="flex justify-end">

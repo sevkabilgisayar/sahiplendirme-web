@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { Check, ChevronRight, ArrowLeft, Upload, MapPin, Sparkles, X, Clock, Award, Eye } from 'lucide-react';
+import { Check, ChevronRight, ArrowLeft, Upload, MapPin, Sparkles, X, Clock, Award, Eye, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import {
   ANIMAL_TYPES, GENDER_OPTIONS, LISTING_TYPES, AGE_OPTIONS,
-  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS, CITIES, LOSS_TIME_OPTIONS,
+  DOG_BREEDS, CAT_BREEDS, BIRD_BREEDS, OTHER_BREEDS, CITIES, DISTRICTS_BY_CITY, LOSS_TIME_OPTIONS,
   PHOTO_MAX, PHOTO_MIN, DESCRIPTION_MIN_CHARS,
 } from '@/constants';
 import dynamic from 'next/dynamic';
@@ -30,6 +31,7 @@ function getBreedsByAnimal(animal: string) {
   if (animal === 'kopek') return DOG_BREEDS;
   if (animal === 'kedi') return CAT_BREEDS;
   if (animal === 'kus') return BIRD_BREEDS;
+  if (animal === 'diger') return OTHER_BREEDS;
   return [];
 }
 
@@ -43,11 +45,67 @@ export default function CreateListingPage() {
     // Medya
     photos: [] as File[], videoLink: '',
     // Konum
-    city: '', district: '', locationPrivacy: 'yaklasik' as 'yaklasik' | 'tam',
+    city: '', district: '', neighborhood: '', locationPrivacy: 'yaklasik' as 'yaklasik' | 'tam',
   });
+  const [mapCenter, setMapCenter] = useState<[number, number]>([41.0082, 28.9784]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [userAccountType, setUserAccountType] = useState('bireysel');
+
+  const [districts, setDistricts] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.profile) {
+          setUserAccountType(data.profile.accountType);
+        }
+      })
+      .catch(err => console.error('Error fetching profile:', err));
+  }, []);
+
+  const geocodeLocation = async (city: string, district: string, neighborhood: string = '') => {
+    if (!city) return;
+    const query = `${neighborhood ? neighborhood + ' Mahallesi, ' : ''}${district ? district + ', ' : ''}${city}, Turkey`;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setMapCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+    }
+  };
+
+  const handleCityChange = async (cityName: string) => {
+    setFormData(p => ({ ...p, city: cityName, district: '', neighborhood: '' }));
+    setDistricts(['Yükleniyor...']);
+    geocodeLocation(cityName, '');
+    
+    if (!cityName) {
+      setDistricts([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://turkiyeapi.dev/api/v1/provinces?name=${cityName}`);
+      if (!res.ok) throw new Error('API Error');
+      const data = await res.json();
+      const found = data.data?.[0];
+      if (found && found.districts) {
+        setDistricts(found.districts.map((d: any) => d.name));
+      } else {
+        // @ts-ignore
+        setDistricts(DISTRICTS_BY_CITY[cityName] || ['Merkez']);
+      }
+    } catch (error) {
+      // @ts-ignore
+      setDistricts(DISTRICTS_BY_CITY[cityName] || ['Merkez']);
+    }
+  };
 
   const nextStep = () => setCurrentStep(p => Math.min(p + 1, 6));
   const prevStep = () => setCurrentStep(p => Math.max(p - 1, 1));
@@ -70,17 +128,65 @@ export default function CreateListingPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    try {
+      let uploadedPhotos: string[] = [];
+      
+      // Fotoğraf yükleme
+      if (formData.photos && formData.photos.length > 0) {
+        const uploadData = new FormData();
+        formData.photos.forEach((file: File) => uploadData.append('file', file));
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadData,
+        });
+        
+        if (uploadRes.ok) {
+          const uploadResult = await uploadRes.json();
+          uploadedPhotos = uploadResult.urls;
+        } else {
+          throw new Error('Fotoğraflar yüklenemedi');
+        }
+      }
+
+      // İlanı kaydet
+      const generatedTitle = formData.title || `${displayName} - ${formData.breed} (${animalTypeLabel} ${typeLabel})`;
+
+      const payload = { ...formData, photos: uploadedPhotos, title: generatedTitle };
+      
+      const res = await fetch('/api/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'İlan oluşturulamadı');
+      }
+
+      setIsSuccess(true);
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert('Hata oluştu: ' + (error as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const breeds = getBreedsByAnimal(formData.animal);
   const isKayip = formData.type === 'kayip';
 
   // Step validations
+  const animalTypeLabel = ANIMAL_TYPES.find(a => a.value === formData.animal)?.label || formData.animal;
+  const typeLabel = LISTING_TYPES.find(t => t.value === formData.type)?.label || formData.type;
+  
+  // Sahiplendirme için isim opsiyonel
+  const isNameRequired = formData.type !== 'sahiplendirme';
+  const displayName = formData.name || 'İsimsiz';
+
   const step1Valid = formData.type && formData.animal;
-  const step2Valid = formData.name && formData.gender && formData.breed && formData.age
+  const step2Valid = formData.title && (!isNameRequired || formData.name) && formData.gender && formData.breed && formData.age
     && formData.description.length >= DESCRIPTION_MIN_CHARS
     && (!isKayip || formData.lossTime);
   const step3Valid = formData.photos.length >= PHOTO_MIN;
@@ -107,7 +213,7 @@ export default function CreateListingPage() {
   }
 
   return (
-    <div className="bg-[var(--background)] min-h-screen py-10">
+    <div className="bg-[var(--background)] min-h-screen pt-28 pb-10">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header & Stepper */}
@@ -136,27 +242,49 @@ export default function CreateListingPage() {
           </div>
         </div>
 
-        <Card className="p-6 sm:p-8 border-[var(--border)] shadow-sm bg-[var(--surface)] min-h-[400px]">
+        <Card className="p-6 sm:p-8 border-[var(--border)] shadow-sm bg-[var(--surface)]">
 
           {/* STEP 1: Kategori + Hayvan Türü */}
           {currentStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-bold font-display mb-6">Ne tür bir ilan vermek istiyorsunuz?</h2>
-              <div className="grid sm:grid-cols-3 gap-4 mb-8">
+              <h2 className="text-xl font-bold font-display mb-6 text-center">Ne tür bir ilan vermek istiyorsunuz?</h2>
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
                 {LISTING_TYPES.map((t) => (
                   <button key={t.value} onClick={() => update('type', t.value)}
                     className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--brand-primary-light)] ${
                       formData.type === t.value ? 'border-[var(--brand-primary)] bg-[var(--surface-secondary)]' : 'border-[var(--border)]'
                     }`}>
-                    <span className="text-3xl">{t.value === 'sahiplendirme' ? '🏠' : t.value === 'kayip' ? '🔍' : '💕'}</span>
+                    <span className="text-3xl">{t.value === 'sahiplendirme' ? '🏠' : t.value === 'kayip' ? '🔍' : t.value === 'ciftlestirme' ? '💕' : '🐾'}</span>
                     <span className="font-semibold text-sm">{t.label}</span>
                   </button>
                 ))}
+                
+                {/* PRO HİZMET İLANI (Locked Suggestion) */}
+                <button 
+                  onClick={() => {
+                    if (userAccountType !== 'profesyonel') {
+                      toast.error('Bu özellik Profesyonel üyeliklere özeldir.', {
+                        description: 'Eğitmen, Kuaför, Veteriner gibi hizmetler verebilmek için profilinizden üyeliğinizi yükseltebilirsiniz.',
+                      });
+                    } else {
+                      window.location.href = '/hizmet-ilani-ver';
+                    }
+                  }}
+                  className={`p-4 rounded-2xl border-2 border-[var(--border)] flex flex-col items-center justify-center gap-2 transition-all hover:border-purple-300 relative overflow-hidden bg-gray-50/50`}>
+                  {userAccountType !== 'profesyonel' && (
+                    <div className="absolute top-3 right-3 text-gray-400"><Lock size={16} /></div>
+                  )}
+                  <span className="text-3xl grayscale opacity-80">🏢</span>
+                  <span className="font-semibold text-sm text-gray-600">Hizmet İlanı</span>
+                  {userAccountType !== 'profesyonel' && (
+                    <span className="text-[10px] text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full font-bold">PRO Özellik</span>
+                  )}
+                </button>
               </div>
               {formData.type && (
                 <div className="animate-slide-up">
                   <h3 className="text-base font-bold font-display mb-4">Hangi hayvan için?</h3>
-                  <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="grid sm:grid-cols-4 gap-4">
                     {ANIMAL_TYPES.map((a) => (
                       <button key={a.value} onClick={() => { update('animal', a.value); update('breed', ''); }}
                         className={`p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--brand-primary-light)] ${
@@ -177,8 +305,12 @@ export default function CreateListingPage() {
             <div className="animate-fade-in flex flex-col gap-5">
               <h2 className="text-xl font-bold font-display mb-2">Temel Bilgiler</h2>
 
+              <div className="mb-5">
+                <Input label="İlan Başlığı *" placeholder="örn: Güzel Kızımıza Ücretsiz Yuva - Melez" value={formData.title || ''} onChange={(e) => update('title', e.target.value)} />
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-5">
-                <Input label="Adı *" placeholder="örn: Pamuk" value={formData.name} onChange={(e) => update('name', e.target.value)} />
+                <Input label={isNameRequired ? "Adı *" : "Adı (Opsiyonel)"} placeholder="örn: Pamuk" value={formData.name} onChange={(e) => update('name', e.target.value)} />
                 <div>
                   <label className="block text-sm font-semibold mb-1.5 text-[var(--foreground)]">Irkı *</label>
                   <select className="w-full h-12 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
@@ -225,7 +357,7 @@ export default function CreateListingPage() {
                   </span>
                 </label>
                 <textarea className="w-full rounded-xl border border-[var(--border)] p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none h-32 bg-[var(--background)]"
-                  placeholder="Hayvanın özellikleri, sağlık durumu, alışkanlıkları hakkında detaylı bilgi verin... (min 30 karakter)"
+                  placeholder={`Hayvanın özellikleri, sağlık durumu, alışkanlıkları hakkında detaylı bilgi verin... (min ${DESCRIPTION_MIN_CHARS} karakter)`}
                   value={formData.description} onChange={(e) => update('description', e.target.value)} />
               </div>
 
@@ -300,12 +432,7 @@ export default function CreateListingPage() {
                 </div>
               )}
 
-              {/* Video Link (Madde 5.A.2) */}
-              <div className="mt-6">
-                <Input label="Video Linki (opsiyonel)" placeholder="https://youtube.com/watch?v=..."
-                  value={formData.videoLink} onChange={(e) => update('videoLink', e.target.value)} />
-                <p className="text-xs text-[var(--foreground-muted)] mt-1">YouTube veya Vimeo linki desteklenir.</p>
-              </div>
+
             </div>
           )}
 
@@ -319,40 +446,42 @@ export default function CreateListingPage() {
                 <div>
                   <label className="block text-sm font-semibold mb-1.5">İl *</label>
                   <select className="w-full h-12 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
-                    value={formData.city} onChange={(e) => update('city', e.target.value)}>
+                    value={formData.city} onChange={(e) => handleCityChange(e.target.value)}>
                     <option value="">İl Seçin</option>
                     {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1.5">İlçe</label>
-                  <input type="text" placeholder="İlçe girin" className="w-full h-12 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
-                    value={formData.district} onChange={(e) => update('district', e.target.value)} />
+                  <select className="w-full h-12 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                    value={formData.district} 
+                    onChange={(e) => {
+                      update('district', e.target.value);
+                      update('neighborhood', '');
+                      geocodeLocation(formData.city, e.target.value);
+                    }} 
+                    disabled={districts.length === 0}>
+                    <option value="">İlçe Seçin</option>
+                    {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-semibold mb-1.5">Mahalle (İsteğe Bağlı)</label>
+                  <Input 
+                    placeholder="Mahalle adı girin (örn: Caferağa)" 
+                    value={formData.neighborhood || ''} 
+                    onChange={(e) => update('neighborhood', e.target.value)}
+                    onBlur={(e) => geocodeLocation(formData.city, formData.district, e.target.value)}
+                  />
+                  <p className="text-xs text-[var(--foreground-muted)] mt-1">Girdiğiniz mahalle haritada otomatik işaretlenir.</p>
                 </div>
               </div>
 
-              {/* Konum Gizliliği (Madde 5.D) */}
-              <div className="mb-6 p-4 bg-[var(--surface-secondary)] rounded-2xl border border-[var(--border)]">
-                <label className="block text-sm font-semibold mb-3">Konum Gösterimi</label>
-                <div className="flex gap-3">
-                  {[
-                    { value: 'yaklasik', label: 'Yaklaşık Konum', desc: 'Mahalle seviyesinde' },
-                    { value: 'tam', label: 'Tam Konum', desc: 'Kesin adres gösterilir' },
-                  ].map((opt) => (
-                    <button key={opt.value} type="button" onClick={() => update('locationPrivacy', opt.value)}
-                      className={`flex-1 p-3 rounded-xl border-2 text-left transition-all ${
-                        formData.locationPrivacy === opt.value ? 'border-[var(--brand-primary)] bg-white' : 'border-[var(--border)]'
-                      }`}>
-                      <div className="text-sm font-semibold">{opt.label}</div>
-                      <div className="text-xs text-[var(--foreground-muted)]">{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
 
               {/* Harita Entegrasyonu */}
               <div className="h-64 rounded-2xl border border-[var(--border)] relative overflow-hidden z-0">
-                <Map center={[41.0082, 28.9784]} zoom={11} popupText="Seçilen Konum" />
+                <Map center={mapCenter} zoom={13} popupText="Seçilen Konum" />
               </div>
             </div>
           )}
@@ -371,9 +500,8 @@ export default function CreateListingPage() {
                   { label: 'Irkı', value: formData.breed },
                   { label: 'Yaşı', value: AGE_OPTIONS.find(a => a.value === formData.age)?.label },
                   { label: 'Cinsiyet', value: GENDER_OPTIONS.find(g => g.value === formData.gender)?.label },
-                  { label: 'Konum', value: `${formData.city}${formData.district ? `, ${formData.district}` : ''}` },
+                  { label: 'Konum', value: `${formData.city}${formData.district ? `, ${formData.district}` : ''}${formData.neighborhood ? `, ${formData.neighborhood} Mah.` : ''}` },
                   { label: 'Fotoğraf', value: `${formData.photos.length} adet` },
-                  ...(formData.videoLink ? [{ label: 'Video', value: formData.videoLink }] : []),
                   ...(isKayip ? [
                     { label: 'Kayıp Zamanı', value: LOSS_TIME_OPTIONS.find(o => o.value === formData.lossTime)?.label },
                     { label: 'Ödül', value: formData.hasReward ? `₺${formData.rewardAmount}` : 'Yok' },

@@ -1,10 +1,8 @@
 'use client';
 
-import { mockListings as featuredListings, mockStoreProducts } from '@/lib/mock-data';
-import { mockServices } from '@/app/(main)/hizmetler/page';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Heart, MapPin, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 const quickCategories = [
   { href: '/ilanlar?kategori=sahiplendirme&tur=kopek', emoji: '🐶', label: 'Köpek', color: 'from-amber-400 to-orange-400', bg: 'bg-amber-50' },
@@ -44,10 +42,9 @@ const banners = [
   },
 ];
 
-const adoptionListings = featuredListings.filter(l => l.type === 'sahiplendirme').slice(0, 6);
-const lostListings = featuredListings.filter(l => l.type === 'kayip').slice(0, 4);
 
-function MobileListingCard({ listing }: { listing: (typeof featuredListings)[0] }) {
+
+function MobileListingCard({ listing }: { listing: any }) {
   const [liked, setLiked] = useState(false);
   return (
     <Link href={`/ilan/${listing.id}`} className="flex-shrink-0 w-[155px] bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 block">
@@ -79,7 +76,7 @@ function MobileListingCard({ listing }: { listing: (typeof featuredListings)[0] 
   );
 }
 
-function MobileServiceCard({ service }: { service: (typeof mockServices)[0] }) {
+function MobileServiceCard({ service }: { service: any }) {
   return (
     <Link href={`/hizmetler/${service.id}`} className="flex-shrink-0 w-[145px] bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 block">
       <div className={`h-[72px] bg-gradient-to-br ${service.color} flex items-center justify-center`}>
@@ -100,6 +97,25 @@ function MobileServiceCard({ service }: { service: (typeof mockServices)[0] }) {
 
 export default function MobileHomePage() {
   const [activeBanner, setActiveBanner] = useState(0);
+  const [adoptionListings, setAdoptionListings] = useState<any[]>([]);
+  const [lostListings, setLostListings] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/listings?kategori=sahiplendirme').then(r => r.json()).then(d => {
+      if (d.success) setAdoptionListings(d.listings.slice(0, 6));
+    });
+    fetch('/api/listings?kategori=kayip').then(r => r.json()).then(d => {
+      if (d.success) setLostListings(d.listings.slice(0, 4));
+    });
+    fetch('/api/services').then(r => r.json()).then(d => {
+      if (d.success) setServices(d.services.slice(0, 5));
+    });
+    fetch('/api/products').then(r => r.json()).then(d => {
+      if (d.success) setStoreProducts(d.products.slice(0, 6));
+    });
+  }, []);
 
   return (
     <div className="bg-gray-50 pb-24">
@@ -239,7 +255,7 @@ export default function MobileHomePage() {
           </Link>
         </div>
         <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide snap-x snap-mandatory">
-          {mockServices.filter(s => s.featured).slice(0, 5).map(s => (
+          {services.map(s => (
             <div key={s.id} className="snap-start">
               <MobileServiceCard service={s} />
             </div>
@@ -260,16 +276,16 @@ export default function MobileHomePage() {
           </Link>
         </div>
         <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide snap-x snap-mandatory">
-          {mockStoreProducts.slice(0, 6).map(p => (
+          {storeProducts.map(p => (
             <Link key={p.id} href={`/magaza/${p.id}`} className="flex-shrink-0 w-[130px] snap-start bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 block">
               <div className="w-full h-[90px] bg-gray-50 flex items-center justify-center overflow-hidden">
-                <img src={p.photo} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
+                <img src={p.image || p.photo || 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400&q=80'} alt={p.name} className="w-full h-full object-cover mix-blend-multiply opacity-90" />
               </div>
               <div className="p-2.5">
-                <p className="font-semibold text-[11px] text-gray-900 line-clamp-2 leading-tight">{p.name}</p>
+                <p className="font-semibold text-[11px] text-gray-900 line-clamp-2 leading-tight">{p.name || p.title}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Star size={9} className="text-yellow-400 fill-yellow-400" />
-                  <span className="text-[9px] text-gray-500">{p.rating}</span>
+                  <span className="text-[9px] text-gray-500">{p.rating || '4.8'}</span>
                 </div>
                 <p className="font-bold text-emerald-600 text-[13px] mt-1">₺{p.price}</p>
               </div>

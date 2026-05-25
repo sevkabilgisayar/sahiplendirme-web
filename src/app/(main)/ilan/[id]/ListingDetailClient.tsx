@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
-  ChevronRight, Heart, Share2, AlertTriangle, Phone, Mail, MapPin,
+  ChevronRight, ChevronLeft, Heart, Share2, AlertTriangle, Phone, Mail, MapPin,
   CheckCircle, ShieldCheck, Eye, Flag, Clock, Award, Camera, Send,
   Sparkles, Bot, User, X, ChevronDown, ChevronUp, Zap, Star, Tag, Package2, ShoppingBag, Info, Building2
 } from 'lucide-react';
@@ -20,13 +20,8 @@ const Map = dynamic(() => import('@/components/map/Map'), {
   loading: () => <div className="w-full h-full bg-slate-100 animate-pulse rounded-2xl border border-[var(--border)]" />,
 });
 
-// Mock sightings
-const mockSightings = [
-  { id: '1', user: 'Mehmet K.', time: 'Dün', location: 'Kadıköy, İstanbul', note: 'Parkta gördüm, tasması yoktu.', createdAt: '2 saat önce' },
-  { id: '2', user: 'Ayşe T.', time: '2 Gün Önce', location: 'Beşiktaş, İstanbul', note: 'Sokakta koşuyordu.', createdAt: '5 saat önce' },
-];
-
 type AiMessage = { role: 'user' | 'ai'; text: string };
+type Sighting = { id: string; note: string; location: string; seenAt: string; contactInfo?: string; reporter?: { firstName: string; lastName: string }; createdAt: string };
 
 const AI_QUICK_QUESTIONS = [
   'Bu hayvan bana uygun mu?',
@@ -58,25 +53,85 @@ function getAIReply(question: string, listing: any): string {
 
 function formatDate(dateStr: string) {
   if (!dateStr) return 'Bilinmiyor';
-  if (dateStr.includes('önce') || dateStr.includes('saat') || dateStr.includes('gün')) return dateStr;
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const [year, month, day] = parts;
-    const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-    return `${day} ${months[parseInt(month) - 1]} ${year}`;
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch {
+    return dateStr;
   }
-  return dateStr;
+}
+
+// UUID'den kısa ilan no: ilk 8 karakter büyük harf
+function shortId(id: string) {
+  return String(id).replace(/-/g, '').toUpperCase().slice(0, 8);
 }
 
 export default function ListingDetailClient({ listing }: { listing: any }) {
   const [activeImage, setActiveImage] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isAdoptModalOpen, setIsAdoptModalOpen] = useState(false);
   const [isSightingModalOpen, setIsSightingModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isFav, setIsFav] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
+  // Sayfa açılınca favoride mi kontrol et
+  useEffect(() => {
+    fetch('/api/favorites')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          const ids = (d.listings || []).map((l: any) => l.id);
+          setIsFav(ids.includes(listing.id));
+        }
+      })
+      .catch(() => {});
+  }, [listing.id]);
+
+  const handleFav = async () => {
+    setFavLoading(true);
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: listing.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsFav(data.action === 'added');
+        toast.success(data.action === 'added' ? 'Favorilere eklendi!' : 'Favorilerden çıkarıldı.');
+      } else if (res.status === 401) {
+        toast.error('Favorilere eklemek için giriş yapmalısınız.');
+      }
+    } catch {
+      toast.error('Bir hata oluştu.');
+    } finally {
+      setFavLoading(false);
+    }
+  };
+
+  // Dinamik Harita Konumu (Eğer koordinat girilmediyse Ankara yerine İl/İlçe bazlı geocoding)
+  const [mapCenter, setMapCenter] = useState<[number, number]>([listing.location.lat, listing.location.lng]);
+
+  useEffect(() => {
+    // 39.9334 ve 32.8597 bizim default Ankara koordinatımız
+    if (listing.location.lat === 39.9334 && listing.location.lng === 32.8597 && listing.city) {
+      const query = `${listing.neighborhood ? listing.neighborhood + ', ' : ''}${listing.district ? listing.district + ', ' : ''}${listing.city}, Turkey`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            setMapCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [listing.location.lat, listing.location.lng, listing.city, listing.district, listing.neighborhood]);
 
   // AI Danışman state
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
   const [aiMessages, setAiMessages] = useState<AiMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
@@ -102,7 +157,23 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
   };
 
   // Modal states
-  const [isLegalModalOpen, setIsLegalModalOpen] = useState(true); // Otomatik açılır
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [dontShowLegalAgain, setDontShowLegalAgain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hidden = localStorage.getItem('hideLegalWarning');
+      if (!hidden) setIsLegalModalOpen(true);
+    }
+  }, []);
+
+  const handleLegalClose = () => {
+    if (dontShowLegalAgain) {
+      localStorage.setItem('hideLegalWarning', 'true');
+    }
+    setIsLegalModalOpen(false);
+  };
+
   const [isFeaturedModalOpen, setIsFeaturedModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('7gun');
 
@@ -123,35 +194,118 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
   const [sightTime, setSightTime] = useState('');
   const [sightLocation, setSightLocation] = useState('');
   const [sightNote, setSightNote] = useState('');
+  const [sightContact, setSightContact] = useState('');
+  const [sightLoading, setSightLoading] = useState(false);
+
+  // Gerçek ihbar verileri
+  const [sightings, setSightings] = useState<Sighting[]>([]);
+  const [sightingsLoading, setSightingsLoading] = useState(false);
+
+  // Şikayet state
+  const [reportReason, setReportReason] = useState('Uygunsuz içerik');
+  const [reportLoading, setReportLoading] = useState(false);
+
+  // Kayıp ilanı ise ihbarları çek
+  useEffect(() => {
+    if (listing.type !== 'kayip') return;
+    setSightingsLoading(true);
+    fetch(`/api/sightings?listingId=${listing.id}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setSightings(d.sightings); })
+      .catch(console.error)
+      .finally(() => setSightingsLoading(false));
+  }, [listing.id, listing.type]);
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href);
     toast.success('Bağlantı kopyalandı!');
   };
 
-  const handleAdopt = () => {
+  const handleAdopt = async () => {
     if (!appMessage || !appCity || !appHousing || !appConsent) {
       toast.error('Lütfen tüm zorunlu alanları doldurun.');
       return;
     }
-    setIsAdoptModalOpen(false);
-    toast.success('Sahiplenme talebiniz iletildi. İlan sahibi sizinle iletişime geçecektir.', { duration: 5000 });
-    setAppMessage(''); setAppCity(''); setAppHousing(''); setAppConsent(false);
+    
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: listing.id,
+          message: `Şehir: ${appCity}\nYaşam Koşulu: ${appHousing}\n\nAçıklama:\n${appMessage}`
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Başvuru yapılamadı');
+      }
+
+      setIsAdoptModalOpen(false);
+      toast.success('Sahiplenme talebiniz iletildi. İlan sahibi sizinle iletişime geçecektir.', { duration: 5000 });
+      setAppMessage(''); setAppCity(''); setAppHousing(''); setAppConsent(false);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
-  const handleSighting = () => {
+  const handleSighting = async () => {
     if (!sightTime || !sightLocation) {
       toast.error('Zaman ve konum alanları zorunludur.');
       return;
     }
-    setIsSightingModalOpen(false);
-    toast.success('İhbarınız iletildi! İlan sahibi bilgilendirilecek.', { duration: 5000 });
-    setSightTime(''); setSightLocation(''); setSightNote('');
+    setSightLoading(true);
+    try {
+      const res = await fetch('/api/sightings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: listing.id,
+          note: sightNote || 'Not belirtilmedi.',
+          location: sightLocation,
+          seenAt: sightTime,
+          contactInfo: sightContact || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'İhbar gönderilemedi');
+
+      // Listeye ekle (sayfa yenilemeden)
+      setSightings(prev => [data.sighting, ...prev]);
+      setIsSightingModalOpen(false);
+      toast.success('İhbarınız kaydedildi! İlan sahibi bilgilendirildi.', { duration: 5000 });
+      setSightTime(''); setSightLocation(''); setSightNote(''); setSightContact('');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setSightLoading(false);
+    }
   };
 
-  const handleReport = () => {
-    setIsReportModalOpen(false);
-    toast.success('Şikayetiniz alındı. Ekibimiz inceleyecektir.');
+  const handleReport = async () => {
+    if (!reportReason) {
+      toast.error('Lütfen bir şikayet sebebi seçin.');
+      return;
+    }
+    setReportLoading(true);
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: listing.id, reason: reportReason, detail: '' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Şikayet gönderilemedi');
+      
+      setIsReportModalOpen(false);
+      toast.success('Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setReportLoading(false);
+    }
   };
 
   const isKayip = listing.type === 'kayip';
@@ -165,59 +319,88 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
   } as Record<string, { label: string; color: string }>)[listing.type] || { label: 'İlan', color: 'bg-gray-100 text-gray-700 border-gray-200' };
 
   return (
-    <div className="bg-[var(--background)] min-h-screen py-8">
+    <div className="bg-[var(--background)] min-h-screen pt-4 sm:pt-6 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-[var(--foreground-muted)] mb-6">
+        <nav className="flex items-center gap-2 text-sm text-[var(--foreground-muted)] mb-3">
           <Link href="/" className="hover:text-[var(--brand-primary)]">Ana Sayfa</Link>
           <ChevronRight size={14} />
-          <Link href="/ilanlar" className="hover:text-[var(--brand-primary)]">İlanlar</Link>
+          <Link href={`/ilanlar?kategori=${listing.type}`} className="hover:text-[var(--brand-primary)] capitalize">
+            {listing.type === 'kayip' ? 'Kayıp' : listing.type === 'ciftlestirme' ? 'Çiftleştirme' : 'Sahiplendirme'} İlanları
+          </Link>
           <ChevronRight size={14} />
-          <span className="text-[var(--foreground)] truncate font-medium">{listing.name} - {listing.breed}</span>
+          <span className="text-[var(--foreground)] truncate font-medium">{listing.name || 'İlan'} - {listing.breed || 'Bilinmiyor'}</span>
         </nav>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* LEFT COLUMN */}
           <div className="flex-1 min-w-0">
             {/* Gallery */}
-            <div className="mb-8">
+            <div className="mb-8 flex flex-col-reverse sm:flex-row gap-4">
+              
+              {/* Thumbnail'lar (Mobil'de altta yatay, Masaüstünde solda dikey) */}
+              {(listing.photos && listing.photos.length > 0) && (
+                <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto pb-2 sm:pb-0 sm:w-20 lg:w-24 flex-shrink-0" style={{ maxHeight: '600px' }}>
+                  {listing.photos.map((photo: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImage(idx)}
+                      className={`flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all w-20 h-20 sm:w-full sm:h-20 lg:h-24 ${
+                        activeImage === idx
+                          ? 'border-[var(--brand-primary)] ring-2 ring-orange-200'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={photo}
+                        alt={`Fotoğraf ${idx + 1}`}
+                        className="w-full h-full object-cover object-center"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Ana fotoğraf */}
-              <div className="w-full rounded-3xl mb-4 overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface-secondary)]" style={{ aspectRatio: '4/3' }}>
-                {listing.photos?.[activeImage] ? (
-                  <img
-                    src={listing.photos[activeImage]}
-                    alt={`${listing.name} - fotoğraf ${activeImage + 1}`}
-                    className="w-full h-full object-cover object-center transition-all duration-500"
-                    onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/800x600/f3f4f6/9ca3af?text=${encodeURIComponent(listing.name)}`; }}
-                  />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${listing.imageColor || 'from-orange-100 to-amber-200'} flex items-center justify-center`}>
-                    <span className="text-9xl">{listing.emoji}</span>
-                  </div>
-                )}
-              </div>
-              {/* Thumbnail'lar */}
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {(listing.photos && listing.photos.length > 0 ? listing.photos : []).map((photo: string, idx: number) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(idx)}
-                    className={`flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                      activeImage === idx
-                        ? 'border-[var(--brand-primary)] ring-2 ring-orange-200'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    style={{ width: 80, height: 80 }}
-                  >
+              <div className="relative flex-1 min-w-0">
+                <div 
+                  className="w-full rounded-3xl overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface-secondary)] cursor-zoom-in relative" 
+                  style={{ aspectRatio: '4/3' }}
+                  onClick={() => setIsGalleryOpen(true)}
+                >
+                  {listing.photos?.[activeImage] ? (
                     <img
-                      src={photo}
-                      alt={`Fotoğraf ${idx + 1}`}
-                      className="w-full h-full object-cover object-center"
-                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      src={listing.photos[activeImage]}
+                      alt={`${listing.name} - fotoğraf ${activeImage + 1}`}
+                      className="w-full h-full object-cover object-center transition-all duration-500"
+                      onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/800x600/f3f4f6/9ca3af?text=${encodeURIComponent(listing.name)}`; }}
                     />
-                  </button>
-                ))}
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${listing.imageColor || 'from-orange-100 to-amber-200'} flex items-center justify-center`}>
+                      <span className="text-9xl">{listing.emoji}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Ok İşaretleri */}
+                {listing.photos && listing.photos.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveImage(prev => prev > 0 ? prev - 1 : listing.photos.length - 1); }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveImage(prev => prev < listing.photos.length - 1 ? prev + 1 : 0); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -237,17 +420,20 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                   <button onClick={handleShare} className="w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary-light)] transition-colors bg-[var(--surface)]">
                     <Share2 size={18} />
                   </button>
-                  <button onClick={() => { setIsFav(!isFav); toast.success(isFav ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi'); }}
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors bg-[var(--surface)] ${isFav ? 'border-red-300 text-red-500 bg-red-50' : 'border-[var(--border)] text-[var(--foreground-muted)] hover:text-red-500 hover:border-red-200'}`}>
+                  <button onClick={handleFav} disabled={favLoading}
+                    className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors bg-[var(--surface)] ${isFav ? 'border-red-300 text-red-500 bg-red-50' : 'border-[var(--border)] text-[var(--foreground-muted)] hover:text-red-500 hover:border-red-200'} disabled:opacity-50`}>
                     <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
                   </button>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-[var(--foreground-muted)] font-medium flex-wrap">
-                <span className="flex items-center gap-1"><MapPin size={16} className="text-[var(--brand-primary)]" />{listing.location.address}</span>
+                <span className="flex items-center gap-1">
+                  <MapPin size={16} className="text-[var(--brand-primary)]" />
+                  {listing.neighborhood && `${listing.neighborhood}, `}{listing.location.address}
+                </span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {listing.viewCount || 124} görüntülenme</span>
-                <span className="ml-auto text-[10px] font-mono bg-[var(--surface-secondary)] border border-[var(--border)] px-2 py-0.5 rounded-md text-[var(--foreground-muted)] select-all cursor-pointer" title="İlan numarası">
-                  #İlan {String(listing.id).padStart(5, '0')}
+                    <span className="ml-auto text-[10px] font-mono bg-[var(--surface-secondary)] border border-[var(--border)] px-2 py-0.5 rounded-md text-[var(--foreground-muted)] select-all cursor-pointer" title="İlan numarası">
+                  #İlan {shortId(listing.id)}
                 </span>
               </div>
             </div>
@@ -273,31 +459,47 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               </div>
             </div>
 
-            {/* Kayıp: Gördüm İhbarları (Madde 6.1) */}
+            {/* Kayıp: Gördüm İhbarları — Gerçek Veritabanı */}
             {isKayip && (
               <div className="mb-10">
                 <h2 className="text-xl font-bold font-display mb-4 flex items-center gap-2">
-                  📍 Gördüm İhbarları <span className="text-sm font-normal text-[var(--foreground-muted)]">({mockSightings.length})</span>
+                  📍 Gördüm İhbarları <span className="text-sm font-normal text-[var(--foreground-muted)]">
+                    ({sightingsLoading ? '...' : sightings.length})
+                  </span>
                 </h2>
-                <div className="space-y-3">
-                  {mockSightings.map((s) => (
-                    <div key={s.id} className="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border)] flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-                        {s.user.charAt(0)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm">{s.user}</span>
-                          <span className="text-xs text-[var(--foreground-muted)]">{s.createdAt}</span>
+                {sightingsLoading ? (
+                  <div className="space-y-3">
+                    {[1,2].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />)}
+                  </div>
+                ) : sightings.length === 0 ? (
+                  <div className="bg-[var(--surface)] p-6 rounded-2xl border border-[var(--border)] text-center text-[var(--foreground-muted)] text-sm">
+                    Henüz bu ilan için ihbar bulunmuyor. Gördüysanız lütfen bildirin!
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sightings.map((s) => (
+                      <div key={s.id} className="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border)] flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                          {s.reporter ? s.reporter.firstName.charAt(0) : '?'}
                         </div>
-                        <div className="text-xs text-[var(--foreground-muted)] mb-1">
-                          📍 {s.location} · ⏰ {s.time}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm">
+                              {s.reporter ? `${s.reporter.firstName} ${s.reporter.lastName.charAt(0)}.` : 'Anonim'}
+                            </span>
+                            <span className="text-xs text-[var(--foreground-muted)]">
+                              {new Date(s.createdAt).toLocaleString('tr-TR')}
+                            </span>
+                          </div>
+                          <div className="text-xs text-[var(--foreground-muted)] mb-1">
+                            📍 {s.location} · ⏰ {s.seenAt}
+                          </div>
+                          <p className="text-sm">{s.note}</p>
                         </div>
-                        <p className="text-sm">{s.note}</p>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -317,26 +519,17 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
               </div>
             )}
 
-            {/* Map — Yaklaşık/Tam Konum Toggle (Madde 5.D) */}
+            {/* Map */}
             <div className="mb-10">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold font-display">
-                  Konum
-                </h2>
-                <div className="flex items-center gap-1 bg-[var(--surface-secondary)] rounded-xl p-1 text-xs border border-[var(--border)]">
-                  <button className="px-3 py-1.5 rounded-lg bg-white shadow-sm font-semibold text-[var(--foreground)]">
-                    Yaklaşık
-                  </button>
-                  <button className="px-3 py-1.5 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors font-medium">
-                    Tam Konum
-                  </button>
-                </div>
-              </div>
+              <h2 className="text-xl font-bold font-display mb-4">
+                Konum
+              </h2>
               <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden shadow-sm border border-[var(--border)]">
-                <Map center={[listing.location.lat, listing.location.lng]} popupText={listing.city} zoom={12} />
+                <Map center={mapCenter} popupText={listing.neighborhood ? `${listing.neighborhood}, ${listing.district}, ${listing.city}` : (listing.district ? `${listing.district}, ${listing.city}` : listing.city)} zoom={13} />
               </div>
               <p className="text-xs text-[var(--foreground-muted)] mt-2 flex items-center gap-1">
-                <MapPin size={12} /> Haritada yaklaşık konum gösterilmektedir. Tam adres için ilan sahibiyle iletişime geçin.
+                <MapPin size={12} /> 
+                Haritada belirtilen bölge gösterilmektedir. Kesin adres için ilan sahibiyle iletişime geçin.
               </p>
             </div>
 
@@ -358,54 +551,55 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
 
               {/* Action Card */}
               <Card className="p-6 border-[var(--border)] shadow-md">
+                
+                {/* 1. İlan Tipi Rozeti (En üstte) */}
+                <div className="mb-5">
+                  {listing.hasReward && listing.rewardAmount ? (
+                    <div className="flex flex-col gap-3">
+                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color} w-fit`}>
+                        <span className="text-lg font-bold">{listingTypeBadge.label}</span>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-200 inline-block w-fit">
+                        <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">KAYIP ÖDÜLÜ</div>
+                        <div className="text-3xl font-bold font-display text-yellow-700">₺{listing.rewardAmount}</div>
+                      </div>
+                    </div>
+                  ) : isCiftlestirme ? (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 bg-purple-100 text-purple-700 border-purple-200">
+                      <span className="text-lg font-bold">💕 Eşleştirme İlanı</span>
+                    </div>
+                  ) : (
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color}`}>
+                      <span className="text-lg font-bold">{listingTypeBadge.label}</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* İlan Tarihi */}
                 <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--border-subtle)] text-sm">
                   <span className="text-[var(--foreground-muted)] font-semibold flex items-center gap-1.5"><Clock size={14} /> İlan Tarihi</span>
                   <span className="font-bold text-[var(--foreground)]">{formatDate(listing.createdAt || '2 gün önce')}</span>
                 </div>
                 {/* İlan No */}
-                <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
+                <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--border-subtle)]">
                   <span className="text-sm text-[var(--foreground-muted)] font-semibold">İlan No</span>
                   <button
                     onClick={() => {
-                      navigator.clipboard?.writeText(String(listing.id).padStart(5, '0'));
+                      navigator.clipboard?.writeText(shortId(listing.id));
                       toast.success('İlan no kopyalandı!');
                     }}
                     className="font-mono text-xl font-black text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20 px-4 py-1.5 rounded-xl hover:bg-[var(--brand-primary)]/20 transition-all shadow-sm"
                     title="Kopyalamak için tıkla"
                   >
-                    #{String(listing.id).padStart(5, '0')}
+                    #{shortId(listing.id)}
                   </button>
                 </div>
-                <div className="mb-6">
-                  {listing.reward ? (
-                    <div className="flex flex-col gap-4">
-                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color} w-fit`}>
-                        <span className="text-lg font-bold">{listingTypeBadge.label}</span>
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">KAYIP ÖDÜLÜ</div>
-                        <div className="text-4xl font-bold font-display text-[var(--foreground)]">₺{listing.reward}</div>
-                      </div>
-                    </div>
-                  ) : isCiftlestirme ? (
-                    <div>
-                      <div className="text-2xl font-bold font-display text-purple-600">💕 Eşleştirme İlanı</div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${listingTypeBadge.color}`}>
-                        <span className="text-lg font-bold">{listingTypeBadge.label}</span>
-                      </div>
-                      {listing.ownerType === 'barinakta' && listing.shelterName && (
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl w-fit">
-                          <Building2 size={16} />
-                          <span className="font-bold text-sm">{listing.shelterName}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                {/* Hayvan Adı */}
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-subtle)]">
+                  <span className="text-sm text-[var(--foreground-muted)] font-semibold">Adı</span>
+                  <span className="font-bold text-[var(--foreground)]">{listing.animalName || '-'}</span>
                 </div>
+
                 <div className="flex flex-col gap-3">
                   {/* Öne Çıkar Butonu */}
                   <button
@@ -434,11 +628,6 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                       İletişime Geç
                     </Button>
                   )}
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1 h-12" leftIcon={<Phone size={18} />}>Ara</Button>
-                    <Button variant="outline" className="flex-1 h-12" leftIcon={<Mail size={18} />}>Mesaj</Button>
-                  </div>
-
                   {/* Owner Info (Moved inside action card) */}
                   <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-secondary)] my-2">
                     <div className="flex items-center gap-4 mb-3">
@@ -449,13 +638,30 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
                         <div className="font-bold text-[var(--foreground)] flex items-center gap-1 text-sm">
                           {listing.owner.name} <CheckCircle size={14} className="text-blue-500" />
                         </div>
-                        <div className="text-[11px] text-[var(--foreground-muted)]">{listing.ownerType === 'sahibinde' ? 'Bireysel Üye' : 'Kurumsal / Barınak'}</div>
+                        <div className="text-[11px] text-[var(--foreground-muted)]">{listing.owner.isGhost ? 'Dış Kaynak' : (listing.ownerType === 'sahibinde' ? 'Bireysel Üye' : 'Kurumsal / Barınak')}</div>
                         <div className="text-[11px] text-[var(--foreground-muted)] mt-0.5">Üyelik: {listing.owner.memberSince}</div>
                       </div>
                     </div>
-                    <Link href="#" className="text-[11px] font-semibold text-[var(--brand-primary)] hover:underline block text-center">
-                      Kullanıcının diğer ilanları →
-                    </Link>
+                    {!listing.owner.isGhost && (
+                      <Link href={`/profil/${listing.owner.id}`} className="text-[11px] font-semibold text-[var(--brand-primary)] hover:underline block text-center mb-4">
+                        Kullanıcının diğer ilanları →
+                      </Link>
+                    )}
+                    
+                    {/* ARA VE MESAJ BUTONLARI */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <a href={`tel:${listing.owner.phone}`} className="w-full block" onClick={() => setShowPhone(true)}>
+                        <Button variant="outline" className="h-11 text-xs w-full rounded-xl transition-all" leftIcon={<Phone size={14} />}>
+                          {showPhone ? (listing.owner.phone || 'Gizli') : 'Ara'}
+                        </Button>
+                      </a>
+                      
+                      <Link href={`/profil/mesajlar?to=${listing.owner.id}&listingId=${listing.id}`} className="w-full block">
+                        <Button variant="outline" className="w-full h-11 text-xs rounded-xl" leftIcon={<Mail size={14} />}>
+                          Mesaj
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* AI Danışman Butonu + Panel - sadece sahiplendirme ve çiftleştirmede */}
@@ -716,8 +922,16 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
             <span className="text-sm text-[var(--foreground-muted)]">Fotoğraf ekle (opsiyonel)</span>
           </label>
 
-          <Button variant="gradient" fullWidth size="lg" onClick={handleSighting} leftIcon={<Send size={16} />}>
-            İhbarı Gönder
+          {/* İletişim (opsiyonel) */}
+          <div>
+            <label className="block text-sm font-semibold mb-1.5">İletişim (opsiyonel)</label>
+            <input type="text" value={sightContact} onChange={(e) => setSightContact(e.target.value)}
+              placeholder="Telefon veya e-posta — anonim ihbar için boş bırakabilirsiniz"
+              className="w-full h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" />
+          </div>
+
+          <Button variant="gradient" fullWidth size="lg" onClick={handleSighting} isLoading={sightLoading} leftIcon={<Send size={16} />}>
+            İhbarı Kaydet
           </Button>
         </div>
       </Modal>
@@ -729,17 +943,17 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
           <div className="flex flex-col gap-2">
             {['Sahte ilan', 'Tekrarlayan ilan', 'Uygunsuz içerik', 'Aldatıcı bilgi', 'Diğer'].map((r) => (
               <label key={r} className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] cursor-pointer hover:bg-[var(--surface-secondary)] transition-colors">
-                <input type="radio" name="report" className="accent-[var(--brand-primary)]" />
+                <input type="radio" name="report" value={r} checked={reportReason === r} onChange={(e) => setReportReason(e.target.value)} className="accent-[var(--brand-primary)]" />
                 <span className="text-sm">{r}</span>
               </label>
             ))}
           </div>
-          <Button variant="danger" fullWidth onClick={handleReport}>Şikayeti Gönder</Button>
+          <Button variant="danger" fullWidth onClick={handleReport} isLoading={reportLoading}>Şikayeti Gönder</Button>
         </div>
       </Modal>
 
       {/* ===== MODAL: Yasal Bilgilendirme ===== */}
-      <Modal isOpen={isLegalModalOpen} onClose={() => setIsLegalModalOpen(false)} title="⚖️ Yasal Bilgilendirme">
+      <Modal isOpen={isLegalModalOpen} onClose={handleLegalClose} title="⚖️ Yasal Bilgilendirme">
         <div className="p-1 flex flex-col gap-4">
           <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
             <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
@@ -769,7 +983,18 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
             Daha fazla bilgi için: <a href="/kvkk" className="text-[var(--brand-primary)] hover:underline">KVKK</a> | <a href="/kullanim-sartlari" className="text-[var(--brand-primary)] hover:underline">Kullanım Şartları</a> | <a href="/gizlilik" className="text-[var(--brand-primary)] hover:underline">Gizlilik Politikası</a>
           </div>
 
-          <Button variant="gradient" fullWidth onClick={() => setIsLegalModalOpen(false)}>Anladım, Devam Et</Button>
+          <div className="flex items-center gap-2 mt-1 px-1">
+            <input 
+              type="checkbox" 
+              id="dontShowLegalAgain"
+              checked={dontShowLegalAgain}
+              onChange={(e) => setDontShowLegalAgain(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+            />
+            <label htmlFor="dontShowLegalAgain" className="text-sm text-[var(--foreground-muted)] cursor-pointer select-none">Bir daha gösterme</label>
+          </div>
+
+          <Button variant="gradient" fullWidth onClick={handleLegalClose}>Anladım, Devam Et</Button>
         </div>
       </Modal>
 
@@ -825,6 +1050,48 @@ export default function ListingDetailClient({ listing }: { listing: any }) {
           </Button>
         </div>
       </Modal>
+
+      {/* ===== FULLSCREEN GALLERY MODAL ===== */}
+      {isGalleryOpen && listing.photos && listing.photos.length > 0 && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm" onClick={() => setIsGalleryOpen(false)}>
+          <button
+            onClick={() => setIsGalleryOpen(false)}
+            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors"
+          >
+            <X size={32} />
+          </button>
+
+          {listing.photos.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); setActiveImage(prev => prev === 0 ? listing.photos.length - 1 : prev - 1); }}
+                className="absolute left-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all"
+              >
+                <ChevronLeft size={32} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setActiveImage(prev => prev === listing.photos.length - 1 ? 0 : prev + 1); }}
+                className="absolute right-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all"
+              >
+                <ChevronRight size={32} />
+              </button>
+            </>
+          )}
+
+          <div className="relative max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={listing.photos[activeImage]}
+              alt={`${listing.name} - büyük fotoğraf`}
+              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+            />
+            {listing.photos.length > 1 && (
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium">
+                {activeImage + 1} / {listing.photos.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

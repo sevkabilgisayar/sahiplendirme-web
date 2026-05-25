@@ -4,7 +4,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen flex">
       {/* Left decorative panel - hidden on mobile */}
-      <div className="hidden lg:flex lg:w-1/2 gradient-brand relative overflow-hidden items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 gradient-brand relative overflow-hidden items-center justify-center p-12 h-screen sticky top-0">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-black/10 rounded-full translate-x-1/4 translate-y-1/4" />

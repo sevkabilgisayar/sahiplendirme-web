@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Store, Star, CheckCircle, Shield, Award, MapPin, Search, UserPlus, Check } from 'lucide-react';
-import { mockStoreProducts } from '@/lib/mock-data';
 import ProductCard from '@/components/ui/ProductCard';
 
 export default function SaticiProfilePage({ params }: { params: { id: string } }) {
@@ -38,8 +37,15 @@ export default function SaticiProfilePage({ params }: { params: { id: string } }
     logo: 'PD'
   };
 
-  // Satıcının ürünleri (mock-data üzerinden tümünü listeliyoruz demo amaçlı)
-  const sellerProducts = mockStoreProducts;
+  const [sellerProducts, setSellerProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setSellerProducts(d.products);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">

@@ -1,39 +1,127 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Search, Phone, MoreVertical, Check, CheckCheck, Ban, Flag, ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
-const mockConversations = [
-  { id: '1', name: 'Ahmet Yılmaz', avatar: 'A', lastMsg: 'Pamuk hâlâ sahiplenmeye müsait mi?', time: '14:30', unread: 2, listingName: 'Pamuk - Kedi', online: true },
-  { id: '2', name: 'Fatma Demir', avatar: 'F', lastMsg: 'Teşekkür ederim, yarın gelirim.', time: 'Dün', unread: 0, listingName: 'Karamel - Golden', online: false },
-  { id: '3', name: 'Barınak İstanbul', avatar: 'B', lastMsg: 'Max aşıları tam, veteriner raporu mevcut.', time: 'Pzt', unread: 0, listingName: 'Max - Labrador', online: true },
-  { id: '4', name: 'Mehmet Kaya', avatar: 'M', lastMsg: 'Luna\'yı Kadıköy\'de gördüm!', time: '25 Nis', unread: 0, listingName: 'Luna - Husky (Kayıp)', online: false },
-];
-
-const mockMessages = [
-  { id: '1', senderId: 'other', text: 'Merhaba, Pamuk hâlâ sahiplenmeye müsait mi?', time: '14:25', status: 'read' },
-  { id: '2', senderId: 'me', text: 'Merhaba! Evet, hâlâ müsait. Detay istiyorsanız sorabilirsiniz.', time: '14:27', status: 'read' },
-  { id: '3', senderId: 'other', text: 'Harika! Kaç aylık ve aşıları tam mı?', time: '14:28', status: 'read' },
-  { id: '4', senderId: 'me', text: '6 aylık, tüm aşıları tam ve kısırlaştırıldı. Çok uysal bir kedi 😊', time: '14:29', status: 'read' },
-  { id: '5', senderId: 'other', text: 'Pamuk hâlâ sahiplenmeye müsait mi?', time: '14:30', status: 'delivered' },
-];
-
 export default function MessagesPage() {
-  const [activeChat, setActiveChat] = useState<string | null>('1');
-  const [message, setMessage] = useState('');
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [messageText, setMessageText] = useState('');
   const [search, setSearch] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const [myUserId, setMyUserId] = useState<string>('');
 
-  const activeConv = mockConversations.find(c => c.id === activeChat);
-  const filteredConvs = mockConversations.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) || c.listingName.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    // get user id
+    fetch('/api/auth/me').then(r => r.json()).then(data => {
+      if (data.user) setMyUserId(data.user.id);
+    });
+    
+    // get conversations
+    fetch('/api/messages').then(r => r.json()).then(data => {
+      if (data.success) {
+        let convs = data.conversations || [];
+        const searchParams = new URLSearchParams(window.location.search);
+        const toUserId = searchParams.get('to');
+        const listingId = searchParams.get('listingId');
+
+        if (toUserId) {
+          const existing = convs.find((c: any) => c.id === toUserId);
+          if (!existing && listingId) {
+            // Fetch listing info to get target user details
+            fetch(`/api/listings/${listingId}`).then(r => r.json()).then(lData => {
+              const l = lData.listing;
+              if (l && (l.user || l.contactName)) {
+                const newConv = {
+                  id: toUserId,
+                  name: l.contactName ? l.contactName : (l.user ? `${l.user.firstName} ${l.user.lastName}` : 'İsimsiz'),
+                  avatar: l.user?.avatar || (l.contactName ? l.contactName.charAt(0) : 'U'),
+                  lastMsg: 'Sohbete başlayın...',
+                  time: 'Şimdi',
+                  listingName: `${l.name || 'İlan'} - ${l.breed || ''}`,
+                  unread: 0,
+                  online: true,
+                  draftListingId: listingId // Store for the first message
+                };
+                setConversations(prev => [newConv, ...prev]);
+                setActiveChat(toUserId);
+              }
+            });
+          } else {
+            setActiveChat(toUserId);
+          }
+        } else if (convs.length > 0) {
+          setActiveChat(convs[0].id);
+        }
+        
+        setConversations(convs);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    let intervalId: any;
+    
+    const fetchMessages = () => {
+      if (activeChat) {
+        fetch(`/api/messages/${activeChat}`).then(r => r.json()).then(data => {
+          if (data.success) setMessages(data.messages);
+        });
+      }
+    };
+
+    if (activeChat) {
+      fetchMessages(); // initial fetch
+      // Kısa aralıklı polling ile "gerçek zamanlı (real-time)" simülasyonu
+      intervalId = setInterval(fetchMessages, 3000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [activeChat]);
+
+  const activeConv = conversations.find(c => c.id === activeChat);
+  const filteredConvs = conversations.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) || (c.listingName && c.listingName.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-    setMessage('');
+  const handleSend = async () => {
+    if (!messageText.trim() || !activeChat) return;
+    
+    const textToSend = messageText;
+    setMessageText('');
+
+    // Optimistic UI update
+    const tempId = Date.now().toString();
+    setMessages(prev => [...prev, { id: tempId, senderId: myUserId, content: textToSend, createdAt: new Date().toISOString(), isRead: false }]);
+
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const listingId = activeConv?.draftListingId || searchParams.get('listingId');
+      
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiverId: activeChat,
+          content: textToSend,
+          listingId: listingId || undefined
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        // replace temp message with real one
+        setMessages(prev => prev.map(m => m.id === tempId ? data.message : m));
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+
 
   return (
     <div className="bg-[var(--background)] min-h-screen">
@@ -129,18 +217,20 @@ export default function MessagesPage() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   <div className="text-center text-xs text-[var(--foreground-muted)] py-2">Bugün</div>
-                  {mockMessages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.senderId === myUserId ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${
-                        msg.senderId === 'me'
+                        msg.senderId === myUserId
                           ? 'bg-[var(--brand-primary)] text-white rounded-br-md'
                           : 'bg-[var(--surface-secondary)] text-[var(--foreground)] rounded-bl-md'
                       }`}>
-                        <p>{msg.text}</p>
-                        <div className={`flex items-center gap-1 justify-end mt-1 ${msg.senderId === 'me' ? 'text-white/70' : 'text-[var(--foreground-muted)]'}`}>
-                          <span className="text-[10px]">{msg.time}</span>
-                          {msg.senderId === 'me' && (
-                            msg.status === 'read' ? <CheckCheck size={12} /> : <Check size={12} />
+                        <p>{msg.content}</p>
+                        <div className={`flex items-center gap-1 justify-end mt-1 ${msg.senderId === myUserId ? 'text-white/70' : 'text-[var(--foreground-muted)]'}`}>
+                          <span className="text-[10px]">
+                            {new Date(msg.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          {msg.senderId === myUserId && (
+                            msg.isRead ? <CheckCheck size={12} /> : <Check size={12} />
                           )}
                         </div>
                       </div>
@@ -151,8 +241,8 @@ export default function MessagesPage() {
                 {/* Input */}
                 <div className="p-4 border-t border-[var(--border)]">
                   <div className="flex gap-2">
-                    <input type="text" placeholder="Mesaj yazın..." value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                    <input type="text" placeholder="Mesaj yazın..." value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                       className="flex-1 h-11 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" />
                     <Button variant="gradient" className="h-11 w-11 p-0" onClick={handleSend}>

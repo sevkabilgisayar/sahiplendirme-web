@@ -1,98 +1,24 @@
 import Link from 'next/link';
 import { ArrowRight, Clock, User, Tag } from 'lucide-react';
-
-export const mockBlogPosts = [
-  {
-    slug: 'kopek-sahiplenme-rehberi',
-    title: 'Köpek Sahiplenirken Dikkat Edilmesi Gerekenler',
-    excerpt: 'İlk kez köpek sahiplenecekler için kapsamlı rehber. Irk seçimi, hazırlık süreci ve yeni dostunuzla uyum dönemi hakkında bilmeniz gereken her şey.',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Sahiplendirme',
-    categoryColor: 'bg-blue-100 text-blue-700',
-    author: 'Dr. Ayşe Yılmaz',
-    authorRole: 'Veteriner Hekim',
-    date: '2024-01-20',
-    readTime: '8 dk',
-    cover: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
-    featured: true,
-  },
-  {
-    slug: 'kedi-beslenmesi',
-    title: 'Kedinizin Yaşına Göre Doğru Beslenme Rehberi',
-    excerpt: 'Yavru kedi, yetişkin ve yaşlı kediler için beslenme önerileri. Hangi besinler zararlı, hangileri faydalı? Uzman veteriner görüşleri.',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Sağlık',
-    categoryColor: 'bg-green-100 text-green-700',
-    author: 'Vet. Mehmet Kaya',
-    authorRole: 'Feline Uzmanı',
-    date: '2024-01-15',
-    readTime: '6 dk',
-    cover: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&auto=format&fit=crop',
-    featured: false,
-  },
-  {
-    slug: 'kayip-hayvan-ihbar',
-    title: 'Kayıp Hayvana Rastladığınızda Ne Yapmalısınız?',
-    excerpt: 'Sokakta kayıp bir hayvan gördüğünüzde atmanız gereken adımlar. Doğru ihbar yöntemi, geçici bakım ve sahibini bulma süreci.',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Barınak Haberleri',
-    categoryColor: 'bg-red-100 text-red-700',
-    author: 'Sahiplendirme.com Ekibi',
-    authorRole: 'Platform Editörü',
-    date: '2024-01-10',
-    readTime: '5 dk',
-    cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop',
-    featured: false,
-  },
-  {
-    slug: 'kopek-egitim-ipuclari',
-    title: '5 Temel Komut: Köpeğinizi Evde Nasıl Eğitirsiniz?',
-    excerpt: '"Otur", "Dur", "Gel", "Yere yat", "Bırak" — Temel komutları öğretmek için aşamalı pozitif pekiştirme yöntemi.',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Eğitim',
-    categoryColor: 'bg-purple-100 text-purple-700',
-    author: 'Emre Demir',
-    authorRole: 'Sertifikalı Eğitmen',
-    date: '2024-01-05',
-    readTime: '10 dk',
-    cover: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&auto=format&fit=crop',
-    featured: false,
-  },
-  {
-    slug: 'sahiplendirme-hikayesi-boncuk',
-    title: 'Boncuk\'un Hikayesi: Barınaktan Sıcak Bir Yuvaya',
-    excerpt: 'Ankara barınağında 8 ay kalan Boncuk\'un sahiplendirilme sürecini anlattık. İlk günden bugüne dönüşümün duygusal hikayesi.',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Sahiplendirme Hikayeleri',
-    categoryColor: 'bg-orange-100 text-orange-700',
-    author: 'Zeynep Arslan',
-    authorRole: 'Topluluk Üyesi',
-    date: '2023-12-28',
-    readTime: '4 dk',
-    cover: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&auto=format&fit=crop',
-    featured: false,
-  },
-  {
-    slug: 'tuy-bakimi-mevsim',
-    title: 'Mevsim Değişikliklerinde Tüy Bakımı',
-    excerpt: 'İlkbahar ve sonbahar dönemlerinde yoğunlaşan tüy dökülmesi sorununu aşmanın pratik yolları. Hangi fırça doğru?',
-    content: 'Uzun makale içeriği burada yer alacak.',
-    category: 'Bakım',
-    categoryColor: 'bg-pink-100 text-pink-700',
-    author: 'Selin Çelik',
-    authorRole: 'Pet Groomer',
-    date: '2023-12-20',
-    readTime: '7 dk',
-    cover: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=800&auto=format&fit=crop',
-    featured: false,
-  },
-];
+import { db } from '@/lib/db';
 
 const CATEGORIES = ['Tümü', 'Sağlık', 'Bakım', 'Eğitim', 'Barınak Haberleri', 'Sahiplendirme Hikayeleri', 'Sahiplendirme'];
 
-export default function BlogPage() {
-  const featured = mockBlogPosts.find(p => p.featured);
-  const rest = mockBlogPosts.filter(p => !p.featured);
+export default async function BlogPage() {
+  const postsRaw = await db.blogPost.findMany({
+    where: { published: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const posts = postsRaw.map(p => ({
+    ...p,
+    cover: p.image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    categoryColor: p.category === 'Sağlık' ? 'bg-green-100 text-green-700' : p.category === 'Eğitim' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700',
+    date: new Date(p.createdAt).toLocaleDateString('tr-TR')
+  }));
+
+  const featured = posts.length > 0 ? posts[0] : null;
+  const rest = posts.length > 1 ? posts.slice(1) : [];
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -128,6 +54,12 @@ export default function BlogPage() {
           ))}
         </div>
 
+        {posts.length === 0 && (
+          <div className="text-center py-20 text-[var(--foreground-muted)]">
+            Henüz blog yazısı bulunmamaktadır.
+          </div>
+        )}
+
         {/* Featured Post */}
         {featured && (
           <Link href={`/blog/${featured.slug}`} className="group block mb-12">
@@ -143,9 +75,8 @@ export default function BlogPage() {
                 <h2 className="text-2xl sm:text-4xl font-bold font-display text-white mb-3 max-w-2xl">{featured.title}</h2>
                 <p className="text-white/80 max-w-xl text-sm mb-5">{featured.excerpt}</p>
                 <div className="flex items-center gap-4 text-white/70 text-xs">
-                  <span className="flex items-center gap-1.5"><User size={13} /> {featured.author}</span>
-                  <span className="flex items-center gap-1.5"><Clock size={13} /> {featured.readTime} okuma</span>
                   <span>{featured.date}</span>
+                  <span className="flex items-center gap-1.5"><Tag size={13} /> {featured.viewCount} okuma</span>
                 </div>
               </div>
             </div>
@@ -169,14 +100,7 @@ export default function BlogPage() {
                   <h3 className="font-bold text-base leading-snug mb-2 group-hover:text-[var(--brand-primary)] transition-colors line-clamp-2">{post.title}</h3>
                   <p className="text-sm text-[var(--foreground-muted)] leading-relaxed mb-4 line-clamp-2">{post.excerpt}</p>
                   <div className="mt-auto flex items-center justify-between text-xs text-[var(--foreground-muted)]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 gradient-brand rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                        {post.author[0]}
-                      </div>
-                      <span className="font-medium">{post.author.split(' ')[0]}</span>
-                    </div>
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1"><Clock size={11} /> {post.readTime}</span>
                       <span>{post.date}</span>
                     </div>
                   </div>
@@ -184,13 +108,6 @@ export default function BlogPage() {
               </article>
             </Link>
           ))}
-        </div>
-
-        {/* Load More */}
-        <div className="text-center mt-10">
-          <button className="flex items-center gap-2 mx-auto bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--brand-primary)] text-[var(--foreground-muted)] hover:text-[var(--brand-primary)] font-semibold px-6 py-3 rounded-xl transition-all">
-            Daha Fazla Yükle <ArrowRight size={16} />
-          </button>
         </div>
       </div>
     </div>

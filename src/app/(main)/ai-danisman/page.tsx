@@ -56,33 +56,38 @@ export default function AiAdvisorPage() {
     setInput('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      let responseText = '';
-      const q = text.toLowerCase();
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          mode: activeMode,
+          conversationHistory: messages,
+        }),
+      });
 
-      if (activeMode === 'irk') {
-        responseText = '📸 **Irk Tespiti Modu**\n\nFotoğraf analizi şu an test modunda. Tam sürümde:\n• Fotoğraftaki hayvanın ırkını %95+ doğrulukla tespit edeceğim\n• Karışık ırk analizi yapacağım\n• Benzer ırkları karşılaştıracağım\n\nŞimdilik yazarak ırk hakkında soru sorabilirsiniz!';
-      } else if (activeMode === 'saglik') {
-        responseText = '🩺 **Sağlık Ön Değerlendirme**\n\n⚠️ Bu bir tıbbi teşhis değildir. Semptomlarınızı paylaşın, genel bir değerlendirme yapayım:\n\n• Hayvanın türü ve yaşı\n• Belirtilerin ne zaman başladığı\n• Yeme-içme durumu\n• Enerji seviyesi\n\nBu bilgileri paylaşırsanız, olası durumlar hakkında bilgi verebilirim. **Ancak mutlaka veterinere götürün.**';
-      } else if (activeMode === 'eslestir') {
-        responseText = '💕 **Hayvan Eşleştirme**\n\nSize en uygun hayvanı bulmam için birkaç soru soracağım:\n\n1. Nerede yaşıyorsunuz? (Apartman / Bahçeli ev / Müstakil)\n2. Günde kaç saat evde oluyorsunuz?\n3. Daha önce hayvan baktınız mı?\n4. Aktif mi yoksa sakin bir hayvan mı tercih edersiniz?\n5. Alerji durumunuz var mı?\n\nBu bilgilere göre sahiplendirme.com\'daki ilanlardan size uygun olanları önereceğim!';
-      } else if (q.includes('apartman') || q.includes('kedi')) {
-        responseText = '🐱 **Apartman Kedileri Önerileri**\n\nKüçük bir apartman dairesi için sakin yapılarıyla bilinen ırklar:\n\n• **British Shorthair** — Sakin, bağımsız, az ses çıkarır\n• **Ragdoll** — Kucak kedisi, çok uysal\n• **Scottish Fold** — Sessiz, uyumlu\n• **Persian** — Düşük enerjili, ideal ev kedisi\n\n💡 *Sahiplendirme.com\'da "Kedi" filtresini kullanarak uygun ilanları görüntüleyebilirsiniz.*';
-      } else if (q.includes('tüy') || q.includes('köpek')) {
-        responseText = '🐶 **Tüy Dökülmesi Azaltma**\n\n1. **Düzenli tarama** — Haftada 3-4 kez furminator ile\n2. **Omega-3 takviyesi** — Somon yağı kapsülü\n3. **Kaliteli mama** — Protein oranı yüksek mamalar\n4. **Banyo** — Ayda 1-2 kez, uygun şampuanla\n5. **Stres kontrolü** — Yeterli egzersiz ve oyun\n\n⚠️ *Aşırı tüy dökülmesi alerji veya tiroid problemi belirtisi olabilir. Veteriner kontrolü öneririm.*';
-      } else {
-        responseText = '🐾 Bu güzel bir soru! Test modunda sınırlı yanıt verebiliyorum.\n\n**Tam sürümde** (OpenAI GPT-4 entegrasyonu ile):\n• Detaylı bakım önerileri\n• Bilimsel kaynaklara dayalı yanıtlar\n• Kişiselleştirilmiş tavsiyeler\n• Fotoğraf analizi\n\nBaşka bir soru sormak ister misiniz?';
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Bir hata oluştu');
       }
 
       setMessages(prev => [
         ...prev,
-        { id: (Date.now() + 1).toString(), role: 'assistant', content: responseText }
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: data.response }
       ]);
+    } catch (error: any) {
+      setMessages(prev => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: `⚠️ Hata: ${error.message}` }
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
@@ -90,14 +95,53 @@ export default function AiAdvisorPage() {
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/ai/analyze-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(resData.error || 'Analiz yapılamadı');
+      }
+
+      const { data } = resData;
+      let responseText = `📸 **Irk Analizi Sonucu**\n\n🔍 Algılanan: **${data.anaIrk}**\n📊 Güven skoru: %${data.guvenSkor}\n\n`;
+      
+      if (data.alternatifIrklar && data.alternatifIrklar.length > 0) {
+        responseText += `*Olası ırk karışımları:*\n`;
+        data.alternatifIrklar.forEach((alt: any) => {
+          responseText += `• ${alt.irk} (%${alt.oran})\n`;
+        });
+        responseText += '\n';
+      }
+
+      if (data.ozellikler && data.ozellikler.length > 0) {
+        responseText += `*Özellikler:* ${data.ozellikler.join(', ')}\n\n`;
+      }
+
+      responseText += `*Genel Bilgi:*\n${data.genelBilgi}\n\n`;
+      responseText += `*Sahiplendirme Bilgisi:*\n${data.sahiplendirmeBilgisi}`;
+
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '📸 **Irk Analizi Sonucu** (Demo)\n\n🔍 Algılanan: **Karışık Irk / Melez**\n📊 Güven skoru: %78\n\n*Olası ırk karışımları:*\n• Golden Retriever (%45)\n• Labrador (%33)\n• Diğer (%22)\n\n⚠️ Gerçek ırk tespiti API entegrasyonu ile çok daha doğru sonuçlar verecektir.'
+        content: responseText
       }]);
+    } catch (error: any) {
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `⚠️ Hata: ${error.message}`
+      }]);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
